@@ -18,6 +18,7 @@ from scholariq.api.routes import (
     profile,
     system,
     topics,
+    tutor,
 )
 from scholariq.compliance.runtime import enforce_environment
 from scholariq.core.config import Settings, get_settings
@@ -61,4 +62,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(curriculum.router, prefix="/api")
     app.include_router(topics.router, prefix="/api")
     app.include_router(knowledge.router, prefix="/api")
+    app.include_router(tutor.router, prefix="/api")
     return app

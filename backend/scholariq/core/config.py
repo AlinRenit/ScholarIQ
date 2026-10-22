@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     # Whether knowledge-base entries that no person has reviewed yet may be used
     # by search, the tutor and quizzes. They are always labelled as unreviewed.
     allow_unreviewed_content: bool = True
+    # Days to keep tutor conversations after their last message. 0 keeps them
+    # until the student deletes them.
+    conversation_retention_days: int = Field(default=30, ge=0, le=3650)
 
     log_level: str = "INFO"
 

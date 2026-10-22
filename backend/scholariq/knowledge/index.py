@@ -19,7 +19,8 @@ from __future__ import annotations
 
 import hashlib
 import threading
-from dataclasses import dataclass
+from collections import Counter
+from dataclasses import dataclass, field
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -27,10 +28,23 @@ from sqlalchemy.orm import Session
 from scholariq.db.models import Concept, KnowledgeDocument, Topic
 from scholariq.domain.enums import TrustStatus
 from scholariq.retrieval.bm25 import BM25Index
-from scholariq.retrieval.text import analyse, query_terms, stem
+from scholariq.retrieval.text import analyse, query_terms, stem, words
 
 FIELD_WEIGHTS = {"name": 3.0, "definition": 2.0, "title": 1.5, "body": 1.0}
 NAME_BONUS = 4.0
+
+
+def name_stems(text: str) -> tuple[str, ...]:
+    """Stems of a concept name, or () when analysis would make it misleading.
+
+    A name that loses words and keeps only one ("i-node" -> node, because "i"
+    is a stopword) would claim an ordinary word. A hyphenated one is joined
+    instead (inode), as the question normaliser does; any other is not used.
+    """
+    stems = tuple(analyse(text))
+    if len(stems) == 1 and len(words(text)) > 1:
+        return name_stems(text.replace("-", "")) if "-" in text else ()
+    return stems
 
 
 @dataclass(frozen=True)
@@ -62,6 +76,8 @@ class ConceptIndex:
     signature: tuple[object, ...]
     # concept id -> [(analysed name or alias, original text)]
     names: dict[str, list[tuple[tuple[str, ...], str]]]
+    # Every word as written in the indexed text, with its frequency (for spelling).
+    surface: Counter[str] = field(default_factory=Counter)
 
     def _terms(self, query: str) -> tuple[list[str], dict[str, str]]:
         """Ordered query stems, plus every searchable stem mapped to its surface text."""
@@ -160,6 +176,7 @@ def build_index(session: Session, allow_unreviewed: bool) -> ConceptIndex:
     entries: dict[str, ConceptEntry] = {}
     names: dict[str, list[tuple[tuple[str, ...], str]]] = {}
     corpus = []
+    surface: Counter[str] = Counter()
     w = FIELD_WEIGHTS
     for c, t in rows:
         entries[c.id] = ConceptEntry(
@@ -174,7 +191,7 @@ def build_index(session: Session, allow_unreviewed: bool) -> ConceptIndex:
         names[c.id] = [
             (phrase, text)
             for text in (c.canonical_name, *c.aliases)
-            if (phrase := tuple(analyse(text)))
+            if (phrase := name_stems(text))
         ]
         for d in docs_by_concept.get(c.id, []):
             fields += [
@@ -183,7 +200,9 @@ def build_index(session: Session, allow_unreviewed: bool) -> ConceptIndex:
                 *((s, w["body"]) for s in d.steps),
             ]
         corpus.append((c.id, fields))
-    return ConceptIndex(BM25Index(corpus), entries, signature, names)
+        for text, _ in fields:
+            surface.update(words(text))
+    return ConceptIndex(BM25Index(corpus), entries, signature, names, surface)
 
 
 _cache: dict[bool, ConceptIndex] = {}

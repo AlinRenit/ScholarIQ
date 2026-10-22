@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { KnowledgeConcept } from "@/lib/api";
 import { Pill, TRUST } from "@/lib/labels";
+import { paragraphs } from "@/lib/text";
 
 const RELATION_LABELS: Record<string, { out: string; in: string }> = {
   requires: { out: "Builds on", in: "Needed for" },
@@ -20,18 +21,6 @@ const DOC_KINDS: Record<string, string> = {
 };
 
 const DEPTH = ["", "Introductory", "Standard", "Advanced"];
-
-/**
- * Paragraphs split on blank lines, with the source file's hard wraps removed. In worked
- * examples a line that ends a sentence keeps its break, so step-by-step lines stay apart.
- */
-function paragraphs(body: string, keepSentenceLines: boolean): string[] {
-  const wrap = keepSentenceLines ? /(?<![.:;!?])[ \t]*\n[ \t]*/g : /[ \t]*\n[ \t]*/g;
-  return body
-    .split(/\n\s*\n/)
-    .map((p) => p.trim().replace(wrap, " "))
-    .filter(Boolean);
-}
 
 const humanise = (key: string) => key.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
 

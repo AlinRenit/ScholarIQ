@@ -14,6 +14,8 @@ from __future__ import annotations
 import argparse
 import tempfile
 from collections import defaultdict
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -140,25 +142,33 @@ def report(results: list[CaseResult]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _build_seed_index(content_dir: Path) -> ConceptIndex:
-    """Load the seed content into a throwaway SQLite database and index it."""
+@contextmanager
+def seed_session(content_dir: Path) -> Iterator[Session]:
+    """A throwaway SQLite database holding the seed curriculum and knowledge base."""
     from scholariq.curriculum.sync import load_files, sync_curricula
     from scholariq.db import models  # noqa: F401  (registers tables)
     from scholariq.db.base import Base
     from scholariq.db.session import build_engine
-    from scholariq.knowledge.index import build_index
     from scholariq.knowledge.loader import load_content
     from scholariq.knowledge.sync import sync_knowledge
 
     with tempfile.TemporaryDirectory() as tmp:
         engine = build_engine(f"sqlite:///{tmp}/eval.sqlite")
         Base.metadata.create_all(engine)
-        with Session(engine) as session:
-            sync_curricula(session, load_files(content_dir))
-            sync_knowledge(session, load_content(content_dir))
-            index = build_index(session, allow_unreviewed=True)
-        engine.dispose()
-    return index
+        try:
+            with Session(engine) as session:
+                sync_curricula(session, load_files(content_dir))
+                sync_knowledge(session, load_content(content_dir))
+                yield session
+        finally:
+            engine.dispose()
+
+
+def _build_seed_index(content_dir: Path) -> ConceptIndex:
+    from scholariq.knowledge.index import build_index
+
+    with seed_session(content_dir) as session:
+        return build_index(session, allow_unreviewed=True)
 
 
 def main(argv: list[str] | None = None) -> None:

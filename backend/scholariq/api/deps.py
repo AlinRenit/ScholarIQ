@@ -19,6 +19,8 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 # Uploads run parsers and OCR locally; cap them per student.
 upload_limiter = RateLimiter(limit=20, window_seconds=600)
+# The tutor is cheap per question, but cap bursts so one client cannot hog a worker.
+tutor_limiter = RateLimiter(limit=60, window_seconds=60)
 
 
 def get_store(settings: SettingsDep) -> Iterator[FileStore]:

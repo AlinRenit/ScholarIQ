@@ -70,6 +70,12 @@ Later milestones append rows here as they add packages.
 | prettier (M3, frontend dev) | code formatting | no | no | allowed |
 | snowballstemmer (M4) | Snowball English stemmer: fixed suffix-stripping rules written by hand, pure Python | no | no | allowed |
 
+Milestone 5 (the tutor) adds no dependencies. Its solvers and code analysis use
+the Python standard library only: `fractions` for exact arithmetic, `ast` to
+parse (never run) student code, and `sqlite3` with an authorizer for the
+practice SQL database, which lives in memory and cannot read files or the
+application database.
+
 Next.js telemetry is disabled in the Docker images (`NEXT_TELEMETRY_DISABLED=1`).
 Set the same variable, or run `npx next telemetry disable`, for local development.
 

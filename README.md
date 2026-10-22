@@ -1,8 +1,9 @@
 # ScholarIQ
 
 ScholarIQ analyses a student's marksheets, works out which subjects and topics
-need attention, and (in later milestones) tutors them with explanations and
-quizzes from a curated local knowledge base, which is built and searchable today.
+need attention, and tutors them with explanations, worked problems and practice
+questions from a curated local knowledge base. Diagnostic quizzes and study
+plans arrive in Milestone 6.
 
 **It does not use AI models.** No OpenAI, Anthropic, Gemini, Hugging Face,
 embedding APIs or local LLMs. Analysis and answers come from deterministic
@@ -19,7 +20,7 @@ Tesseract OCR engine, which runs locally to read scanned marksheets. See
 | 2. Marksheet ingestion and review | **Done** |
 | 3. Analytics, topic evidence, dashboard | **Done** |
 | 4. Knowledge base and BM25 retrieval | **Done** |
-| 5. Question answering | Not started |
+| 5. Question answering (AI-free tutor) | **Done** |
 | 6. Diagnostics and study plans | Not started |
 | 7. Hardening | Not started |
 
@@ -52,6 +53,20 @@ What works today:
   shows its whole score: BM25 contribution per word plus a bonus when the query
   names a concept. Retrieval quality is measured in
   [docs/eval/retrieval.md](docs/eval/retrieval.md).
+* An AI-free tutor. It recognises definition, explanation, comparison,
+  procedure, worked-problem, reasoning, prerequisite, practice, "what should I
+  study" and follow-up questions, tolerates shorthand ("diff b/w") and
+  misspellings ("semafore"), and asks which meaning was intended when a name is
+  ambiguous. Answers are assembled from the knowledge base and say which entry
+  each section came from; comparison tables show "Not recorded" rather than
+  filling gaps. Local solvers work out arithmetic, percentages, linear and
+  quadratic equations, recurrences (master theorem), truth tables, graph
+  traversals and SELECT queries on a built-in practice database, showing each
+  step. Python code is analysed for running time without being run. Questions
+  it cannot answer are declined with the closest concepts it does cover.
+  Teaching depth follows the student's topic classification (or the depth they
+  ask for) and never changes the facts. Quality is measured on 60 gold
+  questions in [docs/eval/answers.md](docs/eval/answers.md).
 
 Sections without a backend yet say so; none show sample data. The roadmap and design are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -174,21 +189,41 @@ the tutor and quizzes may use unreviewed concepts. When `true`, every answer
 built from one is labelled "not yet reviewed by a person". Set it to `false`
 to use reviewed content only.
 
-To re-measure search after changing content or ranking:
+To re-measure search and the tutor after changing content, ranking or the
+answer rules:
 
 ```bash
 cd backend && python -m scholariq.knowledge.evaluate --out ../docs/eval/retrieval.md
+cd backend && python -m scholariq.answering.evaluate --out ../docs/eval/answers.md
 ```
+
+## Tutor conversations and privacy
+
+Each question and its structured answer are stored with the student's profile
+so the conversation can be reopened and follow-ups ("explain step 2 again")
+work. Nothing about a question is written to the logs. A conversation is
+deleted `SCHOLARIQ_CONVERSATION_RETENTION_DAYS` (default 30) after its last
+message; `0` keeps conversations until the student deletes them. Students can
+delete one conversation from the tutor page, or everything with Delete my data.
+Answers to "test my understanding" questions are marked but not recorded, so
+they never change a topic classification.
 
 ## Known limitations
 
-* The tutor is not built yet (Milestone 5), and diagnostic quizzes arrive in
-  Milestone 6. Until then topic-level evidence comes only from topic test
-  results the student enters.
+* Diagnostic quizzes arrive in Milestone 6. Until then topic-level evidence
+  comes only from topic test results the student enters.
+* The tutor answers only from the knowledge base and its solvers. It is not a
+  general problem solver: it handles the problem families listed above, Python
+  code only, and running-time templates for common loop and recursion shapes
+  (anything else is reported as "not matched"). Its question grammar and
+  thresholds were tuned on questions written by the same author as the content,
+  so real students' phrasing will expose gaps; the held-out evaluation set is
+  small (24 questions).
 * No knowledge-base entry has been reviewed by a person yet. The seed content
   was written for ScholarIQ from standard textbook material.
-* Search is lexical. It handles names, aliases, British and American spellings
-  and word endings, but not misspellings, and some queries about unrelated
+* Knowledge-base search is lexical. It handles names, aliases, British and
+  American spellings and word endings, but not misspellings (the tutor corrects
+  spelling before searching), and some queries about unrelated
   subjects still return loosely related concepts (2 of 6 in the evaluation).
 * Custom subjects are shared rows. A student cannot change the topics of a custom
   subject that another profile also uses.

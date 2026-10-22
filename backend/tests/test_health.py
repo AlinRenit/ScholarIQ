@@ -63,5 +63,6 @@ def test_system_info_is_honest(client: TestClient) -> None:
     assert body["uses_external_ai"] is False
     caps = {c["key"]: c["status"] for c in body["capabilities"]}
     assert caps["foundation"] == "available"
+    assert caps["tutor"] == "available"
     # Features that do not exist yet must not be reported as available.
-    assert caps["tutor"] == "planned"
+    assert caps["diagnostics"] == "planned"

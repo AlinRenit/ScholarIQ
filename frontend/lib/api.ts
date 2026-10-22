@@ -344,3 +344,123 @@ export type KnowledgeConcept = {
   }[];
   question_count: number;
 };
+
+// --------------------------------------------------------------------------- //
+// Tutor
+// --------------------------------------------------------------------------- //
+
+export type TutorAction = "simplify" | "example" | "check" | "deeper";
+export type SectionKind =
+  | "definition"
+  | "facts"
+  | "explanation"
+  | "procedure"
+  | "example"
+  | "misconception"
+  | "check"
+  | "table"
+  | "list"
+  | "steps"
+  | "code"
+  | "note"
+  | "summary";
+export type AnswerOrigin = {
+  kind: "knowledge" | "solver" | "analysis" | "template";
+  concept: string | null;
+  document: string | null;
+  solver: string | null;
+  trust: TrustStatus | null;
+};
+export type AnswerItem = {
+  text: string;
+  detail: string | null;
+  concept: string | null;
+  topic: string | null;
+};
+export type CheckQuestion = { slug: string; prompt: string; kind: string; options: string[] };
+export type AnswerSection = {
+  kind: SectionKind;
+  title: string;
+  text: string | null;
+  steps: string[];
+  columns: string[];
+  rows: string[][];
+  items: AnswerItem[];
+  code: string | null;
+  question: CheckQuestion | null;
+  origin: AnswerOrigin;
+};
+export type ConceptRef = {
+  slug: string;
+  name: string;
+  topic_slug: string;
+  topic_name: string;
+  trust: TrustStatus;
+};
+export type Suggestion = {
+  label: string;
+  action: TutorAction | "ask";
+  query: string | null;
+  // On a clarifying question's option: the concept slug that option stands for.
+  concept?: string | null;
+};
+export type TutorAnswer = {
+  status: "answered" | "clarify" | "abstained";
+  handler: string;
+  handler_label: string;
+  intent: string;
+  concepts: ConceptRef[];
+  sections: AnswerSection[];
+  review: { all_reviewed: boolean; label: string | null; unreviewed: string[] };
+  personalisation: {
+    topic: string | null;
+    classification: string | null;
+    level: "overview" | "balanced" | "guided" | "deeper";
+    explanation: string;
+  } | null;
+  interpretation: string[];
+  clarification: { question: string; options: Suggestion[] } | null;
+  missing: string | null;
+  suggestions: Suggestion[];
+  further_reading: {
+    title: string;
+    authors: string | null;
+    citation: string | null;
+    url: string | null;
+  }[];
+  limitations: string[];
+  rules_version: string;
+};
+export type AskResult = { conversation_id: string; message_id: string; answer: TutorAnswer };
+export type ConversationSummary = {
+  id: string;
+  title: string | null;
+  created_at: string;
+  last_message_at: string | null;
+  messages: number;
+};
+export type TutorMessage = {
+  id: string;
+  role: "student" | "tutor";
+  text: string;
+  created_at: string;
+  answer: TutorAnswer | null;
+};
+export type ConversationDetail = {
+  id: string;
+  title: string | null;
+  retention_days: number;
+  messages: TutorMessage[];
+};
+export type CheckResult = {
+  correct: boolean;
+  expected: string;
+  explanation: string;
+  recorded_as_evidence: boolean;
+};
+export type TutorInfo = {
+  retention_days: number;
+  rules_version: string;
+  solvers: string[];
+  allow_unreviewed: boolean;
+};

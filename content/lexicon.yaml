@@ -1,0 +1,38 @@
+# Shorthand that students type, expanded before a question is analysed.
+# Whole words only, case-insensitive. Subject abbreviations (DS, OS, DBMS, CN)
+# and concept aliases (LIFO, 3NF, BST...) live in the curriculum and knowledge
+# files and are not repeated here. Single letters are never expanded: they are
+# variables in notation such as R = {(1, 2)} or T(n).
+version: 1
+abbreviations:
+  algo: algorithm
+  algos: algorithms
+  algorithim: algorithm
+  dp: dynamic programming
+  ll: linked list
+  pq: priority queue
+  diff: difference
+  b/w: between
+  btw: between
+  w/o: without
+  defn: definition
+  eg: for example
+  e.g.: for example
+  pls: please
+  plz: please
+  ur: your
+  wat: what
+  wht: what
+  whats: what is
+  hw: how
+  expln: explain
+  xplain: explain
+  ques: questions
+  qs: questions
+  qns: questions
+  prob: problem
+  probs: problems
+  eqn: equation
+  approx: approximately
+  info: information
+  sem: semester

@@ -3,7 +3,7 @@ version: "2026.10.1"
 concepts:
   - slug: db.anomalies
     name: Update anomalies
-    aliases: [insertion anomaly, deletion anomaly, update anomaly, modification anomaly, redundancy, why normalise]
+    aliases: [insertion anomaly, deletion anomaly, update anomaly, modification anomaly, redundancy]
     difficulty: 2
     further_reading: [silberschatz-db]
     definition: >-

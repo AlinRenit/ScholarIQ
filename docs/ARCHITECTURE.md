@@ -116,34 +116,67 @@ query --analyse--> terms (+ joined compounds) --BM25--> scores --+ name/alias ph
   writes [eval/retrieval.md](eval/retrieval.md). A test keeps hit@1 >= 85% and
   hit@3 >= 90% on in-scope queries so ranking changes cannot regress silently.
 
-Known weaknesses that Milestone 5 must handle: no misspelling tolerance in
-search itself, and unrelated queries that share one common word with the
-content still return weak matches, so the tutor needs its own abstention rule
-(for example, the share of query words the knowledge base covers) rather than
-trusting that search returned something.
+Milestone 5 handles the two weaknesses above in the tutor rather than in
+search: it corrects spelling before searching, and it declines questions whose
+words the knowledge base mostly does not contain.
 
-### Question answering pipeline *(planned, Milestone 5)*
+### Question answering *(implemented in Milestone 5, rules `tutor-rules/1`)*
 
 ```
 question
-  -> normalise (keep math, code identifiers, SQL)
-  -> tokenise, spell-correct against the KB vocabulary (edit distance)
-  -> lexicon match: subjects, topics, concept aliases, abbreviations
-  -> intent grammar: definition | explanation | comparison | procedure |
-     worked problem | reasoning | prerequisites | practice | plan | follow-up
-  -> context resolution against the conversation's structured history
-  -> BM25 retrieval over knowledge documents (reviewed only, or unreviewed too
-     when allowed, labelled as such)
-  -> re-rank: exact concept match, subject context, prerequisite edges, topic
-  -> ambiguity check (score margin between top concepts) -> clarify?
-  -> handler selection -> answer plan (sections, depth from teaching policy)
-  -> validation: every section must be backed by a KB item or solver
-  -> answer + citations + evidence status, or an explicit abstention
+  -> normalise (nlu/normalise.py): NFKC, keep notation (T(n), R = {(1, 2)}, SQL),
+     split out fenced or indented code, expand shorthand from content/lexicon.yaml
+     (diff b/w -> difference between; single letters are never expanded)
+  -> spell-correct unknown words (nlu/spelling.py): Damerau-Levenshtein against
+     the KB vocabulary; 1 edit from 5 letters, 2 from 8, and a 4-letter word only
+     to a single whole concept name ("stak" -> stack). Ties go to whole names,
+     then name frequency, then overall frequency, then alphabetical order
+  -> intent grammar (nlu/intents.py): weighted regular-expression rules for the
+     ten question types, follow-up phrases ("explain step 2 again", "simpler"),
+     requested depth, references ("it", "that")
+  -> link mentions (nlu/parser.py): longest span first; a concept's own name
+     beats a topic name, which beats an alias, which beats a subject; a topic
+     name that spans two concept names gives way to them
+  -> resolve references against the conversation's stored context
+  -> BM25 search (Milestone 4) over the corrected text; coverage = share of
+     content words the KB contains
+  -> decide (answering/engine.py):
+       a written-out problem goes to a solver first
+       ambiguous name: pick by subject context, else by score margin, else ask
+       no named concept and (top score < 9.0 or coverage < 0.5): decline
+       second score >= 0.9 x top without a clear name match: ask which was meant
+  -> handler, with depth from the teaching policy
+  -> validate: every section is backed by a KB entry, a solver or analysis, or
+     is a fixed template; an unbacked section is an error, not an answer
+  -> answer: sections with origins, sources, review status, limitations,
+     interpretation trace, suggestions
 ```
 
-Answers are assembled from knowledge-base content, not generated. A handler that
-cannot back a section with content leaves that section out and says so. Answers
-built from content no person has reviewed say so.
+Handlers: A definition and explanation; B comparison (a table of recorded
+attributes only, "Not recorded in the knowledge base" otherwise); C procedure
+(stored steps, never invented); D worked problems through `answering/solvers/`
+(exact fractions, percentages, linear and quadratic equations, master theorem
+and decrease-and-conquer recurrences, truth tables up to 6 variables, BFS, DFS
+and shortest paths, SELECT on an in-memory practice database under an SQLite
+authorizer and step limit); E code (Python `ast` templates for loops, halving
+loops, sorting calls and recursion; the code is never executed; other languages
+are recognised and declined); F decline, with the closest covered concepts.
+Prerequisite, practice and study-advice handlers use the concept graph and the
+student's topic evidence.
+
+The teaching policy (`tutoring/policy.py`, `teaching-policy/1`) picks a brief
+overview for Strong topics, step-by-step teaching for Needs attention, and the
+standard depth otherwise; a depth the student asks for wins. It changes which
+sections appear and their order, never their content. Asking the tutor about a
+topic, and answering its check questions, is not evidence and never changes a
+classification.
+
+Quality is measured by `answering/evaluate.py` on `content/eval/answers.yaml`
+(60 questions; status, handler, concepts, sections and exact solver results
+must all match), reported in [eval/answers.md](eval/answers.md). Cases are
+split into tuning and held-out; a held-out case that fails and is then fixed
+moves to tuning. A test fails the build if any out-of-scope question is
+answered or held-out accuracy drops below 90%.
 
 ## 4. Repository layout
 
@@ -158,18 +191,18 @@ backend/
     ingestion/         validation, extraction, OCR, layout parsers, import service
     curriculum/        (M3) curriculum schema, YAML sync, subject matching
     analytics/         (M3) subject analytics, topic evidence and classification
-    tutoring/          (M5) teaching policy
+    tutoring/          (M5) teaching policy, conversations and retention
     knowledge/         (M4) content schema, loader, sync, review, index, evaluation
     retrieval/         (M4) tokeniser, stemmer, BM25
-    nlu/               (M5) query parsing
-    answering/         (M5) handlers and solvers
+    nlu/               (M5) normalising, spelling, intent grammar, mention linking
+    answering/         (M5) answer engine, handlers, solvers, code analysis, gold evaluation
     planning/          (M6) study plans
   migrations/          Alembic
   tests/
 frontend/
   app/                 Next.js App Router pages and the /api proxy
   components/  lib/  tests/
-content/               curriculum, knowledge base, sources, retrieval eval set (M4)
+content/               curriculum, knowledge base, sources, shorthand lexicon, eval sets
 docs/                  architecture, compliance, eval/ reports
 docker-compose.yml
 ```
@@ -321,9 +354,9 @@ model in the system and is used only to turn pixels into characters.
 2. **Language understanding is shallow.** A grammar plus lexicon handles the ten
    listed question types in common phrasings, not arbitrary language.
    Mitigation: clarifying questions when the top interpretations are close,
-   spelling correction against the KB vocabulary, an evaluation set that
-   includes paraphrases, and logging (without student identity) of unparsed
-   question shapes to guide grammar work.
+   spelling correction against the KB vocabulary, and an evaluation set that
+   includes paraphrases. Question text is never logged, so grammar gaps have to
+   be found through the evaluation set and feedback, not from usage logs.
 3. **Answers are assembled, not composed.** Responses are built from verified
    sections, so they can read as structured rather than conversational, and
    cannot synthesise a novel explanation. This is the price of not
@@ -338,8 +371,9 @@ model in the system and is used only to turn pixels into characters.
 6. **Marksheet layout diversity.** There is no universal format. Mitigation:
    pluggable layout parsers with a generic table/line fallback, and a review
    UI that makes correction fast.
-7. **Solver scope.** SymPy and custom solvers handle defined problem families
-   (recurrences of supported forms, truth tables, explicit graphs, SQL on a
+7. **Solver scope.** Small hand-written solvers (no SymPy) handle defined
+   problem families (arithmetic, percentages, linear and quadratic equations,
+   recurrences of supported forms, truth tables, explicit graphs, SELECT on a
    sandbox DB). Anything else is declined, not attempted.
 8. **Code questions.** Executing student code safely needs a real sandbox.
    Initially code is analysed statically (Python `ast`, pattern-based complexity
@@ -357,7 +391,10 @@ model in the system and is used only to turn pixels into characters.
 * Uploaded files are stored under random server-generated names (mode 0600)
   outside any served directory, with size limits and signature checks.
 * All queries go through SQLAlchemy with bound parameters.
-* Request bodies, files and question text are not logged.
+* Request bodies, files and question text are not logged. Tutor conversations
+  are stored per student and deleted `SCHOLARIQ_CONVERSATION_RETENTION_DAYS`
+  after their last message (default 30). Tutor questions are rate limited per
+  student (60 a minute, in process).
 * Startup fails if AI-provider credentials are present (`SCHOLARIQ_STRICT_AI_ENV_CHECK`).
 * Deleting a student cascades to every student-owned row, and the same service
   deletes their uploaded files. Expired files are purged after uploads.

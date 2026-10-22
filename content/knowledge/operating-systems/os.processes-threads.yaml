@@ -15,6 +15,7 @@ concepts:
       states: new, ready, running, waiting (blocked), terminated
       os_record: process control block (PCB) with registers, state, memory and file information
       creation_cost: higher than a thread
+      communication: through inter-process communication set up by the OS (pipes, message queues, shared memory segments)
     contrasts: [os.thread]
     documents:
       - kind: explanation
@@ -63,6 +64,7 @@ concepts:
       the same process share its code, data, heap and open files, but each has
       its own program counter, registers and stack.
     attributes:
+      address_space: shared with the other threads of the same process
       shared_with_other_threads: code, global data, heap, open files
       private: program counter, registers, stack
       creation_cost: lower than a process

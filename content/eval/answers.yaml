@@ -1,0 +1,90 @@
+# Gold-standard questions for the tutor's answer engine.
+#
+# Each case states what a correct answer must be: its status, the handler that
+# should answer, the concepts it should be about (in order), section kinds it
+# must contain, and for worked problems the exact result. Cases under
+# "held_out" were written after the engine was built and were not used to set
+# its thresholds; report them separately.
+#
+# `after` lists earlier questions in the same conversation, for follow-ups.
+version: 1
+cases:
+  # ---- definitions and explanations (Handler A)
+  - {q: "What is a stack?", status: answered, handler: A, concepts: [ds.stack], sections: [definition, facts, check], group: tuning}
+  - {q: "Define a hash table", status: answered, handler: A, concepts: [ds.hash-table], sections: [definition], group: tuning}
+  - {q: "Explain deadlocks", status: answered, handler: A, concepts: [os.deadlock], group: tuning}
+  - {q: "What does ACID stand for?", status: answered, handler: A, concepts: [db.acid], group: tuning}
+  - {q: "Explain how virtual memory works.", status: answered, handler: A, concepts: [os.virtual-memory-concept], group: tuning}
+  - {q: "Why can deadlocks occur?", status: answered, handler: A, concepts: [os.deadlock], group: tuning}
+  - {q: "what is 3NF", status: answered, handler: A, concepts: [db.3nf], group: tuning}
+  - {q: "semafore", status: answered, handler: A, concepts: [os.semaphore], group: tuning}
+  - {q: "wat is a stak?", status: answered, handler: A, concepts: [ds.stack], group: tuning}
+  - {q: "what is an i-node", status: answered, handler: A, concepts: [os.inode], group: tuning}
+  - {q: "What is normalization?", status: answered, handler: A, sections: [list], group: tuning}
+
+  # ---- comparisons (Handler B)
+  - {q: "What is the difference between a process and a thread?", status: answered, handler: B, concepts: [os.process, os.thread], sections: [table], group: tuning}
+  - {q: "stack vs queue", status: answered, handler: B, concepts: [ds.stack, ds.queue], sections: [table], group: tuning}
+  - {q: "TCP or UDP, which is faster?", status: answered, handler: B, concepts: [cn.tcp, cn.udp], group: tuning}
+  - {q: "compare arrays and linked lists", status: answered, handler: B, concepts: [ds.array, ds.linked-list], group: tuning}
+
+  # ---- procedures (Handler C)
+  - {q: "How do I calculate the time complexity of this algorithm?", status: answered, handler: C, concepts: [ds.complexity-big-o], sections: [procedure], group: tuning}
+  - {q: "steps to normalise a relation to 3NF", status: answered, handler: C, group: tuning}
+
+  # ---- worked problems (Handler D)
+  - {q: "Solve T(n) = 2T(n/2) + n", status: answered, handler: D, result: "T(n) = Θ(n log n)", group: tuning}
+  - {q: "what is 15% of 240", status: answered, handler: D, result: "15% of 240 = 36", group: tuning}
+  - {q: "solve 3x - 4 = 11", status: answered, handler: D, result: "x = 5", group: tuning}
+  - {q: "truth table for p and not p", status: answered, handler: D, result: "(p ∧ ¬p) is a contradiction (false in every row).", group: tuning}
+  - {q: "BFS from A with edges A-B, A-C, C-D", status: answered, handler: D, result: "BFS order: A, B, C, D", group: tuning}
+  - {q: "SELECT count(*) FROM students", status: answered, handler: D, result: "1 row(s) returned.", group: tuning}
+  - {q: "Solve this recurrence relation.", status: answered, handler: C, concepts: [algo.recurrence-relation], group: tuning}
+
+  # ---- code (Handler E)
+  - {q: "what is the time complexity?\n```python\nfor i in range(n):\n    for j in range(n):\n        x += 1\n```", status: answered, handler: E, contains: "Θ(n^2)", group: tuning}
+
+  # ---- prerequisites, practice
+  - {q: "What should I learn before studying graph algorithms?", status: answered, handler: prerequisites, group: tuning}
+  - {q: "Give me questions on binary search.", status: answered, handler: practice, concepts: [ds.binary-search], sections: [check], group: tuning}
+
+  # ---- follow-ups
+  - {q: "Can you explain the second step again?", after: ["Explain Dijkstra's algorithm"], status: answered, handler: follow-up, concepts: [algo.dijkstra], group: tuning}
+  - {q: "show me an example", after: ["What is a semaphore?"], status: answered, handler: follow-up, concepts: [os.semaphore], sections: [example], group: tuning}
+  - {q: "and how is a queue different?", after: ["What is a stack?"], status: answered, handler: B, concepts: [ds.stack, ds.queue], group: tuning}
+
+  # ---- clarification and abstention (Handler F)
+  - {q: "processes waiting for each other forever", status: clarify, concepts_include: [os.deadlock], group: tuning}
+  - {q: "who won the world cup", status: abstained, handler: F, group: tuning}
+  - {q: "what is a black hole", status: abstained, handler: F, group: tuning}
+  - {q: "explain photosynthesis", status: abstained, handler: F, group: tuning}
+  - {q: "What should I study first based on my results?", status: abstained, group: tuning}
+
+  # ---- held out: written after tuning, not used to set thresholds
+  - {q: "what's a priority queue used for", status: answered, handler: A, concepts: [ds.priority-queue], group: held_out}
+  - {q: "explain the master theorem", status: answered, handler: A, concepts: [algo.master-theorem], group: held_out}
+  - {q: "how does a hash function work", status: answered, handler: A, concepts: [ds.hash-function], group: held_out}
+  - {q: "what is a primary key", status: answered, handler: A, concepts: [db.keys], group: held_out}
+  - {q: "explain round robin scheduling briefly", status: answered, handler: A, concepts: [os.round-robin], group: held_out}
+  - {q: "what is the pigeon hole principle", status: answered, handler: A, concepts: [dm.pigeonhole], group: held_out}
+  - {q: "define bipartite graph", status: answered, handler: A, concepts: [dm.graph-coloring], group: held_out}
+  - {q: "difference between BFS and DFS", status: answered, handler: B, concepts: [ds.bfs, ds.dfs], group: held_out}
+  - {q: "paging vs segmentation", status: answered, handler: B, concepts: [os.paging, os.segmentation], group: held_out}
+  - {q: "how is 2NF different from 3NF", status: answered, handler: B, concepts: [db.2nf, db.3nf], group: held_out}
+  - {q: "how do I find the closure of a set of attributes", status: answered, handler: C, concepts: [db.closure], group: held_out}
+  - {q: "how to detect a cycle in a linked list", status: answered, handler: C, concepts: [ds.cycle-detection], group: held_out}
+  - {q: "T(n) = 3T(n/3) + n", status: answered, handler: D, result: "T(n) = Θ(n log n)", group: held_out}
+  - {q: "what is 2^8 - 1", status: answered, handler: D, result: "2^8 - 1 = 255", group: held_out}
+  - {q: "x^2 - 9 = 0", status: answered, handler: D, result: "x = -3 or 3", group: held_out}
+  - {q: "is (p -> q) <-> (!q -> !p) a tautology?", status: answered, handler: D, result: "((p → q) ↔ (¬q → ¬p)) is a tautology (true in every row).", group: held_out}
+  - {q: "quiz me on deadlocks", status: answered, handler: practice, group: held_out}
+  # Moved from held_out: it failed when first run and the engine was then
+  # changed to pass it, so it no longer measures unseen questions.
+  - {q: "prerequisites for dynamic programming", status: answered, handler: prerequisites, group: tuning}
+  - {q: "what is a sliding window protocol", status: answered, group: held_out}
+  - {q: "explain the krebs cycle", status: abstained, handler: F, group: held_out}
+  - {q: "best pizza in town", status: abstained, handler: F, group: held_out}
+  - {q: "how do neural networks learn", status: abstained, handler: F, group: held_out}
+  - {q: "what is a deadlok", status: answered, handler: A, concepts: [os.deadlock], group: held_out}
+  - {q: "explian normalisation", status: answered, handler: A, group: held_out}
+  - {q: "go deeper", after: ["What is a B+ tree?"], status: answered, concepts: [db.b-plus-tree], group: held_out}

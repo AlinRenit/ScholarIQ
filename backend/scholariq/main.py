@@ -15,6 +15,8 @@ from scholariq.api.routes import (
     documents,
     health,
     knowledge,
+    plan,
+    practice,
     profile,
     system,
     topics,
@@ -63,4 +65,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(topics.router, prefix="/api")
     app.include_router(knowledge.router, prefix="/api")
     app.include_router(tutor.router, prefix="/api")
+    app.include_router(practice.router, prefix="/api")
+    app.include_router(plan.router, prefix="/api")
     return app

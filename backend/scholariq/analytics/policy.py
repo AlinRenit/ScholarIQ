@@ -73,6 +73,47 @@ class TrendRules(BaseModel):
     min_change_points: float = Field(3.0, ge=0)
 
 
+class QuizRules(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    # Questions per diagnostic quiz (fewer when a topic has fewer).
+    size: int = Field(5, ge=1, le=20)
+
+
+class PlanWeights(BaseModel):
+    """Weights of the study-plan priority formula (plan-formula/1)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    need: float = Field(3.0, ge=0)
+    importance: float = Field(2.0, ge=0)
+    goal: float = Field(2.0, ge=0)
+    unlocks: float = Field(1.0, ge=0)
+    recent_result: float = Field(1.0, ge=0)
+    study_time: float = Field(0.5, ge=0)
+
+
+class PlanRules(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    weights: PlanWeights = Field(default_factory=PlanWeights)
+    # How much each classification says the topic needs work, 0..1.
+    need: dict[str, Fraction] = Field(
+        default_factory=lambda: {
+            "needs_attention": 1.0,
+            "developing": 0.6,
+            "insufficient_evidence": 0.5,
+            "strong": 0.1,
+        }
+    )
+    # Added to the need of an unclassified topic whose subject mark is low.
+    weak_subject_bonus: Fraction = 0.2
+    # A diagnostic counts as "recent" for this many days.
+    recent_days: int = Field(30, ge=1)
+    # Study time is divided by this to put it on a 0..1 scale.
+    long_topic_minutes: int = Field(300, ge=1)
+
+
 class Policy(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -80,6 +121,8 @@ class Policy(BaseModel):
     subject_bands: SubjectBands = Field(default_factory=SubjectBands)
     topics: TopicRules = Field(default_factory=TopicRules)
     trends: TrendRules = Field(default_factory=TrendRules)
+    quizzes: QuizRules = Field(default_factory=QuizRules)
+    plan: PlanRules = Field(default_factory=PlanRules)
 
 
 DEFAULT_POLICY = Policy()

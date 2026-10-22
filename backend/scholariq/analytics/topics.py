@@ -107,8 +107,7 @@ def subject_message(signal: SubjectSignal, topic_name: str) -> str:
 
 _NEXT = {
     MasteryClass.INSUFFICIENT_EVIDENCE: (
-        "Add topic-level evidence: a topic test result now, or a diagnostic quiz once "
-        "quizzes are available (Milestone 6)."
+        "Take a diagnostic quiz on this topic, or add a topic test result."
     ),
     MasteryClass.NEEDS_ATTENTION: (
         "Work through this topic step by step, starting with its prerequisites, then "

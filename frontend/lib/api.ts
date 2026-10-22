@@ -464,3 +464,84 @@ export type TutorInfo = {
   solvers: string[];
   allow_unreviewed: boolean;
 };
+
+// --------------------------------------------------------------------------- //
+// Practice (diagnostic quizzes) and study plan
+// --------------------------------------------------------------------------- //
+
+export type QuizSummary = { id: string; submitted_at: string; correct: number; total: number };
+export type PracticeTopic = {
+  slug: string;
+  name: string;
+  subjects: string[];
+  questions: number;
+  classification: MasteryClass;
+  quizzes: QuizSummary[];
+  open_quiz: string | null;
+};
+export type QuizQuestion = {
+  slug: string;
+  prompt: string;
+  options: string[];
+  style: "conceptual" | "application" | string;
+  difficulty: number;
+  concept: string | null;
+  trust: TrustStatus;
+};
+export type QuizOutcome = {
+  classification: MasteryClass;
+  reasons: string[];
+  next_action: string;
+  direct_observations: number;
+};
+export type Quiz = {
+  id: string;
+  topic_slug: string;
+  topic_name: string;
+  created_at: string;
+  available: number;
+  questions: QuizQuestion[];
+  submitted_at: string | null;
+  correct: number | null;
+  marked: {
+    slug: string;
+    chosen: number;
+    correct_option: number;
+    correct: boolean;
+    explanation: string;
+  }[];
+  before: QuizOutcome | null;
+  after: QuizOutcome | null;
+  recorded_as_evidence: boolean;
+};
+export type PlanTerm = { value: number; weight: number; contribution: number; why: string };
+export type PlanItemStatus = "pending" | "lesson_completed" | "skipped";
+export type PlanItem = {
+  id: string;
+  topic_slug: string;
+  topic_name: string;
+  position: number;
+  priority: string;
+  status: PlanItemStatus;
+  breakdown: {
+    classification: MasteryClass;
+    minutes: number | null;
+    terms: Record<string, PlanTerm>;
+    after: string[];
+    moved_for: string | null;
+    goal: boolean;
+    next_step: string;
+  };
+};
+export type StudyPlan = {
+  id: string;
+  created_at: string;
+  formula_version: string;
+  parameters: {
+    goal_topics: string[];
+    weights: Record<string, number>;
+    policy_version: string;
+    left_out_strong: string[];
+  };
+  items: PlanItem[];
+};

@@ -152,3 +152,15 @@ concepts:
         options: [MAC addresses, Connection state, Disk usage, User passwords]
         answer: {option_index: 1}
         explanation: Knowing which connections are open lets it allow replies while blocking unsolicited traffic.
+      - slug: q.cn.network-security.6
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: "A stateful firewall blocks new inbound connections but allows outbound HTTPS. A reply arrives from a web server a user just contacted. What happens to it?"
+        options:
+          - It is dropped, because inbound traffic is blocked
+          - It is allowed, because it belongs to a connection that started inside
+          - It is sent to the DNS server for checking
+          - It is allowed only if it uses port 80
+        answer: {option_index: 1}
+        explanation: "A stateful firewall remembers connections opened from inside and lets their replies back in, while still blocking new connections from outside."

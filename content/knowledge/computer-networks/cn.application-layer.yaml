@@ -164,3 +164,15 @@ concepts:
           - Discover, request, offer, acknowledge
         answer: {option_index: 1}
         explanation: Discover, offer, request, acknowledge - often remembered as DORA.
+      - slug: q.cn.application-layer.7
+        kind: multiple_choice
+        style: application
+        difficulty: 1
+        prompt: "A laptop joins a new Wi-Fi network and has no IP address yet. Which protocol does it use to get one?"
+        options:
+          - DNS
+          - DHCP
+          - ARP
+          - SMTP
+        answer: {option_index: 1}
+        explanation: "DHCP leases an IP address (with the subnet mask, gateway and DNS server) to a host that joins the network."

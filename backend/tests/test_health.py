@@ -64,5 +64,6 @@ def test_system_info_is_honest(client: TestClient) -> None:
     caps = {c["key"]: c["status"] for c in body["capabilities"]}
     assert caps["foundation"] == "available"
     assert caps["tutor"] == "available"
+    assert caps["diagnostics"] == "available"
     # Features that do not exist yet must not be reported as available.
-    assert caps["diagnostics"] == "planned"
+    assert caps["hardening"] == "planned"

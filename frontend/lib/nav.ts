@@ -35,7 +35,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   {
     href: "/practice",
     label: "Practice",
-    description: "Diagnostic quizzes with verified answers that update your topic evidence.",
+    description:
+      "Diagnostic quizzes on each topic. Results become topic evidence and can change a classification.",
     capability: "diagnostics",
   },
   {

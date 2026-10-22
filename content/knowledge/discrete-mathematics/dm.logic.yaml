@@ -43,6 +43,18 @@ concepts:
         options: [p ∧ ¬p, p ∨ ¬p, p → ¬p, p ↔ ¬p]
         answer: {option_index: 1}
         explanation: Either p or its negation is true in every case.
+      - slug: q.dm.logic.7
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: "A program runs a block only if (x > 0) ∧ ¬(y > 10). For which values does the block run?"
+        options:
+          - x = 0, y = 5
+          - x = 3, y = 12
+          - x = 3, y = 10
+          - x = -1, y = 0
+        answer: {option_index: 2}
+        explanation: "x = 3 makes x > 0 true, and y = 10 makes y > 10 false, so its negation is true and the conjunction holds."
 
   - slug: dm.implication
     name: Conditional statement

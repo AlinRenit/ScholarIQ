@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { StartQuizButton } from "@/components/practice/StartQuizButton";
 import { Button } from "@/components/ui-client";
 import { errorMessage, type TopicAnalysis } from "@/lib/api";
 import { MASTERY, Pill } from "@/lib/labels";
@@ -131,7 +132,8 @@ export function TopicCard({
       )}
 
       {mode === "closed" ? (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap items-start gap-2">
+          <StartQuizButton topic={topic.slug} label="Take a diagnostic quiz" />
           <Button variant="secondary" onClick={() => setMode("topic_exam")}>
             Add a topic test result
           </Button>

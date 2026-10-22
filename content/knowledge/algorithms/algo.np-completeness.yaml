@@ -129,3 +129,15 @@ concepts:
           - From a problem in P to X
         answer: {option_index: 1}
         explanation: If a known hard problem reduces to X, then X must be at least as hard.
+      - slug: q.algo.np-completeness.6
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: "Someone finds a polynomial-time algorithm for 3-SAT, which is NP-complete. What follows?"
+        options:
+          - Only 3-SAT becomes easy
+          - P = NP
+          - NP-complete problems become undecidable
+          - Nothing about any other problem
+        answer: {option_index: 1}
+        explanation: "Every problem in NP reduces to 3-SAT in polynomial time, so a fast 3-SAT algorithm would solve all of NP in polynomial time."

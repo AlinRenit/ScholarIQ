@@ -231,6 +231,7 @@ INTELLIGENCE_PACKAGES: tuple[str, ...] = (
     "scholariq.answering",
     "scholariq.tutoring",
     "scholariq.planning",
+    "scholariq.diagnostics",
 )
 
 

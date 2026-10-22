@@ -423,6 +423,24 @@ class VerifiedAnswer(IdMixin, TimestampMixin, Base):
 # --------------------------------------------------------------------------- #
 
 
+class QuizSession(IdMixin, Base):
+    """One diagnostic quiz as it was shown: which questions, in which order, and
+    how each question's options were shuffled. Answers are marked against it."""
+
+    __tablename__ = "quiz_sessions"
+
+    student_id: Mapped[str] = mapped_column(
+        FK, ForeignKey("students.id", ondelete="CASCADE"), index=True
+    )
+    topic_id: Mapped[str] = mapped_column(FK, ForeignKey("topics.id", ondelete="CASCADE"))
+    # [{"question_id": .., "slug": .., "order": [original option index, ...]}, ...]
+    items: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Number correct out of len(items); set on submission.
+    correct: Mapped[int | None] = mapped_column(Integer)
+
+
 class DiagnosticAttempt(IdMixin, Base):
     __tablename__ = "diagnostic_attempts"
 

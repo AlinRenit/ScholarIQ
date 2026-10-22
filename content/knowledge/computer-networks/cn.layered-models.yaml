@@ -128,3 +128,15 @@ concepts:
         options: [Segment, Packet, Frame, Message]
         answer: {option_index: 2}
         explanation: The link layer wraps a packet in a frame with link addresses and an error check.
+      - slug: q.cn.layered-models.6
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: "A web page travels over HTTP and TCP/IP across an Ethernet link. Which header comes first (outermost) in the frame on the wire?"
+        options:
+          - TCP header
+          - IP header
+          - HTTP header
+          - Ethernet header
+        answer: {option_index: 3}
+        explanation: "Each layer wraps the data from the layer above, so the link-layer (Ethernet) header is added last and sits outermost."

@@ -2,8 +2,8 @@
 
 ScholarIQ analyses a student's marksheets, works out which subjects and topics
 need attention, and tutors them with explanations, worked problems and practice
-questions from a curated local knowledge base. Diagnostic quizzes and study
-plans arrive in Milestone 6.
+questions from a curated local knowledge base, with diagnostic quizzes that
+update topic evidence and a study plan whose ordering it explains.
 
 **It does not use AI models.** No OpenAI, Anthropic, Gemini, Hugging Face,
 embedding APIs or local LLMs. Analysis and answers come from deterministic
@@ -21,7 +21,7 @@ Tesseract OCR engine, which runs locally to read scanned marksheets. See
 | 3. Analytics, topic evidence, dashboard | **Done** |
 | 4. Knowledge base and BM25 retrieval | **Done** |
 | 5. Question answering (AI-free tutor) | **Done** |
-| 6. Diagnostics and study plans | Not started |
+| 6. Diagnostics and study plans | **Done** |
 | 7. Hardening | Not started |
 
 What works today:
@@ -67,6 +67,18 @@ What works today:
   Teaching depth follows the student's topic classification (or the depth they
   ask for) and never changes the facts. Quality is measured on 60 gold
   questions in [docs/eval/answers.md](docs/eval/answers.md).
+* Diagnostic quizzes on every topic (Practice). A quiz has up to five stored
+  questions mixing understanding and application, chooses questions the
+  student has seen least, and shuffles answer options with a fixed per-quiz
+  seed. After submission each answer is explained, the result is stored as
+  topic evidence, and the page shows the topic's classification before and
+  after with the reasons. Quizzes can be retaken; past quizzes stay viewable.
+* A study plan built with a published formula (`plan-formula/1`): need from
+  the classification, curriculum importance, goals the student picks, how many
+  planned topics build on it, recent quiz results and study time. Prerequisite
+  topics always come first. Each position shows its formula terms. Students
+  can mark a topic as studied or skip it; that is progress, not evidence, and
+  never changes a classification.
 
 Sections without a backend yet say so; none show sample data. The roadmap and design are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -210,8 +222,13 @@ they never change a topic classification.
 
 ## Known limitations
 
-* Diagnostic quizzes arrive in Milestone 6. Until then topic-level evidence
-  comes only from topic test results the student enters.
+* Every quiz question is multiple choice, and most topics have five to eight
+  questions, so after one or two retakes questions repeat (in a new order).
+  The answer keys are seed content no person has reviewed yet.
+* Topic prerequisites are derived from concept "requires" links in the
+  knowledge base. The plan formula's weights are teaching conventions (defaults
+  in `backend/scholariq/analytics/policy.py`, overridable in an optional
+  `content/policy.yaml`), not fitted to outcomes.
 * The tutor answers only from the knowledge base and its solvers. It is not a
   general problem solver: it handles the problem families listed above, Python
   code only, and running-time templates for common loop and recursion shapes

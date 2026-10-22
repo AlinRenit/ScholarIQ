@@ -196,7 +196,8 @@ backend/
     retrieval/         (M4) tokeniser, stemmer, BM25
     nlu/               (M5) normalising, spelling, intent grammar, mention linking
     answering/         (M5) answer engine, handlers, solvers, code analysis, gold evaluation
-    planning/          (M6) study plans
+    diagnostics/       (M6) quiz selection, option shuffling, marking, evidence
+    planning/          (M6) study-plan formula and service
   migrations/          Alembic
   tests/
 frontend/
@@ -286,12 +287,33 @@ reason says so. Weights and thresholds live in `analytics/policy.py` and can be
 overridden from the content directory; each classification records the rule
 and policy versions.
 
-### Study-plan priority *(planned, Milestone 6)*
+### Diagnostic quizzes *(implemented in Milestone 6)*
 
-`priority = w_need * need + w_imp * importance + w_goal * goal_match
-+ w_unblock * unlocks - w_time * normalised_study_time`, with prerequisites
-forced earlier by a topological pass over `requires` edges. Each term is stored
-in `score_breakdown` and shown to the student.
+`diagnostics/quiz.py` chooses up to `policy.quizzes.size` (5) questions for a
+topic: least often shown to this student first, then longest ago, then a hash
+of the quiz id and question slug; one application and one conceptual question
+are guaranteed when the topic has them; shown easiest first. Options are
+shuffled by sorting on a hash of (quiz id, slug, option index), and the order
+is stored in `quiz_sessions.items`, so marking maps the displayed choice back
+to the stored answer key. Submitting writes one `DiagnosticAttempt` per
+question and one `TopicEvidence` row (kind diagnostic, score = fraction
+correct, sample size = questions), then recomputes classifications with
+`topic-rules/1`; the response carries the classification before and after.
+
+### Study-plan priority *(implemented in Milestone 6, `plan-formula/1`)*
+
+`priority = 3 need + 2 importance + 2 goal + 1 unlocks + 1 recent_result
+- 0.5 study_time` (weights in `policy.plan`). need: Needs attention 1,
+Developing 0.6, Insufficient evidence 0.5 (+0.2 when a subject mark that
+includes the topic may need attention), Strong 0.1. importance: curriculum
+1-5 / 5. goal: 1 if the student chose it. unlocks: planned topics that build on
+it (max 3) / 3. recent_result: share missed in a quiz from the last 30 days.
+study_time: minutes / 300, capped at 1. Strong topics are left out unless they
+are goals. Topic prerequisites come from concept `requires` edges across
+topics; a depth-first pass places a topic's planned prerequisites before it
+(cycles are cut). Every term is stored in `score_breakdown` and shown.
+Marking a topic as studied is stored on the plan item only and is never
+evidence.
 
 ## 6. Dependencies
 

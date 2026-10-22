@@ -141,3 +141,15 @@ concepts:
           - It only allows reads
         answer: {option_index: 1}
         explanation: Deadlock needs waiting; timestamp ordering aborts instead of blocking.
+      - slug: q.db.concurrency-control.7
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: "Under basic timestamp ordering, T1 (timestamp 5) tries to write X after T2 (timestamp 8) has already read X. What happens?"
+        options:
+          - T1 writes X
+          - T1 is rolled back
+          - T2 is rolled back
+          - T1 waits for T2 to finish
+        answer: {option_index: 1}
+        explanation: "A younger transaction (T2) has already read X, so the older T1 writing it now would break timestamp order; T1 is rolled back and restarted."

@@ -1,0 +1,150 @@
+topic: db.relational-model
+version: "2026.10.1"
+concepts:
+  - slug: db.relation
+    name: Relation
+    aliases: [table, relational model, tuple, attribute, relation schema, relations]
+    difficulty: 1
+    further_reading: [silberschatz-db]
+    definition: >-
+      In the relational model, data is stored in relations (tables). Each
+      relation has a schema of named attributes (columns), and each tuple (row)
+      gives one value per attribute. A relation is a set of tuples, so rows
+      have no inherent order.
+    attributes:
+      relation: table
+      tuple: row
+      attribute: column
+      domain: the set of allowed values for an attribute
+      degree: number of attributes
+      cardinality: number of tuples
+    documents:
+      - kind: explanation
+        title: Relational vocabulary
+        depth: 1
+        body: |-
+          Student(roll_no, name, dept) is a relation schema with three
+          attributes, so its degree is 3. Each row such as (101, 'Asha', 'CSE')
+          is a tuple. If the table has 60 rows, its cardinality is 60.
+
+          Formally a relation is a set, so it has no duplicate tuples and no
+          row order. SQL tables relax this and allow duplicates unless a key
+          forbids them.
+    questions:
+      - slug: q.db.relational-model.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: In the relational model, what is the degree of a relation?
+        options: [Number of rows, Number of attributes, Number of keys, Number of tables it references]
+        answer: {option_index: 1}
+        explanation: Degree counts attributes (columns); cardinality counts tuples (rows).
+
+  - slug: db.keys
+    name: Keys
+    aliases: [primary key, candidate key, super key, superkey, foreign key, composite key, alternate key]
+    difficulty: 2
+    further_reading: [silberschatz-db]
+    definition: >-
+      A superkey is a set of attributes that uniquely identifies every tuple. A
+      candidate key is a minimal superkey. The primary key is the candidate key
+      chosen to identify rows, and a foreign key is an attribute set that must
+      match the primary key of a row in another (or the same) relation.
+    attributes:
+      superkey: uniquely identifies tuples; may contain extra attributes
+      candidate_key: minimal superkey - removing any attribute breaks uniqueness
+      primary_key: the chosen candidate key; cannot be null
+      foreign_key: refers to a key of another relation, enforcing referential integrity
+    requires: [db.relation]
+    related: [db.closure]
+    documents:
+      - kind: example
+        title: Superkeys and candidate keys
+        depth: 2
+        body: |-
+          Student(roll_no, email, name). Both roll_no and email are unique.
+          {roll_no}, {email}, {roll_no, name} and {roll_no, email, name} are
+          all superkeys. {roll_no} and {email} are candidate keys because they
+          are minimal; {roll_no, name} is not, since roll_no alone suffices.
+          Choosing roll_no as the primary key makes email an alternate key.
+      - kind: explanation
+        title: Referential integrity
+        depth: 1
+        body: |-
+          Enrolment(roll_no, course_id) has roll_no as a foreign key to
+          Student. The database rejects an enrolment for a roll_no that does
+          not exist and must decide what happens when a referenced student is
+          deleted: reject the delete, cascade it, or set the reference to null.
+    questions:
+      - slug: q.db.relational-model.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is a candidate key?
+        options:
+          - Any set of attributes containing the primary key
+          - A minimal set of attributes that uniquely identifies each tuple
+          - An attribute that refers to another table
+          - Any attribute that has no null values
+        answer: {option_index: 1}
+        explanation: It is a superkey with no unnecessary attributes.
+      - slug: q.db.relational-model.3
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          In Employee(emp_id, phone, name), emp_id and phone are each unique.
+          Which of these is a superkey but NOT a candidate key?
+        options: ["{emp_id}", "{phone}", "{emp_id, name}", "{name}"]
+        answer: {option_index: 2}
+        explanation: It identifies rows uniquely but is not minimal, since emp_id alone does.
+      - slug: q.db.relational-model.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which constraint does a foreign key enforce?
+        options: [Entity integrity, Referential integrity, Domain integrity, Uniqueness of every column]
+        answer: {option_index: 1}
+        explanation: Every foreign-key value must match an existing key in the referenced table (or be null if allowed).
+
+  - slug: db.relational-algebra
+    name: Relational algebra
+    aliases: [selection, projection, natural join, cartesian product, relational operators, sigma, pi]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      Relational algebra is a set of operations on relations that produce
+      relations: selection (σ) keeps rows meeting a condition, projection (π)
+      keeps chosen columns, and union, difference, Cartesian product and join
+      combine relations.
+    attributes:
+      selection: σ - filters rows
+      projection: π - picks columns and removes duplicates
+      cartesian_product: ×, pairs every row of one relation with every row of the other
+      natural_join: ⋈, joins on equal values of common attributes
+      sql_equivalents: WHERE for σ, SELECT list for π, JOIN for ⋈
+    requires: [db.relation]
+    related: [db.sql-select]
+    documents:
+      - kind: example
+        title: Selection, projection and join
+        depth: 2
+        body: |-
+          σ dept='CSE' (Student) returns the rows of CSE students.
+          π name (Student) returns just the names, without duplicates.
+          Student ⋈ Enrolment pairs each student with their enrolments by
+          matching roll_no. If Student has 60 rows and Course has 8, then
+          Student × Course has 60 × 8 = 480 rows.
+    questions:
+      - slug: q.db.relational-model.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which relational algebra operator chooses a subset of rows?
+        options: [Projection (π), Selection (σ), Union (∪), Rename (ρ)]
+        answer: {option_index: 1}
+        explanation: Selection filters rows by a condition; projection picks columns.
+      - slug: q.db.relational-model.6
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: R has 5 tuples and S has 7 tuples. How many tuples are in R × S?
+        options: ["12", "35", "5", "7"]
+        answer: {option_index: 1}
+        explanation: The Cartesian product pairs every tuple of R with every tuple of S, 5 × 7 = 35.

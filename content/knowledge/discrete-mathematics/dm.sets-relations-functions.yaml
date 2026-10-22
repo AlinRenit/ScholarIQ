@@ -1,0 +1,140 @@
+topic: dm.sets-relations-functions
+version: "2026.10.1"
+concepts:
+  - slug: dm.sets
+    name: Sets
+    aliases: [set, set operations, union, intersection, power set, subset, set difference, cardinality]
+    difficulty: 1
+    further_reading: [rosen]
+    definition: >-
+      A set is an unordered collection of distinct elements. The main
+      operations are union (A ∪ B), intersection (A ∩ B), difference (A − B)
+      and complement; the power set P(A) is the set of all subsets of A.
+    attributes:
+      union: elements in A or B
+      intersection: elements in both
+      difference: elements in A but not in B
+      power_set_size: 2^n for a set of n elements
+      inclusion_exclusion: "|A ∪ B| = |A| + |B| − |A ∩ B|"
+    documents:
+      - kind: example
+        title: Set operations
+        depth: 1
+        body: |-
+          A = {1, 2, 3, 4} and B = {3, 4, 5}.
+          A ∪ B = {1, 2, 3, 4, 5}; A ∩ B = {3, 4}; A − B = {1, 2}.
+          |A ∪ B| = 4 + 3 − 2 = 5, matching inclusion-exclusion.
+          P({1, 2}) = {∅, {1}, {2}, {1, 2}}, which has 2² = 4 elements.
+    questions:
+      - slug: q.dm.sets-relations-functions.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: How many elements does the power set of a 5-element set have?
+        options: ["5", "10", "25", "32"]
+        answer: {option_index: 3}
+        explanation: Each element is either in a subset or not, giving 2^5 = 32 subsets.
+      - slug: q.dm.sets-relations-functions.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          In a class, 30 students take maths, 25 take physics and 10 take both.
+          How many take at least one of the two?
+        options: ["35", "45", "55", "65"]
+        answer: {option_index: 1}
+        explanation: 30 + 25 − 10 = 45 by inclusion-exclusion.
+
+  - slug: dm.relations
+    name: Relations
+    aliases: [relation, binary relation, reflexive, symmetric, transitive, antisymmetric, equivalence relation, partial order]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      A binary relation R on a set A is a set of ordered pairs from A × A. A
+      relation can be reflexive, symmetric, antisymmetric or transitive; an
+      equivalence relation is reflexive, symmetric and transitive, and a
+      partial order is reflexive, antisymmetric and transitive.
+    attributes:
+      reflexive: (a, a) ∈ R for every a
+      symmetric: (a, b) ∈ R implies (b, a) ∈ R
+      antisymmetric: (a, b) and (b, a) both in R imply a = b
+      transitive: (a, b) and (b, c) in R imply (a, c) ∈ R
+      equivalence_relation: reflexive, symmetric, transitive; partitions the set into classes
+      partial_order: reflexive, antisymmetric, transitive
+      number_of_relations: 2^(n²) on an n-element set
+    requires: [dm.sets]
+    documents:
+      - kind: example
+        title: Equivalence classes
+        depth: 2
+        body: |-
+          On the integers, a ~ b when a − b is divisible by 3. It is reflexive
+          (a − a = 0), symmetric (if 3 divides a − b it divides b − a) and
+          transitive (add the two differences). It splits the integers into
+          three classes: remainders 0, 1 and 2.
+          By contrast ≤ is reflexive, antisymmetric and transitive: a partial
+          (in fact total) order, not an equivalence.
+    questions:
+      - slug: q.dm.sets-relations-functions.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which properties define an equivalence relation?
+        options:
+          - Reflexive, antisymmetric, transitive
+          - Reflexive, symmetric, transitive
+          - Symmetric and transitive only
+          - Irreflexive and transitive
+        answer: {option_index: 1}
+        explanation: Reflexive, antisymmetric and transitive would instead define a partial order.
+      - slug: q.dm.sets-relations-functions.4
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          On A = {1, 2, 3}, R = {(1,1), (2,2), (3,3), (1,2)}. Which property
+          does R NOT have?
+        options: [Reflexive, Antisymmetric, Transitive, Symmetric]
+        answer: {option_index: 3}
+        explanation: (1, 2) is in R but (2, 1) is not.
+
+  - slug: dm.functions
+    name: Functions
+    aliases: [function, injective, surjective, bijective, one-to-one, onto, bijection, injection, surjection]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      A function f from A to B assigns exactly one element of B to each element
+      of A. It is injective (one-to-one) if distinct inputs give distinct
+      outputs, surjective (onto) if every element of B is an output, and
+      bijective if it is both.
+    attributes:
+      injective: f(a1) = f(a2) implies a1 = a2
+      surjective: every b in B equals f(a) for some a
+      bijective: both; has an inverse function
+      finite_sets: an injection from A to B needs |A| ≤ |B|; a surjection needs |A| ≥ |B|
+      number_of_functions: "|B|^|A|"
+    requires: [dm.sets]
+    documents:
+      - kind: example
+        title: Classifying functions on the integers
+        depth: 2
+        body: |-
+          f(x) = 2x from integers to integers is injective but not surjective
+          (odd numbers are never hit). g(x) = x + 1 is a bijection; its inverse
+          is x − 1. h(x) = x² is neither: h(2) = h(−2), and negative numbers
+          are never hit.
+    questions:
+      - slug: q.dm.sets-relations-functions.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: f(x) = 2x from the integers to the integers is…
+        options: [Injective but not surjective, Surjective but not injective, Bijective, Neither]
+        answer: {option_index: 0}
+        explanation: Different inputs give different outputs, but odd integers are never outputs.
+      - slug: q.dm.sets-relations-functions.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: How many functions are there from a 3-element set to a 2-element set?
+        options: ["5", "6", "8", "9"]
+        answer: {option_index: 2}
+        explanation: Each of the 3 inputs has 2 choices of output, so 2³ = 8.

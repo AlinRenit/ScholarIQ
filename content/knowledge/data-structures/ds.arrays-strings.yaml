@@ -1,0 +1,188 @@
+topic: ds.arrays-strings
+version: "2026.10.1"
+concepts:
+  - slug: ds.array
+    name: Array
+    aliases: [static array, fixed-size array, one-dimensional array]
+    difficulty: 1
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      An array stores a fixed number of elements of the same type in one
+      contiguous block of memory, so the element at any index can be reached
+      directly by computing its address.
+    attributes:
+      access_by_index: O(1)
+      search_unsorted: O(n)
+      insert_or_delete_in_middle: O(n), because later elements must shift
+      size: fixed when the array is created
+      memory_layout: contiguous
+    contrasts: [ds.linked-list]
+    documents:
+      - kind: explanation
+        title: How an array works
+        depth: 1
+        body: |-
+          An array reserves one block of memory big enough for all of its
+          elements. Because every element has the same size, the address of
+          element i is base_address + i × element_size. That calculation takes
+          the same time for any i, which is why reading or writing a[i] is O(1).
+
+          The price of contiguity is that the middle of an array cannot grow.
+          Inserting at index i means shifting every element from i onwards one
+          place to the right, and deleting means shifting them left, so both
+          take O(n) time in the worst case.
+      - kind: example
+        title: Address of an array element
+        depth: 1
+        body: |-
+          An array of 4-byte integers starts at address 1000. Element a[0] is
+          at 1000, a[1] at 1004, and a[7] at 1000 + 7 × 4 = 1028.
+      - kind: misconception
+        title: Arrays are not always faster than linked lists
+        depth: 2
+        body: |-
+          Arrays win at indexed access and cache-friendly scanning. Linked
+          lists win when you already hold a reference to a position and need
+          to insert or remove there, which is O(1) for a list but O(n) for an
+          array because of shifting.
+    questions:
+      - slug: q.ds.arrays-strings.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What is the time complexity of reading a[i] from an array of n elements?
+        options: [O(1), O(log n), O(n), O(n log n)]
+        answer: {option_index: 0}
+        explanation: >-
+          The address of a[i] is computed directly as base + i × element size,
+          which takes constant time whatever i is.
+      - slug: q.ds.arrays-strings.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          An array of 8-byte values starts at address 2000. At which address
+          does element a[5] start?
+        options: ["2005", "2040", "2048", "2400"]
+        answer: {option_index: 1}
+        explanation: The address is 2000 + 5 × 8 = 2040.
+      - slug: q.ds.arrays-strings.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          Why does inserting a value at the front of an array of n elements
+          take O(n) time?
+        options:
+          - The array must be sorted again
+          - Every existing element must shift one position to make room
+          - The array must be searched for a free slot
+          - Memory for the whole array must be freed first
+        answer: {option_index: 1}
+        explanation: >-
+          Elements are stored contiguously, so making room at index 0 moves all
+          n existing elements one place to the right.
+
+  - slug: ds.dynamic-array
+    name: Dynamic array
+    aliases: [resizable array, ArrayList, vector, growable array, Python list]
+    difficulty: 2
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A dynamic array is an array that grows when it is full by allocating a
+      larger block (typically double the size) and copying the elements across,
+      which makes appending O(1) amortised.
+    attributes:
+      access_by_index: O(1)
+      append: O(1) amortised, O(n) for the append that triggers a resize
+      growth: multiply capacity by a constant factor such as 2
+    requires: [ds.array]
+    part_of: []
+    documents:
+      - kind: explanation
+        title: Why appending is O(1) amortised
+        depth: 2
+        body: |-
+          A dynamic array keeps a capacity larger than its size. Appending into
+          spare capacity costs O(1). When it is full, it allocates a block twice
+          as large and copies every element, which costs O(n) for that one
+          append.
+
+          Doubling means copies happen after 1, 2, 4, 8, … appends. Over n
+          appends the total copying is at most 1 + 2 + 4 + … + n < 2n, so the
+          average cost per append is constant. That average over a whole
+          sequence of operations is what "amortised O(1)" means. It is a
+          guarantee about the total, not about each single append.
+      - kind: misconception
+        title: Growing by a fixed amount is not enough
+        depth: 2
+        body: |-
+          If the capacity grows by a constant (say 10 slots) instead of a
+          constant factor, n appends cause about n/10 resizes each copying up
+          to n elements, for O(n²) total work. Geometric growth is what makes
+          appending amortised O(1).
+    questions:
+      - slug: q.ds.arrays-strings.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: >-
+          A dynamic array doubles its capacity when full. What is the amortised
+          cost of appending one element?
+        options: [O(1), O(log n), O(n), O(n²)]
+        answer: {option_index: 0}
+        explanation: >-
+          The total copying over n appends is less than 2n, so the cost per
+          append averages to a constant.
+
+  - slug: ds.string
+    name: String
+    aliases: [character array, char array, text string]
+    difficulty: 1
+    further_reading: [sedgewick-wayne]
+    definition: >-
+      A string is a sequence of characters. Most languages store it as an array
+      of characters (or of encoded bytes), so indexing and length are cheap but
+      building a long string by repeated concatenation can be expensive.
+    attributes:
+      access_by_index: O(1) for fixed-width encodings
+      concatenation: O(n + m) to copy both strings into a new one
+    requires: [ds.array]
+    documents:
+      - kind: explanation
+        title: Strings as arrays of characters
+        depth: 1
+        body: |-
+          In C a string is a char array ending with the null character '\0',
+          so finding its length means scanning to that terminator (O(n)).
+          Languages such as Java and Python store the length separately, so
+          length is O(1).
+
+          In Java and Python strings are immutable: "changing" one creates a
+          new string. Joining n pieces one at a time therefore copies the
+          growing result again and again, O(n²) characters in total. Collecting
+          the pieces and joining once (StringBuilder, ''.join) is O(total
+          length).
+    questions:
+      - slug: q.ds.arrays-strings.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: How does C mark the end of a string stored in a char array?
+        options:
+          - With a stored length field before the characters
+          - With the null character '\0' after the last character
+          - With a newline character
+          - The array size marks the end
+        answer: {option_index: 1}
+        explanation: >-
+          C strings are null-terminated: functions such as strlen scan until
+          they find '\0'.
+      - slug: q.ds.arrays-strings.6
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          In Python, a loop builds a result by doing s = s + piece for n pieces
+          of similar length. Roughly how does the total work grow?
+        options: [O(n), O(n log n), O(n²), O(2^n)]
+        answer: {option_index: 2}
+        explanation: >-
+          Strings are immutable, so each concatenation copies the whole result
+          so far. Copying 1 + 2 + … + n pieces is O(n²).

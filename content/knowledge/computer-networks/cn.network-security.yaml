@@ -1,0 +1,154 @@
+topic: cn.network-security
+version: "2026.10.1"
+concepts:
+  - slug: cn.symmetric-encryption
+    name: Symmetric-key encryption
+    aliases: [symmetric encryption, secret key cryptography, AES, shared key encryption, symmetric key]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      Symmetric-key encryption uses the same secret key to encrypt and to
+      decrypt. It is fast, which suits bulk data, but the two parties must
+      first share the key securely. AES is the standard example.
+    attributes:
+      keys: one shared secret key
+      speed: fast
+      challenge: distributing the key securely
+      example: AES
+    contrasts: [cn.public-key-encryption]
+    documents:
+      - kind: explanation
+        title: The key-distribution problem
+        depth: 1
+        body: |-
+          If Asha and Ravi share a secret key, anyone without it cannot read
+          their messages. But how do they agree on the key over a network an
+          attacker can watch? Sending it in the clear defeats the purpose. Public
+          key cryptography solves this, and real protocols such as TLS use it
+          to set up a symmetric key for the rest of the session.
+    questions:
+      - slug: q.cn.network-security.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the main difficulty with symmetric-key encryption?
+        options:
+          - It is too slow for large data
+          - Both parties must share the secret key securely in advance
+          - It cannot be decrypted
+          - It needs two different keys
+        answer: {option_index: 1}
+        explanation: The same key encrypts and decrypts, so it must reach both sides without being exposed.
+
+  - slug: cn.public-key-encryption
+    name: Public-key cryptography
+    aliases: [asymmetric encryption, public key encryption, RSA, public and private key, asymmetric cryptography]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      Public-key (asymmetric) cryptography gives each party a key pair. Data
+      encrypted with the public key can be decrypted only with the matching
+      private key, and a signature made with the private key can be verified
+      with the public key. RSA is a classic example.
+    attributes:
+      keys: a public key shared openly and a private key kept secret
+      confidentiality: encrypt with the recipient's public key
+      signature: sign with the sender's private key; verify with the sender's public key
+      speed: much slower than symmetric encryption
+      example: RSA, elliptic-curve cryptography
+    contrasts: [cn.symmetric-encryption]
+    documents:
+      - kind: misconception
+        title: Which key does what
+        depth: 2
+        body: |-
+          To send Ravi a secret, encrypt with Ravi's public key; only his
+          private key can decrypt it. To prove a message came from Asha, she
+          signs with her own private key and anyone can check it with her
+          public key. Encrypting with your own private key does not give
+          secrecy, since everyone has your public key.
+    questions:
+      - slug: q.cn.network-security.2
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Asha wants to send Ravi a message only Ravi can read. Which key should she encrypt with?
+        options: [Asha's private key, Asha's public key, Ravi's public key, Ravi's private key]
+        answer: {option_index: 2}
+        explanation: Only Ravi's private key, which only Ravi has, can decrypt it.
+      - slug: q.cn.network-security.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: To create a digital signature, the sender uses…
+        options: [Their own private key, Their own public key, The receiver's public key, A shared symmetric key]
+        answer: {option_index: 0}
+        explanation: Only the sender has the private key, and anyone can verify the signature with the public key.
+
+  - slug: cn.tls
+    name: TLS
+    aliases: [transport layer security, SSL, HTTPS, TLS handshake, certificate, digital certificate]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      TLS secures a connection between two applications. In its handshake the
+      server proves its identity with a certificate signed by a trusted
+      certificate authority, and the two sides agree on symmetric session keys
+      used to encrypt and integrity-protect the data. HTTPS is HTTP over TLS.
+    attributes:
+      provides: confidentiality, integrity, server authentication
+      authentication: server certificate signed by a certificate authority
+      bulk_encryption: symmetric session keys agreed in the handshake
+      runs_over: TCP
+    requires: [cn.public-key-encryption, cn.symmetric-encryption]
+    documents:
+      - kind: explanation
+        title: Why TLS uses both kinds of cryptography
+        depth: 2
+        body: |-
+          Public-key operations are slow, so TLS uses them only during the
+          handshake, to authenticate the server and agree on a shared secret.
+          From that secret both sides derive symmetric keys, which then encrypt
+          all application data quickly.
+    questions:
+      - slug: q.cn.network-security.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: In TLS, what encrypts the bulk of the application data?
+        options:
+          - The server's private key
+          - Symmetric session keys agreed during the handshake
+          - The certificate authority's public key
+          - Nothing; TLS only authenticates
+        answer: {option_index: 1}
+        explanation: Symmetric encryption is much faster, so it carries the data after the handshake.
+
+  - slug: cn.firewall
+    name: Firewall
+    aliases: [firewalls, packet filter, packet filtering, stateful firewall]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      A firewall sits between networks and allows or blocks traffic according
+      to rules, for example by address, port and protocol. A stateful firewall
+      also tracks connections, so it can allow replies to connections started
+      from inside while blocking unsolicited incoming traffic.
+    attributes:
+      stateless_filter: checks each packet against rules on its own
+      stateful: tracks connection state
+      typical_policy: allow outgoing, block unsolicited incoming
+    documents:
+      - kind: explanation
+        title: What a firewall can and cannot do
+        depth: 1
+        body: |-
+          A firewall can stop traffic that should never reach a network, such
+          as outside connections to an internal database port. It cannot stop
+          attacks carried inside traffic it allows, such as a malicious file
+          downloaded over HTTPS, and it does nothing about threats already
+          inside the network.
+    questions:
+      - slug: q.cn.network-security.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What does a stateful firewall track that a simple packet filter does not?
+        options: [MAC addresses, Connection state, Disk usage, User passwords]
+        answer: {option_index: 1}
+        explanation: Knowing which connections are open lets it allow replies while blocking unsolicited traffic.

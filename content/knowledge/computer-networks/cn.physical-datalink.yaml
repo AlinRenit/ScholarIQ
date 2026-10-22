@@ -1,0 +1,154 @@
+topic: cn.physical-datalink
+version: "2026.10.1"
+concepts:
+  - slug: cn.mac-address
+    name: MAC address
+    aliases: [MAC, hardware address, physical address, Ethernet address, ARP, address resolution protocol]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      A MAC address is a 48-bit link-layer address assigned to a network
+      interface. Frames on a local network are delivered by MAC address; ARP
+      finds the MAC address that belongs to an IP address on the same network.
+    attributes:
+      length: 48 bits, written as six hexadecimal pairs
+      scope: local network (one link)
+      arp: broadcasts "who has this IP?" and caches the reply
+      versus_ip: MAC identifies an interface on a link; IP identifies a host's location in the internet
+    requires: [cn.osi-model]
+    documents:
+      - kind: explanation
+        title: Why both MAC and IP addresses
+        depth: 1
+        body: |-
+          IP addresses are hierarchical and change with the network you join,
+          which lets routers forward packets across the world. MAC addresses
+          are flat and tied to the interface, which is enough to deliver a
+          frame across one link. On each hop the IP addresses stay the same
+          while the MAC addresses change to those of the current link.
+    questions:
+      - slug: q.cn.physical-datalink.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: How long is an Ethernet MAC address?
+        options: [32 bits, 48 bits, 64 bits, 128 bits]
+        answer: {option_index: 1}
+        explanation: It is 48 bits, usually written as six pairs of hex digits.
+      - slug: q.cn.physical-datalink.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which protocol finds the MAC address for a known IP address on the local network?
+        options: [DNS, DHCP, ARP, ICMP]
+        answer: {option_index: 2}
+        explanation: The Address Resolution Protocol broadcasts a request and caches the reply.
+
+  - slug: cn.error-detection
+    name: Error detection
+    aliases: [parity, parity bit, checksum, CRC, cyclic redundancy check, error detection codes]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      Error detection adds redundant bits so the receiver can tell that a
+      frame was corrupted in transit. A parity bit detects any odd number of
+      flipped bits; a cyclic redundancy check (CRC) detects all burst errors
+      shorter than its length and is used in Ethernet.
+    attributes:
+      even_parity: the bit makes the total number of 1s even
+      parity_limit: misses any even number of flipped bits
+      crc: remainder of polynomial division; strong at catching burst errors
+      detection_vs_correction: detection only says "corrupted"; correction (e.g. Hamming codes) can fix it
+    documents:
+      - kind: example
+        title: Even parity
+        depth: 1
+        body: |-
+          Data 1011001 has four 1s, so with even parity the parity bit is 0 and
+          the sent word is 10110010. If one bit flips, the receiver counts an
+          odd number of 1s and detects the error. If two bits flip, the count is
+          even again and the error goes unnoticed.
+    questions:
+      - slug: q.cn.physical-datalink.3
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: With even parity, what parity bit is added to the data 1101011?
+        options: ["0", "1", "It depends on the receiver", Parity is not defined for 7 bits]
+        answer: {option_index: 1}
+        explanation: The data has five 1s, so a 1 is added to make the count even.
+      - slug: q.cn.physical-datalink.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which error does a single parity bit fail to detect?
+        options: [One flipped bit, Three flipped bits, Two flipped bits, Any single burst of one bit]
+        answer: {option_index: 2}
+        explanation: Two flips leave the parity of the word unchanged.
+
+  - slug: cn.mac-protocols
+    name: Medium access control
+    aliases: [CSMA/CD, CSMA/CA, multiple access, medium access control, ALOHA, collision detection]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      Medium access control decides which station may transmit on a shared
+      channel. In CSMA/CD (classic shared Ethernet) stations listen before
+      sending and stop if they detect a collision; in CSMA/CA (Wi-Fi) they try
+      to avoid collisions because they cannot detect them reliably while
+      transmitting.
+    attributes:
+      csma_cd: carrier sense, collision detection, exponential backoff; classic Ethernet
+      csma_ca: carrier sense, collision avoidance with random backoff and acknowledgements; Wi-Fi
+      switched_ethernet: full-duplex links to a switch, so collisions do not occur
+    requires: [cn.mac-address]
+    documents:
+      - kind: explanation
+        title: Why Wi-Fi avoids rather than detects collisions
+        depth: 2
+        body: |-
+          A radio cannot easily hear other stations while it is transmitting,
+          and two stations may each be in range of the access point but not of
+          each other (the hidden-terminal problem). So Wi-Fi waits a random
+          backoff before sending and relies on acknowledgements to learn that a
+          frame got through.
+    questions:
+      - slug: q.cn.physical-datalink.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which medium access method does Wi-Fi (802.11) use?
+        options: [CSMA/CD, CSMA/CA, Token ring, Pure ALOHA]
+        answer: {option_index: 1}
+        explanation: Wireless stations cannot reliably detect collisions, so they avoid them.
+
+  - slug: cn.switch
+    name: Switches and hubs
+    aliases: [switch, hub, bridge, network switch, collision domain, broadcast domain, MAC address table]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      A hub repeats every incoming signal out of all ports, so all attached
+      devices share one collision domain. A switch learns which MAC addresses
+      are on which port and forwards each frame only where it needs to go,
+      giving each port its own collision domain.
+    attributes:
+      hub_layer: physical (layer 1)
+      switch_layer: data link (layer 2)
+      router_layer: network (layer 3)
+      switch_learning: records the source MAC of each frame against the port it arrived on
+      broadcast_domain: a switch forwards broadcasts to all ports; a router does not
+    requires: [cn.mac-address]
+    documents:
+      - kind: explanation
+        title: How a switch learns
+        depth: 2
+        body: |-
+          When a frame arrives, the switch records "source MAC is reachable on
+          this port". To forward, it looks up the destination MAC: if known, it
+          sends the frame out of that port only; if unknown, it floods it to all
+          other ports. Over time the table fills and flooding becomes rare.
+    questions:
+      - slug: q.cn.physical-datalink.6
+        kind: multiple_choice
+        difficulty: 2
+        prompt: At which layer does a typical network switch forward traffic?
+        options: [Physical, Data link, Network, Transport]
+        answer: {option_index: 1}
+        explanation: It forwards frames using MAC addresses, a layer 2 function.

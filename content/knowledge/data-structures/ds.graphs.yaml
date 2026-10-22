@@ -1,0 +1,182 @@
+topic: ds.graphs
+version: "2026.10.1"
+concepts:
+  - slug: ds.graph
+    name: Graph
+    aliases: [graphs, graph data structure, directed graph, undirected graph, digraph]
+    difficulty: 2
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A graph is a set of vertices joined by edges. In an undirected graph an
+      edge connects two vertices both ways; in a directed graph each edge goes
+      from one vertex to another. Edges may carry weights.
+    attributes:
+      notation: G = (V, E) with |V| vertices and |E| edges
+      max_edges_undirected: V(V − 1)/2 without self-loops
+      max_edges_directed: V(V − 1) without self-loops
+    related: [dm.graph-basics]
+    documents:
+      - kind: explanation
+        title: Graph vocabulary
+        depth: 1
+        body: |-
+          Two vertices joined by an edge are adjacent. The degree of a vertex is
+          the number of edges touching it; in a directed graph we separate
+          in-degree and out-degree. A path is a sequence of vertices joined by
+          edges, and a cycle is a path that returns to its start. An undirected
+          graph is connected if every vertex can reach every other one.
+
+          A graph is sparse when |E| is close to |V| and dense when |E| is close
+          to |V|². The choice of representation depends on which it is.
+    questions:
+      - slug: q.ds.graphs.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          What is the maximum number of edges in a simple undirected graph with
+          6 vertices?
+        options: ["6", "12", "15", "30"]
+        answer: {option_index: 2}
+        explanation: Every pair can be joined once - 6 × 5 / 2 = 15.
+
+  - slug: ds.graph-representation
+    name: Graph representation
+    aliases: [adjacency list, adjacency matrix, representing graphs]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      A graph is usually stored as an adjacency list, which keeps for each
+      vertex the list of its neighbours (O(V + E) space), or as an adjacency
+      matrix, a V × V table whose entry (u, v) records whether an edge u–v
+      exists (O(V²) space).
+    attributes:
+      adjacency_list_space: O(V + E)
+      adjacency_matrix_space: O(V²)
+      edge_check_list: O(degree of u)
+      edge_check_matrix: O(1)
+      best_for: lists for sparse graphs, matrices for dense graphs
+    requires: [ds.graph]
+    documents:
+      - kind: explanation
+        title: Adjacency list or adjacency matrix?
+        depth: 1
+        body: |-
+          An adjacency matrix answers "is there an edge from u to v?" in O(1)
+          but always uses V² cells, even when there are few edges, and listing a
+          vertex's neighbours takes O(V).
+
+          An adjacency list stores only the edges that exist, so it uses
+          O(V + E) space and lists neighbours in time proportional to the
+          degree. Most real graphs are sparse, so adjacency lists are the usual
+          default; BFS and DFS run in O(V + E) with them, but O(V²) with a
+          matrix.
+    questions:
+      - slug: q.ds.graphs.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: How much space does an adjacency matrix use for a graph with V vertices and E edges?
+        options: [O(V), O(E), O(V + E), O(V²)]
+        answer: {option_index: 3}
+        explanation: It has one cell for every ordered pair of vertices, whatever E is.
+      - slug: q.ds.graphs.3
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          A road network has 1,000,000 junctions and about 2,500,000 roads. Which
+          representation is more suitable?
+        options:
+          - Adjacency matrix, because edge checks are O(1)
+          - Adjacency list, because the graph is sparse
+          - Either, they use the same memory
+          - Neither can store a graph this large
+        answer: {option_index: 1}
+        explanation: >-
+          A matrix would need 10^12 cells. An adjacency list needs space
+          proportional to V + E, a few million entries.
+
+  - slug: ds.bfs
+    name: Breadth-first search
+    aliases: [BFS, breadth first search, level order search]
+    difficulty: 3
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      Breadth-first search explores a graph outward from a source in layers:
+      all vertices at distance 1, then distance 2, and so on, using a queue.
+      In an unweighted graph it finds shortest paths measured in edges.
+    attributes:
+      uses: queue
+      time: O(V + E) with adjacency lists
+      finds: shortest paths by number of edges in unweighted graphs
+    requires: [ds.graph-representation, ds.queue]
+    contrasts: [ds.dfs]
+    documents:
+      - kind: procedure
+        title: Breadth-first search from a source s
+        depth: 1
+        body: Visit vertices in order of their distance (in edges) from s.
+        steps:
+          - Mark s as visited, set dist[s] = 0 and put s in a queue.
+          - While the queue is not empty, dequeue a vertex u.
+          - For each neighbour v of u that is not visited, mark v visited, set dist[v] = dist[u] + 1, record parent[v] = u, and enqueue v.
+          - When the queue empties, dist holds the edge-count distance to every reachable vertex.
+    questions:
+      - slug: q.ds.graphs.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which data structure does breadth-first search use to decide which vertex to explore next?
+        options: [Stack, Queue, Priority queue, Hash table]
+        answer: {option_index: 1}
+        explanation: Vertices are explored in the order they were discovered, first in first out.
+
+  - slug: ds.dfs
+    name: Depth-first search
+    aliases: [DFS, depth first search, backtracking search]
+    difficulty: 3
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      Depth-first search explores a graph by following one path as far as
+      possible before backtracking, using recursion or an explicit stack. It
+      underlies cycle detection, topological sorting and finding connected
+      components.
+    attributes:
+      uses: stack (or recursion)
+      time: O(V + E) with adjacency lists
+      applications: cycle detection, topological sort, connected components
+    requires: [ds.graph-representation, ds.stack]
+    contrasts: [ds.bfs]
+    documents:
+      - kind: procedure
+        title: Recursive depth-first search
+        depth: 1
+        body: Visit everything reachable from u, going deep first.
+        steps:
+          - Mark u as visited.
+          - For each neighbour v of u, if v is not visited, call DFS(v).
+          - Return to the caller when every neighbour of u has been handled (this is the backtracking step).
+      - kind: misconception
+        title: DFS does not find shortest paths
+        depth: 2
+        body: |-
+          DFS may reach a vertex through a long detour before it ever tries the
+          direct edge. Use BFS for shortest paths in unweighted graphs and
+          Dijkstra's algorithm when edges have non-negative weights.
+    questions:
+      - slug: q.ds.graphs.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: >-
+          You need the fewest number of hops between two computers in an
+          unweighted network. Which search should you use?
+        options: [Depth-first search, Breadth-first search, Either gives the same guarantee, Neither]
+        answer: {option_index: 1}
+        explanation: >-
+          BFS visits vertices in order of distance, so the first time it reaches
+          the target it has used the fewest edges. DFS gives no such guarantee.
+      - slug: q.ds.graphs.6
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the running time of DFS on a graph stored as adjacency lists?
+        options: [O(V), O(E), O(V + E), O(V × E)]
+        answer: {option_index: 2}
+        explanation: Each vertex is visited once and each adjacency list is scanned once.

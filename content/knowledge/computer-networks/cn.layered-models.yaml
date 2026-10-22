@@ -1,0 +1,130 @@
+topic: cn.layered-models
+version: "2026.10.1"
+concepts:
+  - slug: cn.osi-model
+    name: OSI reference model
+    aliases: [OSI model, OSI, seven layer model, OSI layers, open systems interconnection]
+    difficulty: 1
+    further_reading: [kurose-ross]
+    definition: >-
+      The OSI reference model divides network communication into seven layers:
+      physical, data link, network, transport, session, presentation and
+      application. Each layer offers services to the layer above and uses the
+      services of the layer below.
+    attributes:
+      layer_1: physical - bits on the medium
+      layer_2: data link - frames between neighbouring nodes, MAC addresses
+      layer_3: network - packets across networks, IP addresses, routing
+      layer_4: transport - end-to-end delivery between processes, ports
+      layer_5: session - dialogue control
+      layer_6: presentation - data representation, encryption, compression
+      layer_7: application - network services for applications
+    contrasts: [cn.tcp-ip-model]
+    documents:
+      - kind: explanation
+        title: Why layers
+        depth: 1
+        body: |-
+          Layering splits a hard problem into smaller ones with clear
+          interfaces. A web browser does not need to know whether bits travel
+          over Wi-Fi or fibre, and Ethernet does not need to know about web
+          pages. Each layer can change independently as long as its interface
+          stays the same.
+
+          A common way to remember the order from layer 1 up is "Please Do Not
+          Throw Sausage Pizza Away": physical, data link, network, transport,
+          session, presentation, application.
+    questions:
+      - slug: q.cn.layered-models.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: At which OSI layer does routing between networks happen?
+        options: [Data link, Network, Transport, Session]
+        answer: {option_index: 1}
+        explanation: The network layer (layer 3) moves packets across networks using IP addresses.
+      - slug: q.cn.layered-models.2
+        kind: multiple_choice
+        difficulty: 1
+        prompt: How many layers does the OSI model have?
+        options: ["4", "5", "7", "8"]
+        answer: {option_index: 2}
+        explanation: Physical, data link, network, transport, session, presentation and application.
+      - slug: q.cn.layered-models.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which OSI layer provides end-to-end delivery between processes using port numbers?
+        options: [Network, Transport, Data link, Presentation]
+        answer: {option_index: 1}
+        explanation: The transport layer (layer 4) identifies processes by port and runs end to end.
+
+  - slug: cn.tcp-ip-model
+    name: TCP/IP model
+    aliases: [TCP/IP, internet protocol suite, internet model, TCP IP model, five-layer model]
+    difficulty: 1
+    further_reading: [kurose-ross]
+    definition: >-
+      The TCP/IP model is the layered architecture actually used on the
+      internet. It is commonly taught with five layers (physical, link,
+      network, transport, application) or four (merging physical and link);
+      OSI's session and presentation layers are folded into the application.
+    attributes:
+      layers: application, transport, network (internet), link, physical
+      application_examples: HTTP, DNS, SMTP
+      transport_examples: TCP, UDP
+      network_examples: IP, ICMP
+      link_examples: Ethernet, Wi-Fi
+    contrasts: [cn.osi-model]
+    documents:
+      - kind: explanation
+        title: OSI versus TCP/IP
+        depth: 1
+        body: |-
+          OSI is a reference model designed before its protocols, useful for
+          naming layers. TCP/IP grew from working protocols and is what the
+          internet runs. The main difference is that TCP/IP has no separate
+          session and presentation layers; applications handle those concerns
+          themselves.
+    questions:
+      - slug: q.cn.layered-models.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which OSI layers have no separate counterpart in the TCP/IP model?
+        options: [Physical and data link, Session and presentation, Network and transport, Transport and application]
+        answer: {option_index: 1}
+        explanation: Their functions are handled inside TCP/IP's application layer.
+
+  - slug: cn.encapsulation
+    name: Encapsulation
+    aliases: [protocol data unit, PDU, headers, segment packet frame, decapsulation]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      Encapsulation is how each layer wraps the data from the layer above with
+      its own header (and sometimes trailer). The unit is called a message at
+      the application layer, a segment at transport, a packet (datagram) at
+      network and a frame at link.
+    attributes:
+      application: message
+      transport: segment (TCP) or datagram (UDP)
+      network: packet or datagram
+      link: frame
+      physical: bits
+    requires: [cn.tcp-ip-model]
+    documents:
+      - kind: example
+        title: Sending a web request
+        depth: 1
+        body: |-
+          The browser's HTTP request is the message. TCP adds a header with
+          ports and sequence numbers: a segment. IP adds source and destination
+          addresses: a packet. Ethernet adds MAC addresses and a CRC trailer: a
+          frame. The receiver strips the headers in reverse order
+          (decapsulation).
+    questions:
+      - slug: q.cn.layered-models.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the unit of data at the data link layer called?
+        options: [Segment, Packet, Frame, Message]
+        answer: {option_index: 2}
+        explanation: The link layer wraps a packet in a frame with link addresses and an error check.

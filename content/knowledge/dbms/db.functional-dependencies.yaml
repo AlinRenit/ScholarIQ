@@ -1,0 +1,143 @@
+topic: db.functional-dependencies
+version: "2026.10.1"
+concepts:
+  - slug: db.functional-dependency
+    name: Functional dependency
+    aliases: [FD, functional dependencies, FDs, determinant, trivial functional dependency]
+    difficulty: 2
+    further_reading: [silberschatz-db]
+    definition: >-
+      A functional dependency X → Y holds in a relation when any two tuples
+      that agree on the attributes X also agree on Y. X is called the
+      determinant. It is trivial when Y is a subset of X.
+    attributes:
+      notation: X → Y, read "X determines Y"
+      trivial: Y ⊆ X, e.g. AB → A
+      source: a rule about all valid data, not just the rows present today
+    requires: [db.relation]
+    documents:
+      - kind: explanation
+        title: Reading a functional dependency
+        depth: 1
+        body: |-
+          roll_no → name means a roll number can never belong to two
+          different names. It does not mean the reverse: two students may share
+          a name, so name → roll_no need not hold.
+
+          FDs come from the meaning of the data. A sample table can disprove an
+          FD (two rows with the same X but different Y) but can never prove one,
+          because future rows might break it.
+    questions:
+      - slug: q.db.functional-dependencies.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What does the functional dependency A → B mean?
+        options:
+          - Every value of B appears with exactly one value of A
+          - Tuples that agree on A must also agree on B
+          - A and B are both keys
+          - A is a foreign key referencing B
+        answer: {option_index: 1}
+        explanation: Equal A-values force equal B-values; the reverse is not implied.
+      - slug: q.db.functional-dependencies.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          A table has rows (A=1, B=x), (A=1, B=y), (A=2, B=x). Which dependency
+          is definitely violated by this data?
+        options: [A → B, B → A, Both, Neither]
+        answer: {option_index: 2}
+        explanation: >-
+          A = 1 appears with x and y, breaking A → B. B = x appears with 1 and
+          2, breaking B → A.
+
+  - slug: db.armstrong-axioms
+    name: Armstrong's axioms
+    aliases: [Armstrong axioms, inference rules for functional dependencies, reflexivity augmentation transitivity]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      Armstrong's axioms are sound and complete rules for deriving functional
+      dependencies: reflexivity (if Y ⊆ X then X → Y), augmentation (if X → Y
+      then XZ → YZ) and transitivity (if X → Y and Y → Z then X → Z).
+    attributes:
+      reflexivity: if Y ⊆ X then X → Y
+      augmentation: if X → Y then XZ → YZ
+      transitivity: if X → Y and Y → Z then X → Z
+      derived_rules: union, decomposition, pseudotransitivity
+    requires: [db.functional-dependency]
+    documents:
+      - kind: explanation
+        title: Derived rules
+        depth: 3
+        body: |-
+          From the three axioms follow: union (X → Y and X → Z give X → YZ),
+          decomposition (X → YZ gives X → Y and X → Z) and pseudotransitivity
+          (X → Y and WY → Z give WX → Z). Note that XY → Z does NOT imply
+          X → Z; splitting the left-hand side is not allowed.
+    questions:
+      - slug: q.db.functional-dependencies.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: From A → B and B → C, which rule lets you conclude A → C?
+        options: [Reflexivity, Augmentation, Transitivity, Decomposition]
+        answer: {option_index: 2}
+        explanation: Transitivity chains X → Y and Y → Z into X → Z.
+      - slug: q.db.functional-dependencies.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Given AB → C, which of these can you always conclude?
+        options: [A → C, B → C, AB → A, C → AB]
+        answer: {option_index: 2}
+        explanation: AB → A holds by reflexivity. AB → C does not let you split the left side.
+
+  - slug: db.closure
+    name: Attribute closure
+    aliases: [closure of attributes, attribute closure, X+, finding candidate keys, closure algorithm]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      The closure X+ of a set of attributes X is every attribute functionally
+      determined by X under a set of FDs. X is a superkey exactly when X+
+      contains all attributes of the relation.
+    attributes:
+      use: test whether X → Y follows (Y ⊆ X+) and whether X is a superkey
+      key_hint: attributes that never appear on a right-hand side must be in every candidate key
+    requires: [db.functional-dependency]
+    related: [db.keys]
+    documents:
+      - kind: procedure
+        title: Computing X+
+        depth: 2
+        body: Find every attribute determined by X.
+        steps:
+          - Start with result = X.
+          - For each FD L → R, if L ⊆ result, add R to result.
+          - Repeat until a full pass adds nothing new.
+      - kind: example
+        title: Finding a candidate key with closures
+        depth: 2
+        body: |-
+          R(A, B, C, D, E) with A → B, B → C and CD → E.
+          A and D never appear on a right-hand side, so every key contains both.
+          {A, D}+: start with A, D; A → B adds B; B → C adds C; CD → E adds E.
+          {A, D}+ = {A, B, C, D, E}, so AD is a superkey, and since neither A
+          nor D alone works, AD is the candidate key.
+    questions:
+      - slug: q.db.functional-dependencies.5
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: R(A, B, C, D) with A → B, B → C and C → D. What is {B}+?
+        options: ["{B}", "{B, C}", "{B, C, D}", "{A, B, C, D}"]
+        answer: {option_index: 2}
+        explanation: B gives C, and C gives D. Nothing gives A.
+      - slug: q.db.functional-dependencies.6
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: R(A, B, C, D) with A → B, B → C and C → D. What is the candidate key?
+        options: [A, B, AB, ABCD]
+        answer: {option_index: 0}
+        explanation: "{A}+ = {A, B, C, D}, and A appears on no right-hand side, so A is the only key."

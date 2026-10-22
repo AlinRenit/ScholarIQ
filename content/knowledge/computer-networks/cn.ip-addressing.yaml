@@ -1,0 +1,176 @@
+topic: cn.ip-addressing
+version: "2026.10.1"
+concepts:
+  - slug: cn.ipv4-address
+    name: IPv4 address
+    aliases: [IP address, IPv4, dotted decimal, IP addresses, network and host part]
+    difficulty: 1
+    further_reading: [kurose-ross, rfc791]
+    definition: >-
+      An IPv4 address is a 32-bit number, written as four decimal octets such
+      as 192.168.1.10. It has a network part, shared by all hosts on the same
+      network, and a host part that identifies the interface within it.
+    attributes:
+      length: 32 bits
+      notation: four octets 0–255 in dotted decimal
+      total_addresses: 2^32, about 4.3 billion
+      structure: network prefix + host part
+    documents:
+      - kind: explanation
+        title: Network and host parts
+        depth: 1
+        body: |-
+          Routers forward packets using only the network part, which keeps
+          routing tables small: one entry can cover thousands of hosts. Which
+          bits are the network part is given by a prefix length or subnet mask,
+          for example /24 or 255.255.255.0 for the first 24 bits.
+    questions:
+      - slug: q.cn.ip-addressing.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: How many bits are in an IPv4 address?
+        options: ["16", "32", "48", "128"]
+        answer: {option_index: 1}
+        explanation: Four 8-bit octets make 32 bits.
+
+  - slug: cn.subnetting
+    name: Subnetting and CIDR
+    aliases: [subnet, subnet mask, CIDR, classless inter-domain routing, prefix length, network address, broadcast address, subnetting]
+    difficulty: 3
+    further_reading: [kurose-ross, rfc4632]
+    definition: >-
+      A subnet is a block of IP addresses sharing a prefix. In CIDR notation
+      a.b.c.d/n, the first n bits are the network prefix, so the block holds
+      2^(32 − n) addresses; the first is the network address, the last is the
+      broadcast address, and 2^(32 − n) − 2 are usable by hosts.
+    attributes:
+      block_size: 2^(32 − n) addresses
+      usable_hosts: 2^(32 − n) − 2
+      network_address: all host bits 0
+      broadcast_address: all host bits 1
+      mask_from_prefix: n one-bits followed by zeros, e.g. /26 = 255.255.255.192
+    requires: [cn.ipv4-address]
+    documents:
+      - kind: procedure
+        title: Finding the network and broadcast address
+        depth: 2
+        body: For an address with prefix length n.
+        steps:
+          - Work out the block size in the octet where the prefix ends - 256 minus that octet's mask value (for /26 the last octet's mask is 192, so the block is 64).
+          - Find the multiple of the block size at or just below the address's value in that octet; that is the network address.
+          - The broadcast address is the network address plus the block size minus 1 in that octet.
+          - Usable host addresses are everything strictly between the two.
+      - kind: example
+        title: 192.168.10.77/26
+        depth: 2
+        body: |-
+          /26 leaves 6 host bits: 2^6 = 64 addresses per block, mask
+          255.255.255.192. Blocks start at .0, .64, .128 and .192. 77 falls in
+          the block starting at 64.
+          Network 192.168.10.64, broadcast 192.168.10.127, usable hosts
+          .65 to .126, which is 62 hosts.
+      - kind: misconception
+        title: Do not forget the two reserved addresses
+        depth: 1
+        body: |-
+          A /24 has 256 addresses but only 254 usable hosts, because the
+          network and broadcast addresses cannot be assigned to an interface.
+          (Point-to-point /31 links are a special exception.)
+    questions:
+      - slug: q.cn.ip-addressing.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: How many usable host addresses does a /27 subnet have?
+        options: ["30", "32", "62", "64"]
+        answer: {option_index: 0}
+        explanation: 2^(32 − 27) = 32 addresses, minus the network and broadcast addresses.
+      - slug: q.cn.ip-addressing.3
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: What is the network address of 172.16.5.140/26?
+        options: [172.16.5.0, 172.16.5.64, 172.16.5.128, 172.16.5.140]
+        answer: {option_index: 2}
+        explanation: /26 blocks are 64 wide, starting at 0, 64, 128 and 192. 140 is in the block starting at 128.
+      - slug: q.cn.ip-addressing.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which subnet mask corresponds to /26?
+        options: [255.255.255.0, 255.255.255.128, 255.255.255.192, 255.255.255.224]
+        answer: {option_index: 2}
+        explanation: 26 one-bits leave the last octet as 11000000, which is 192.
+      - slug: q.cn.ip-addressing.5
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: What is the broadcast address of 10.1.1.100/28?
+        options: [10.1.1.103, 10.1.1.111, 10.1.1.127, 10.1.1.255]
+        answer: {option_index: 1}
+        explanation: /28 blocks are 16 wide. 100 is in the block 96–111, so the broadcast address is .111.
+
+  - slug: cn.private-addresses-nat
+    name: Private addresses and NAT
+    aliases: [private IP address, NAT, network address translation, RFC 1918, "192.168"]
+    difficulty: 2
+    further_reading: [kurose-ross, rfc1918]
+    definition: >-
+      Private address ranges (10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16)
+      may be used inside any organisation but are not routed on the public
+      internet. Network address translation (NAT) lets many hosts with
+      private addresses share one public address.
+    attributes:
+      ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+      nat: rewrites source address and port on the way out, and reverses it for replies
+      reason: conserves the limited IPv4 address space
+    requires: [cn.subnetting]
+    documents:
+      - kind: explanation
+        title: How a home router uses NAT
+        depth: 1
+        body: |-
+          Your laptop has an address like 192.168.1.20. When it contacts a
+          website, the router replaces the source address with its single
+          public address and a port number it chooses, and remembers the
+          mapping. Replies come back to that port, and the router forwards them
+          to the laptop.
+    questions:
+      - slug: q.cn.ip-addressing.6
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which of these is a private IPv4 address?
+        options: [8.8.8.8, 172.20.4.1, 172.32.0.1, 193.168.1.1]
+        answer: {option_index: 1}
+        explanation: 172.16.0.0/12 covers 172.16.0.0 to 172.31.255.255, so 172.20.4.1 is private.
+
+  - slug: cn.ipv6
+    name: IPv6
+    aliases: [IPv6 address, IP version 6, 128-bit address]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      IPv6 uses 128-bit addresses written as eight groups of four hexadecimal
+      digits, giving about 3.4 × 10^38 addresses. It was introduced mainly
+      because IPv4 addresses ran out, and it simplifies the header.
+    attributes:
+      length: 128 bits
+      notation: "eight groups of hex digits; one run of zero groups can be written as ::"
+      motivation: IPv4 address exhaustion
+    requires: [cn.ipv4-address]
+    contrasts: [cn.ipv4-address]
+    documents:
+      - kind: example
+        title: Shortening IPv6 addresses
+        depth: 1
+        body: |-
+          2001:0db8:0000:0000:0000:0000:0000:0001 drops leading zeros in each
+          group and replaces the longest run of zero groups with :: once,
+          giving 2001:db8::1.
+    questions:
+      - slug: q.cn.ip-addressing.7
+        kind: multiple_choice
+        difficulty: 1
+        prompt: How many bits are in an IPv6 address?
+        options: ["32", "64", "128", "256"]
+        answer: {option_index: 2}
+        explanation: IPv6 addresses are 128 bits long.

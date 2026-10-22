@@ -1,0 +1,185 @@
+topic: algo.dynamic-programming
+version: "2026.10.1"
+concepts:
+  - slug: algo.dynamic-programming
+    name: Dynamic programming
+    aliases: [DP, dynamic programming approach, tabulation, bottom-up dynamic programming]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      Dynamic programming solves a problem by breaking it into overlapping
+      subproblems, solving each subproblem once, and storing its answer for
+      reuse. It applies when the problem has optimal substructure and
+      overlapping subproblems.
+    attributes:
+      requires: optimal substructure and overlapping subproblems
+      styles: top-down with memoisation, or bottom-up tabulation
+      cost: number of distinct subproblems × work per subproblem
+      examples: 0/1 knapsack, longest common subsequence, edit distance, shortest paths (Bellman-Ford, Floyd-Warshall)
+    requires: [algo.recurrence-relation]
+    contrasts: [algo.divide-and-conquer, algo.greedy-method]
+    documents:
+      - kind: explanation
+        title: The two ingredients
+        depth: 1
+        body: |-
+          Optimal substructure means an optimal solution is built from optimal
+          solutions to smaller subproblems. Overlapping subproblems means the
+          same smaller problems come up again and again. Plain recursion solves
+          them repeatedly; dynamic programming solves each one once.
+
+          Computing Fibonacci numbers shows the difference. The recursive
+          definition fib(n) = fib(n − 1) + fib(n − 2) makes about 1.6^n calls.
+          Storing fib(0) … fib(n) in a table needs only n additions.
+      - kind: procedure
+        title: Designing a dynamic-programming solution
+        depth: 2
+        body: A reliable order of steps for a new DP problem.
+        steps:
+          - Define the subproblem precisely in words, e.g. "best value using the first i items with capacity w".
+          - Write the recurrence that expresses a subproblem through smaller ones.
+          - Identify the base cases.
+          - Choose an evaluation order in which every subproblem's dependencies are computed first (or memoise a recursive version).
+          - Read the final answer from the table, and record choices if you need to reconstruct the solution itself.
+    questions:
+      - slug: q.algo.dynamic-programming.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which two properties make a problem suitable for dynamic programming?
+        options:
+          - Greedy-choice property and sorted input
+          - Optimal substructure and overlapping subproblems
+          - Independent subproblems and a linear-time combine step
+          - A unique optimal solution and integer inputs
+        answer: {option_index: 1}
+        explanation: Without overlap there is nothing to reuse; without optimal substructure the stored answers cannot be combined.
+      - slug: q.algo.dynamic-programming.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: How many additions does a bottom-up table need to compute fib(n)?
+        options: [About log n, About n, About n², About 2^n]
+        answer: {option_index: 1}
+        explanation: Each entry fib(i) for i = 2 … n is one addition of two stored entries.
+
+  - slug: algo.memoization
+    name: Memoisation
+    aliases: [memoization, memoisation, top-down dynamic programming, caching recursive results]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      Memoisation stores the result of each recursive call the first time it is
+      computed and returns the stored result on later calls with the same
+      arguments. It turns a top-down recursive solution into dynamic
+      programming.
+    attributes:
+      direction: top-down
+      computes: only the subproblems actually reached
+      overhead: recursion stack and a lookup per call
+    requires: [algo.dynamic-programming]
+    documents:
+      - kind: explanation
+        title: Top-down versus bottom-up
+        depth: 2
+        body: |-
+          Top-down memoisation keeps the natural recursive structure and
+          computes only subproblems that are needed, at the cost of recursion
+          depth. Bottom-up tabulation fills the table in a fixed order without
+          recursion and often allows saving memory, for example keeping only
+          the previous row. Both have the same asymptotic time.
+    questions:
+      - slug: q.algo.dynamic-programming.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What does memoisation add to a recursive function?
+        options:
+          - A cache of results for arguments already computed
+          - A sorted order for the recursive calls
+          - Parallel execution of recursive calls
+          - A greedy choice at each level
+        answer: {option_index: 0}
+        explanation: Repeated calls with the same arguments return the stored answer instead of recomputing it.
+
+  - slug: algo.knapsack-01
+    name: 0/1 knapsack problem
+    aliases: [0-1 knapsack, zero one knapsack, knapsack problem, binary knapsack]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      In the 0/1 knapsack problem each item is either taken whole or left, and
+      the goal is the largest total value within a weight capacity W. Dynamic
+      programming solves it in O(nW) time.
+    attributes:
+      subproblem: K[i][w] = best value using the first i items with capacity w
+      recurrence: K[i][w] = max(K[i−1][w], value_i + K[i−1][w − weight_i]) when weight_i ≤ w
+      time: O(nW), pseudo-polynomial
+    requires: [algo.dynamic-programming]
+    contrasts: [algo.fractional-knapsack]
+    documents:
+      - kind: example
+        title: A small knapsack table
+        depth: 2
+        body: |-
+          Capacity 5. Items (value, weight): A (3, 2), B (4, 3), C (5, 4).
+          Best for each capacity using A only: w 0–1 → 0, w 2–5 → 3.
+          Adding B: w 3 → 4, w 4 → 4, w 5 → max(3, 4 + K_A[2] = 7) = 7.
+          Adding C: w 4 → max(4, 5) = 5, w 5 → max(7, 5 + K_AB[1] = 5) = 7.
+          The answer is 7, taking A and B.
+      - kind: misconception
+        title: O(nW) is not polynomial in the input size
+        depth: 3
+        body: |-
+          W is a number, written in about log W bits. A running time that grows
+          with W itself is exponential in the length of its encoding, which is
+          why it is called pseudo-polynomial and why knapsack is still NP-hard.
+    questions:
+      - slug: q.algo.dynamic-programming.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Capacity 7. Items (value, weight): (10, 3), (13, 4), (7, 2), (8, 5).
+          What is the best total value in the 0/1 knapsack problem?
+        options: ["17", "20", "23", "25"]
+        answer: {option_index: 2}
+        explanation: >-
+          Taking the items of weight 3 and 4 uses all 7 units for 10 + 13 = 23.
+          Other fits are lower, e.g. 3 + 2 → 17, 4 + 2 → 20, 5 + 2 → 15.
+      - slug: q.algo.dynamic-programming.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the running time of the standard DP for 0/1 knapsack with n items and capacity W?
+        options: [O(n), O(n log n), O(nW), O(2^n)]
+        answer: {option_index: 2}
+        explanation: There are (n + 1)(W + 1) table entries, each filled in O(1).
+
+  - slug: algo.lcs
+    name: Longest common subsequence
+    aliases: [LCS, longest common subsequence problem]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      The longest common subsequence of two sequences is the longest sequence
+      that appears in both in the same order, not necessarily contiguously.
+      Dynamic programming finds its length in O(mn) time.
+    attributes:
+      recurrence: L[i][j] = L[i−1][j−1] + 1 if x_i = y_j, otherwise max(L[i−1][j], L[i][j−1])
+      time: O(mn)
+      differs_from: longest common substring, which must be contiguous
+    requires: [algo.dynamic-programming]
+    documents:
+      - kind: example
+        title: LCS of ABCBDAB and BDCABA
+        depth: 2
+        body: |-
+          One longest common subsequence is BCBA, of length 4 (BDAB is
+          another). The letters appear in both strings in this order, with
+          other letters in between.
+    questions:
+      - slug: q.algo.dynamic-programming.6
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: What is the length of the longest common subsequence of "AGGTAB" and "GXTXAYB"?
+        options: ["3", "4", "5", "6"]
+        answer: {option_index: 1}
+        explanation: GTAB appears in both strings in order.

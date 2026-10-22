@@ -1,0 +1,113 @@
+topic: dm.proof-induction
+version: "2026.10.1"
+concepts:
+  - slug: dm.mathematical-induction
+    name: Mathematical induction
+    aliases: [induction, proof by induction, principle of induction, base case, inductive step, inductive hypothesis]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      Mathematical induction proves that a statement P(n) holds for every
+      integer n ≥ n0 by proving a base case P(n0) and an inductive step: if
+      P(k) holds for some k ≥ n0, then P(k + 1) holds.
+    attributes:
+      base_case: prove P(n0)
+      inductive_hypothesis: assume P(k) for an arbitrary k ≥ n0
+      inductive_step: prove P(k + 1) using the hypothesis
+      strong_induction: assume P(n0), …, P(k) to prove P(k + 1)
+    documents:
+      - kind: example
+        title: Sum of the first n natural numbers
+        depth: 2
+        body: |-
+          Claim: 1 + 2 + … + n = n(n + 1)/2 for all n ≥ 1.
+          Base case: n = 1 gives 1 = 1·2/2. True.
+          Inductive step: assume 1 + … + k = k(k + 1)/2. Then
+          1 + … + k + (k + 1) = k(k + 1)/2 + (k + 1) = (k + 1)(k + 2)/2,
+          which is the claim for k + 1. By induction it holds for all n ≥ 1.
+      - kind: misconception
+        title: The base case is not optional
+        depth: 2
+        body: |-
+          "n = n + 1" has a valid-looking inductive step (adding 1 to both
+          sides of k = k + 1 gives k + 1 = k + 2) but no true base case, so it
+          proves nothing. Both parts are needed.
+    questions:
+      - slug: q.dm.proof-induction.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What are the two parts of a proof by mathematical induction?
+        options:
+          - Hypothesis and conclusion
+          - Base case and inductive step
+          - Contrapositive and converse
+          - Definition and example
+        answer: {option_index: 1}
+        explanation: Prove the first case, then show each case implies the next.
+      - slug: q.dm.proof-induction.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: In the inductive step, what may you assume?
+        options:
+          - P(k + 1)
+          - P(k) for some arbitrary k ≥ n0
+          - P(n) for all n
+          - Nothing
+        answer: {option_index: 1}
+        explanation: The inductive hypothesis is P(k); the goal is to derive P(k + 1).
+      - slug: q.dm.proof-induction.3
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          To prove 2^n > n² for all n ≥ 5 by induction, what is the base case?
+        options: [n = 0, n = 1, n = 4, n = 5]
+        answer: {option_index: 3}
+        explanation: >-
+          The claim starts at n = 5 (32 > 25). It fails at n = 4 (16 = 16), so
+          the base case must be 5.
+
+  - slug: dm.proof-techniques
+    name: Proof techniques
+    aliases: [direct proof, proof by contradiction, proof by contrapositive, counterexample, proof methods]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      Common proof techniques are direct proof (assume p, derive q), proof by
+      contrapositive (assume ¬q, derive ¬p), proof by contradiction (assume the
+      statement is false and derive an impossibility) and disproof by
+      counterexample.
+    attributes:
+      direct: assume p, derive q
+      contrapositive: prove ¬q → ¬p instead of p → q
+      contradiction: assume the negation and derive a contradiction
+      counterexample: one example is enough to disprove a "for all" claim
+    requires: [dm.implication]
+    documents:
+      - kind: example
+        title: √2 is irrational, by contradiction
+        depth: 3
+        body: |-
+          Suppose √2 = a/b with integers a, b in lowest terms. Then a² = 2b², so
+          a² is even and therefore a is even: a = 2c. Then 4c² = 2b², so
+          b² = 2c² and b is even too. Both even contradicts lowest terms, so
+          √2 is irrational.
+    questions:
+      - slug: q.dm.proof-induction.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: How do you disprove the claim "every odd number greater than 1 is prime"?
+        options: [Proof by induction, A single counterexample such as 9, A direct proof, It cannot be disproved]
+        answer: {option_index: 1}
+        explanation: One counterexample is enough to show a universal claim is false.
+      - slug: q.dm.proof-induction.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: To prove "if n² is even then n is even" by contrapositive, what do you prove?
+        options:
+          - If n is even then n² is even
+          - If n is odd then n² is odd
+          - If n² is odd then n is odd
+          - n² is always even
+        answer: {option_index: 1}
+        explanation: The contrapositive of p → q is ¬q → ¬p.

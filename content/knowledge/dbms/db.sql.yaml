@@ -1,0 +1,186 @@
+topic: db.sql
+version: "2026.10.1"
+concepts:
+  - slug: db.sql-select
+    name: SQL SELECT queries
+    aliases: [SELECT statement, SQL query, SELECT FROM WHERE, ORDER BY, DISTINCT, SQL basics]
+    difficulty: 1
+    further_reading: [silberschatz-db]
+    definition: >-
+      A SQL SELECT query names the columns to return (SELECT), the tables to
+      read (FROM), an optional row filter (WHERE) and an optional sort order
+      (ORDER BY). SQL describes what result is wanted, not how to compute it.
+    attributes:
+      clauses_written: SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER BY
+      logical_order: FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY
+      distinct: removes duplicate result rows
+      style: declarative
+    requires: [db.relation]
+    related: [db.relational-algebra]
+    documents:
+      - kind: example
+        title: A basic query
+        depth: 1
+        body: |-
+          SELECT name, cgpa
+          FROM student
+          WHERE dept = 'CSE' AND cgpa >= 8
+          ORDER BY cgpa DESC;
+          This returns the name and CGPA of CSE students with a CGPA of at
+          least 8, highest first.
+      - kind: explanation
+        title: The logical order of evaluation
+        depth: 2
+        body: |-
+          Although written SELECT … FROM … WHERE, a query is evaluated as if
+          FROM came first (build the rows), then WHERE (filter rows), GROUP BY
+          (form groups), HAVING (filter groups), SELECT (compute output
+          columns) and finally ORDER BY. This explains why a column alias
+          defined in SELECT cannot be used in WHERE but can be used in
+          ORDER BY.
+    questions:
+      - slug: q.db.sql.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which clause filters individual rows before any grouping?
+        options: [HAVING, WHERE, ORDER BY, GROUP BY]
+        answer: {option_index: 1}
+        explanation: WHERE filters rows; HAVING filters groups after GROUP BY.
+
+  - slug: db.sql-joins
+    name: SQL joins
+    aliases: [JOIN, inner join, left join, left outer join, right join, full outer join, outer join]
+    difficulty: 2
+    further_reading: [silberschatz-db]
+    definition: >-
+      A join combines rows from two tables on a condition. An inner join keeps
+      only matching pairs; a left outer join also keeps every left-table row
+      without a match, filling the right side with NULLs.
+    attributes:
+      inner_join: only rows with a match on both sides
+      left_outer_join: all left rows; NULLs where no right match exists
+      right_outer_join: all right rows; NULLs where no left match exists
+      full_outer_join: all rows from both sides
+    requires: [db.sql-select]
+    documents:
+      - kind: example
+        title: Inner join versus left join
+        depth: 1
+        body: |-
+          student(roll_no, name) has Asha (1), Ravi (2) and Meera (3).
+          enrolment(roll_no, course) has (1, DBMS) and (1, OS) and (3, CN).
+
+          SELECT s.name, e.course FROM student s
+          JOIN enrolment e ON s.roll_no = e.roll_no;
+          gives Asha–DBMS, Asha–OS, Meera–CN. Ravi has no enrolment, so he is
+          missing.
+
+          With LEFT JOIN instead, Ravi also appears, with course NULL.
+    questions:
+      - slug: q.db.sql.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          Table A has 4 customers. Table B has orders for 2 of them, 3 orders
+          each. How many rows does A LEFT JOIN B ON A.id = B.customer_id
+          return?
+        options: ["4", "6", "8", "12"]
+        answer: {option_index: 2}
+        explanation: 2 customers × 3 orders = 6 matched rows, plus 2 unmatched customers with NULLs.
+      - slug: q.db.sql.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which join returns every row of the left table even when there is no match?
+        options: [INNER JOIN, LEFT OUTER JOIN, CROSS JOIN, SELF JOIN]
+        answer: {option_index: 1}
+        explanation: Unmatched left rows are kept with NULLs for the right table's columns.
+
+  - slug: db.sql-aggregation
+    name: SQL aggregation and grouping
+    aliases: [GROUP BY, HAVING, aggregate functions, COUNT, SUM, AVG, MAX, MIN]
+    difficulty: 2
+    further_reading: [silberschatz-db]
+    definition: >-
+      Aggregate functions such as COUNT, SUM, AVG, MIN and MAX summarise many
+      rows into one value. GROUP BY computes them per group of rows sharing
+      the same values, and HAVING filters the groups.
+    attributes:
+      group_by: one output row per distinct combination of grouping columns
+      having: condition on groups, may use aggregates
+      where_vs_having: WHERE cannot use aggregates; HAVING can
+      count_star_vs_column: COUNT(*) counts rows; COUNT(col) skips NULLs
+    requires: [db.sql-select]
+    documents:
+      - kind: example
+        title: Departments with more than 50 students
+        depth: 2
+        body: |-
+          SELECT dept, COUNT(*) AS students, AVG(cgpa) AS avg_cgpa
+          FROM student
+          WHERE year = 3
+          GROUP BY dept
+          HAVING COUNT(*) > 50;
+          WHERE keeps third-year rows, GROUP BY makes one group per
+          department, and HAVING keeps only groups with more than 50 rows.
+      - kind: misconception
+        title: Every selected column must be grouped or aggregated
+        depth: 2
+        body: |-
+          SELECT dept, name, COUNT(*) FROM student GROUP BY dept is invalid in
+          standard SQL: each department group has many names, so there is no
+          single name to show. Either group by name too, or aggregate it.
+    questions:
+      - slug: q.db.sql.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which clause can filter on COUNT(*) > 5?
+        options: [WHERE, HAVING, FROM, ORDER BY only]
+        answer: {option_index: 1}
+        explanation: Aggregates are computed per group, after WHERE has run, so they are filtered with HAVING.
+      - slug: q.db.sql.5
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          A column marks has the values 10, NULL, 20, NULL, 30 in five rows.
+          What do COUNT(*) and COUNT(marks) return?
+        options: [5 and 5, 5 and 3, 3 and 3, 3 and 5]
+        answer: {option_index: 1}
+        explanation: COUNT(*) counts all rows; COUNT(column) skips NULLs.
+
+  - slug: db.sql-null
+    name: NULL in SQL
+    aliases: [NULL values, three-valued logic, IS NULL, unknown value]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      NULL marks a missing or unknown value. Comparisons with NULL yield
+      UNKNOWN rather than TRUE or FALSE, so NULL = NULL is not true; tests must
+      use IS NULL or IS NOT NULL.
+    attributes:
+      comparison_result: UNKNOWN
+      where_clause: keeps only rows where the condition is TRUE
+      test: IS NULL / IS NOT NULL
+      aggregates: ignore NULLs, except COUNT(*)
+    requires: [db.sql-select]
+    documents:
+      - kind: misconception
+        title: WHERE x = NULL never matches
+        depth: 2
+        body: |-
+          x = NULL evaluates to UNKNOWN for every row, and WHERE keeps only
+          rows where the condition is TRUE, so the query returns nothing. Write
+          WHERE x IS NULL instead.
+    questions:
+      - slug: q.db.sql.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: How many rows does SELECT * FROM t WHERE col = NULL return?
+        options:
+          - All rows where col is NULL
+          - No rows
+          - All rows
+          - It depends on the number of NULLs
+        answer: {option_index: 1}
+        explanation: Comparing with NULL gives UNKNOWN, never TRUE, so no row qualifies.

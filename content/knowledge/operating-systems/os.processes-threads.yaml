@@ -1,0 +1,153 @@
+topic: os.processes-threads
+version: "2026.10.1"
+concepts:
+  - slug: os.process
+    name: Process
+    aliases: [processes, program in execution, process control block, PCB, process states]
+    difficulty: 2
+    further_reading: [silberschatz-os, ostep]
+    definition: >-
+      A process is a program in execution. It has its own address space (code,
+      data, heap and stack), its own resources such as open files, and a
+      process control block in which the operating system records its state.
+    attributes:
+      address_space: private to the process
+      states: new, ready, running, waiting (blocked), terminated
+      os_record: process control block (PCB) with registers, state, memory and file information
+      creation_cost: higher than a thread
+    contrasts: [os.thread]
+    documents:
+      - kind: explanation
+        title: Process states
+        depth: 1
+        body: |-
+          A new process becomes ready when it can run but is waiting for a CPU.
+          The scheduler dispatches it to running. A running process that must
+          wait for I/O or an event becomes waiting (blocked) and returns to
+          ready when the event happens. A timer interrupt can move it from
+          running back to ready. When it finishes it becomes terminated.
+
+          A process never goes straight from waiting to running: it must be
+          ready first and then be chosen by the scheduler.
+      - kind: explanation
+        title: Context switch
+        depth: 2
+        body: |-
+          To switch the CPU from one process to another, the kernel saves the
+          current process's registers and state into its PCB and loads the
+          saved state of the next one. This is pure overhead: no user work is
+          done during it, so very frequent switches waste CPU time.
+    questions:
+      - slug: q.os.processes-threads.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: A running process requests data from disk. Which state does it move to?
+        options: [Ready, Waiting (blocked), Terminated, New]
+        answer: {option_index: 1}
+        explanation: It cannot continue until the I/O completes, so it blocks.
+      - slug: q.os.processes-threads.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Where does the operating system save a process's registers during a context switch?
+        options: [In the process control block, In the page table, On the disk swap area always, In the ready queue head]
+        answer: {option_index: 0}
+        explanation: The PCB holds the saved CPU state so the process can resume later.
+
+  - slug: os.thread
+    name: Thread
+    aliases: [threads, lightweight process, multithreading, kernel thread, user thread]
+    difficulty: 2
+    further_reading: [silberschatz-os, ostep]
+    definition: >-
+      A thread is a single sequence of execution within a process. Threads of
+      the same process share its code, data, heap and open files, but each has
+      its own program counter, registers and stack.
+    attributes:
+      shared_with_other_threads: code, global data, heap, open files
+      private: program counter, registers, stack
+      creation_cost: lower than a process
+      communication: through shared memory, which needs synchronisation
+    contrasts: [os.process]
+    related: [os.race-condition]
+    documents:
+      - kind: explanation
+        title: Why use threads
+        depth: 1
+        body: |-
+          Threads let one program do several things at once: a server can
+          handle many clients, and an editor can save while you keep typing.
+          Because threads share memory, they communicate cheaply and are
+          faster to create and switch between than processes.
+
+          The same sharing is the risk: two threads updating the same variable
+          without coordination can corrupt it. That is why synchronisation
+          tools such as mutexes exist.
+      - kind: misconception
+        title: Threads do not get separate copies of globals
+        depth: 2
+        body: |-
+          After fork(), a child process gets its own copy of the parent's
+          memory, so changes in one are invisible to the other. Threads are
+          different: a global variable changed by one thread is changed for
+          every thread in that process.
+    questions:
+      - slug: q.os.processes-threads.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which of these does each thread have its own copy of?
+        options: [Heap, Global variables, Stack, Open file table]
+        answer: {option_index: 2}
+        explanation: Each thread needs its own stack for its function calls; the rest is shared by the process.
+      - slug: q.os.processes-threads.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Why is creating a thread usually cheaper than creating a process?
+        options:
+          - A thread does not need its own address space
+          - Threads never use the CPU
+          - Threads are created by hardware
+          - Processes must always be written to disk
+        answer: {option_index: 0}
+        explanation: A new thread reuses its process's memory and resources; only a stack and register state are new.
+
+  - slug: os.fork
+    name: fork system call
+    aliases: [fork(), fork, process creation, exec, fork and exec]
+    difficulty: 3
+    further_reading: [ostep]
+    definition: >-
+      On Unix-like systems fork() creates a new process that is a copy of the
+      caller. It returns 0 in the child and the child's process id in the
+      parent; exec() then replaces a process's program with a new one.
+    attributes:
+      return_in_child: "0"
+      return_in_parent: the child's process id (negative on failure)
+      memory: child gets a copy (usually copy-on-write)
+    requires: [os.process]
+    documents:
+      - kind: example
+        title: Counting processes created by fork
+        depth: 2
+        body: |-
+          int main() { fork(); fork(); printf("hi\n"); }
+          The first fork makes 2 processes; each of them runs the second fork,
+          making 4. All 4 print, so "hi" appears 4 times. In general, n
+          fork() calls in sequence produce 2^n processes.
+    questions:
+      - slug: q.os.processes-threads.5
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          A program calls fork() three times in a row and then prints one line.
+          How many lines are printed in total?
+        options: ["3", "4", "6", "8"]
+        answer: {option_index: 3}
+        explanation: Each fork doubles the number of processes, giving 2³ = 8.
+      - slug: q.os.processes-threads.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What does fork() return in the child process?
+        options: ["0", The parent's process id, The child's own process id, "-1"]
+        answer: {option_index: 0}
+        explanation: The child sees 0; the parent sees the child's id.

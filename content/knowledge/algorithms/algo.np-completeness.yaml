@@ -1,0 +1,131 @@
+topic: algo.np-completeness
+version: "2026.10.1"
+concepts:
+  - slug: algo.p-and-np
+    name: P and NP
+    aliases: [complexity classes P and NP, P vs NP, class NP, class P, nondeterministic polynomial time]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      P is the class of decision problems solvable in polynomial time. NP is
+      the class of decision problems whose "yes" answers can be checked in
+      polynomial time given a suitable certificate. Every problem in P is in
+      NP; whether P = NP is unknown.
+    attributes:
+      p: solvable in polynomial time
+      np: a proposed solution can be verified in polynomial time
+      relationship: P ⊆ NP; whether they are equal is an open problem
+      decision_problems: yes/no questions, e.g. "is there a route shorter than k?"
+    requires: [ds.growth-rates]
+    documents:
+      - kind: explanation
+        title: Solving versus checking
+        depth: 1
+        body: |-
+          For a problem in NP you may not know how to find an answer quickly,
+          but if someone hands you a candidate you can check it quickly.
+          Given a Sudoku-like puzzle of any size, checking a filled grid is
+          easy; filling it may not be.
+
+          NP does not mean "not polynomial". It stands for nondeterministic
+          polynomial time, and every problem in P is also in NP.
+    questions:
+      - slug: q.algo.np-completeness.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What characterises a problem in NP?
+        options:
+          - It cannot be solved in polynomial time
+          - A proposed yes-answer can be verified in polynomial time
+          - It needs exponential memory
+          - It has no algorithm at all
+        answer: {option_index: 1}
+        explanation: NP is defined by efficient verification of certificates, not by being hard.
+      - slug: q.algo.np-completeness.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which statement about P and NP is known to be true?
+        options: [P = NP, P ≠ NP, P is a subset of NP, NP is a subset of P but not equal]
+        answer: {option_index: 2}
+        explanation: Anything solvable quickly can be verified quickly. Whether the classes are equal is open.
+
+  - slug: algo.np-complete
+    name: NP-complete problem
+    aliases: [NP-complete, NP completeness, NP-hard, NP hard, NPC]
+    difficulty: 4
+    further_reading: [clrs]
+    definition: >-
+      A problem is NP-hard if every problem in NP reduces to it in polynomial
+      time, and NP-complete if it is NP-hard and also in NP. A polynomial-time
+      algorithm for any NP-complete problem would give one for all of NP.
+    attributes:
+      np_hard: at least as hard as every problem in NP
+      np_complete: NP-hard and in NP
+      first_proved: Boolean satisfiability (SAT), by Cook and Levin
+      examples: SAT, 3-SAT, vertex cover, Hamiltonian cycle, travelling salesman (decision), subset sum
+    requires: [algo.p-and-np, algo.reduction]
+    documents:
+      - kind: explanation
+        title: What NP-completeness tells you in practice
+        depth: 2
+        body: |-
+          Proving a problem NP-complete is strong evidence that no efficient
+          exact algorithm exists, since finding one would settle P = NP. In
+          practice you then look for approximation algorithms, heuristics,
+          exact algorithms that are fast on typical inputs, or special cases
+          that are easier (for example, 2-SAT is solvable in polynomial time
+          even though 3-SAT is NP-complete).
+    questions:
+      - slug: q.algo.np-completeness.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: A problem is NP-complete when it is…
+        options:
+          - in P and in NP
+          - in NP and NP-hard
+          - NP-hard but not in NP
+          - not solvable by any algorithm
+        answer: {option_index: 1}
+        explanation: NP-complete means both in NP and at least as hard as everything in NP.
+      - slug: q.algo.np-completeness.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which problem was the first proved NP-complete?
+        options: [Travelling salesman, Boolean satisfiability (SAT), Graph colouring, Sorting]
+        answer: {option_index: 1}
+        explanation: The Cook-Levin theorem showed SAT is NP-complete.
+
+  - slug: algo.reduction
+    name: Polynomial-time reduction
+    aliases: [reduction, reducibility, Karp reduction, many-one reduction, reducing one problem to another]
+    difficulty: 4
+    further_reading: [clrs]
+    definition: >-
+      A polynomial-time reduction from problem A to problem B converts any
+      instance of A into an instance of B, in polynomial time, so that the
+      answers agree. It shows B is at least as hard as A.
+    attributes:
+      notation: A ≤p B
+      direction: to prove B is NP-hard, reduce a known NP-hard problem A to B
+    requires: [algo.p-and-np]
+    documents:
+      - kind: misconception
+        title: Reducing in the right direction
+        depth: 3
+        body: |-
+          To show a new problem B is hard, reduce a known hard problem A to B
+          (A ≤p B): if B were easy, A would be easy too. Reducing B to a hard
+          problem only shows B is no harder than that problem, which proves
+          nothing about B being hard.
+    questions:
+      - slug: q.algo.np-completeness.5
+        kind: multiple_choice
+        difficulty: 4
+        prompt: To prove a new problem X is NP-hard, which reduction do you give?
+        options:
+          - From X to a known NP-complete problem
+          - From a known NP-complete problem to X
+          - From X to a problem in P
+          - From a problem in P to X
+        answer: {option_index: 1}
+        explanation: If a known hard problem reduces to X, then X must be at least as hard.

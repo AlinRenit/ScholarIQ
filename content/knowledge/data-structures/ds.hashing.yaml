@@ -1,0 +1,164 @@
+topic: ds.hashing
+version: "2026.10.1"
+concepts:
+  - slug: ds.hash-table
+    name: Hash table
+    aliases: [hash map, hashmap, dictionary, hash tables, associative array]
+    difficulty: 2
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A hash table stores key-value pairs in an array of buckets. A hash
+      function turns each key into a bucket index, so insert, search and delete
+      take O(1) time on average.
+    attributes:
+      average_insert_search_delete: O(1)
+      worst_case: O(n), when many keys collide
+      ordering: none - keys are not kept in sorted order
+      load_factor: number of keys divided by number of buckets
+    contrasts: [ds.bst]
+    documents:
+      - kind: explanation
+        title: How a hash table works
+        depth: 1
+        body: |-
+          To store key k, compute h(k), reduce it to an index such as
+          h(k) mod m for a table of m buckets, and put the pair there. Looking k
+          up repeats the same computation, so the cost does not depend on how
+          many keys are stored, as long as keys spread evenly across buckets.
+
+          Two different keys can map to the same bucket. Handling these
+          collisions well, and keeping the load factor α = n/m small by
+          resizing, is what keeps operations O(1) on average.
+      - kind: misconception
+        title: O(1) is an average, not a guarantee
+        depth: 2
+        body: |-
+          If many keys land in the same bucket, a lookup must check them all,
+          and in the worst case every key collides, giving O(n). Good hash
+          functions and resizing make this unlikely, but a balanced BST is the
+          better choice when you need guaranteed O(log n) or sorted iteration.
+    questions:
+      - slug: q.ds.hashing.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What is the average time to look up a key in a well-designed hash table?
+        options: [O(1), O(log n), O(n), O(n log n)]
+        answer: {option_index: 0}
+        explanation: >-
+          The hash function points straight at the bucket, and with a low load
+          factor each bucket holds only a few keys.
+      - slug: q.ds.hashing.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which task suits a balanced BST better than a hash table?
+        options:
+          - Checking whether a word is in a dictionary
+          - Counting how often each word appears
+          - Listing all keys in sorted order
+          - Storing user sessions by session id
+        answer: {option_index: 2}
+        explanation: >-
+          A hash table keeps no order; a BST lists keys in sorted order with an
+          inorder traversal.
+
+  - slug: ds.collision-resolution
+    name: Collision resolution
+    aliases: [hash collisions, separate chaining, chaining, open addressing, linear probing,
+              quadratic probing, double hashing]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      Collision resolution decides where a key goes when its bucket is already
+      occupied. Separate chaining keeps a list of keys in each bucket; open
+      addressing probes other slots of the array, for example the next slot in
+      linear probing.
+    attributes:
+      separate_chaining: each bucket holds a list; load factor may exceed 1
+      linear_probing: try h(k), h(k)+1, h(k)+2, … modulo m
+      quadratic_probing: try h(k) + 1², h(k) + 2², … modulo m
+      double_hashing: step size given by a second hash function
+      open_addressing_limit: load factor must stay below 1
+    requires: [ds.hash-table]
+    documents:
+      - kind: example
+        title: Linear probing step by step
+        depth: 2
+        body: |-
+          Table size m = 7, h(k) = k mod 7. Insert 10, 17, 24 in that order.
+          10 mod 7 = 3, so 10 goes to slot 3.
+          17 mod 7 = 3 is taken, so try slot 4: 17 goes there.
+          24 mod 7 = 3 is taken, slot 4 is taken, so 24 goes to slot 5.
+          Runs of occupied slots like 3–5 are called primary clusters; they
+          make later probes longer, which is the main weakness of linear
+          probing.
+      - kind: explanation
+        title: Deleting with open addressing
+        depth: 3
+        body: |-
+          With open addressing you cannot simply empty a slot on deletion: a
+          later search for a key that probed past this slot would stop early
+          and wrongly report "not found". Deleted slots are marked with a
+          tombstone that searches skip over but inserts may reuse.
+    questions:
+      - slug: q.ds.hashing.3
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          A table of size 10 uses h(k) = k mod 10 and linear probing. Keys 42,
+          52 and 62 are inserted in that order into an empty table. In which
+          slot does 62 end up?
+        options: ["2", "3", "4", "5"]
+        answer: {option_index: 2}
+        explanation: >-
+          All three hash to slot 2. 42 takes 2, 52 probes to 3, and 62 probes 2
+          and 3 before landing in 4.
+      - slug: q.ds.hashing.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which collision strategy allows the load factor to go above 1?
+        options: [Linear probing, Quadratic probing, Separate chaining, Double hashing]
+        answer: {option_index: 2}
+        explanation: >-
+          With chaining each bucket holds a list of any length. Open-addressing
+          schemes store at most one key per slot, so they need n ≤ m.
+
+  - slug: ds.hash-function
+    name: Hash function
+    aliases: [hashing function, division method, multiplication method]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      A hash function maps a key to an integer used to choose a bucket. A good
+      one is fast, deterministic, and spreads typical keys evenly so that few
+      of them collide.
+    attributes:
+      division_method: h(k) = k mod m, with m usually a prime not close to a power of 2
+      properties: deterministic, fast, spreads keys uniformly
+    requires: [ds.hash-table]
+    documents:
+      - kind: explanation
+        title: What makes a hash function good
+        depth: 2
+        body: |-
+          The same key must always give the same value, or lookups fail. The
+          function should be cheap to compute, and similar keys should land in
+          different buckets.
+
+          With the division method h(k) = k mod m, choosing m as a power of 2
+          keeps only the lowest bits of k, so keys that differ only in higher
+          bits collide. A prime m that is not close to a power of 2 avoids this.
+    questions:
+      - slug: q.ds.hashing.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which property must every hash function used in a hash table have?
+        options:
+          - It never produces collisions
+          - It always returns the same value for the same key
+          - It returns values in sorted key order
+          - It encrypts the key
+        answer: {option_index: 1}
+        explanation: >-
+          Lookups recompute the hash, so it must be deterministic. Collisions
+          cannot be avoided in general and are handled separately.

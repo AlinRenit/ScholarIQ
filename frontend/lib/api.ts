@@ -278,3 +278,69 @@ export type CurriculumSubject = {
   is_custom: boolean;
   topics: { id: string; slug: string; name: string; importance: number }[];
 };
+
+export type TrustStatus = "verified" | "imported" | "retired";
+export type KnowledgeTopicCoverage = {
+  id: string;
+  slug: string;
+  name: string;
+  concepts: number;
+  verified_concepts: number;
+  documents: number;
+  questions: number;
+};
+export type KnowledgeOverview = {
+  concepts: number;
+  verified_concepts: number;
+  documents: number;
+  questions: number;
+  allow_unreviewed: boolean;
+  subjects: { id: string; name: string; topics: KnowledgeTopicCoverage[] }[];
+};
+export type KnowledgeTopic = {
+  slug: string;
+  name: string;
+  concepts: { slug: string; name: string; trust_status: TrustStatus }[];
+};
+export type KnowledgeSearchMatch = {
+  slug: string;
+  name: string;
+  topic_slug: string;
+  topic_name: string;
+  trust_status: TrustStatus;
+  score: number;
+  matched_terms: Record<string, number>;
+  name_match: string | null;
+  name_bonus: number;
+};
+export type KnowledgeSearch = {
+  query: string;
+  method: string;
+  unmatched_terms: string[];
+  allow_unreviewed: boolean;
+  results: KnowledgeSearchMatch[];
+};
+export type KnowledgeConcept = {
+  slug: string;
+  name: string;
+  aliases: string[];
+  definition: string;
+  attributes: Record<string, string>;
+  difficulty: number;
+  topic_slug: string;
+  topic_name: string;
+  trust_status: TrustStatus;
+  reviewed_by: string | null;
+  reviewed_on: string | null;
+  content_version: string;
+  origin: string | null;
+  documents: { kind: string; title: string; body: string; steps: string[]; depth: number }[];
+  relations: { kind: string; direction: "in" | "out"; slug: string; name: string }[];
+  further_reading: {
+    title: string;
+    authors: string | null;
+    citation: string | null;
+    url: string | null;
+  }[];
+  question_count: number;
+};

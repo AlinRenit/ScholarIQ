@@ -1,0 +1,128 @@
+topic: os.file-systems
+version: "2026.10.1"
+concepts:
+  - slug: os.file-allocation
+    name: File allocation methods
+    aliases: [contiguous allocation, linked allocation, indexed allocation, FAT, file allocation table]
+    difficulty: 2
+    further_reading: [silberschatz-os]
+    definition: >-
+      A file system places a file's data blocks on disk using contiguous
+      allocation (one run of consecutive blocks), linked allocation (each block
+      points to the next) or indexed allocation (an index block lists all of
+      the file's blocks).
+    attributes:
+      contiguous: fast sequential and direct access; external fragmentation and hard to grow
+      linked: no external fragmentation; direct access is slow; a lost pointer breaks the chain
+      indexed: direct access without external fragmentation; costs index blocks
+      fat: linked allocation with the links kept in a table at the start of the volume
+    documents:
+      - kind: explanation
+        title: Comparing the three methods
+        depth: 1
+        body: |-
+          Contiguous allocation needs only a start block and a length, and
+          reading block i is one calculation, but files are hard to grow and
+          free space fragments.
+
+          Linked allocation lets a file grow anywhere, but reaching block i
+          means following i pointers, so it suits sequential access only.
+
+          Indexed allocation keeps a block of pointers per file, giving direct
+          access to any block without fragmentation. Unix inodes are a form of
+          indexed allocation.
+    questions:
+      - slug: q.os.file-systems.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which allocation method makes reading the 1000th block of a file slowest?
+        options: [Contiguous, Linked, Indexed, They are all the same]
+        answer: {option_index: 1}
+        explanation: With linked allocation you must follow 999 next-pointers to get there.
+      - slug: q.os.file-systems.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which allocation method suffers from external fragmentation?
+        options: [Contiguous, Linked, Indexed, None]
+        answer: {option_index: 0}
+        explanation: Each file needs one run of consecutive free blocks, so free space breaks into unusable gaps.
+
+  - slug: os.inode
+    name: Inode
+    aliases: [inodes, index node, i-node, direct blocks, indirect blocks]
+    difficulty: 3
+    further_reading: [ostep]
+    definition: >-
+      An inode is the Unix structure that stores a file's metadata (size,
+      owner, permissions, timestamps) and pointers to its data blocks: some
+      direct pointers plus single, double and triple indirect pointers for
+      larger files. The file's name is stored in a directory entry, not in
+      the inode.
+    attributes:
+      stores: metadata and block pointers
+      does_not_store: the file name
+      direct_pointers: point straight at data blocks
+      indirect_pointers: point at blocks full of further pointers
+    requires: [os.file-allocation]
+    documents:
+      - kind: example
+        title: Maximum file size from direct and single-indirect pointers
+        depth: 3
+        body: |-
+          Blocks are 4 KB and pointers are 4 bytes, so one block holds
+          4096 / 4 = 1024 pointers. With 12 direct pointers and one single
+          indirect pointer, a file can reach 12 × 4 KB + 1024 × 4 KB
+          = 48 KB + 4 MB.
+    questions:
+      - slug: q.os.file-systems.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Where is a file's name stored in a Unix file system?
+        options: [In its inode, In the directory entry that points to the inode, In the first data block, In the superblock]
+        answer: {option_index: 1}
+        explanation: That is why one inode can have several names (hard links).
+      - slug: q.os.file-systems.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Blocks are 1 KB and block pointers are 4 bytes. How many data blocks
+          can one single-indirect block point to?
+        options: ["4", "256", "1024", "4096"]
+        answer: {option_index: 1}
+        explanation: 1024 bytes / 4 bytes per pointer = 256 pointers.
+
+  - slug: os.disk-scheduling
+    name: Disk scheduling
+    aliases: [disk scheduling algorithms, SSTF, SCAN, C-SCAN, elevator algorithm, seek time]
+    difficulty: 3
+    further_reading: [silberschatz-os]
+    definition: >-
+      Disk scheduling orders pending requests on a hard disk to reduce head
+      movement. FCFS serves them in arrival order, SSTF serves the request
+      closest to the head, and SCAN sweeps back and forth like an elevator.
+    attributes:
+      fcfs: fair but can move the head a long way
+      sstf: shortest seek time first; low total movement but can starve far requests
+      scan: sweep to one end, then reverse; bounded waiting
+      c_scan: sweep one way, then jump back to the start; more uniform waiting
+    documents:
+      - kind: example
+        title: FCFS versus SSTF
+        depth: 2
+        body: |-
+          Head at cylinder 53; queue 98, 183, 37, 122, 14, 124, 65, 67.
+          FCFS moves 45 + 85 + 146 + 85 + 108 + 110 + 59 + 2 = 640 cylinders.
+          SSTF serves 65, 67, 37, 14, 98, 122, 124, 183, moving
+          12 + 2 + 30 + 23 + 84 + 24 + 2 + 59 = 236 cylinders.
+    questions:
+      - slug: q.os.file-systems.5
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          The head is at cylinder 50 and the queue is 20, 60, 35, 90. What is
+          the total head movement under SSTF?
+        options: ["100", "120", "150", "160"]
+        answer: {option_index: 1}
+        explanation: 50 → 60 (10) → 35 (25) → 20 (15) → 90 (70), a total of 120.

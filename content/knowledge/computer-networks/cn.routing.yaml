@@ -1,0 +1,130 @@
+topic: cn.routing
+version: "2026.10.1"
+concepts:
+  - slug: cn.forwarding-table
+    name: Forwarding and longest prefix match
+    aliases: [routing table, forwarding table, longest prefix match, default route, next hop]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      A router forwards each packet by looking up its destination address in a
+      forwarding table of prefixes. When several prefixes match, the longest
+      (most specific) one wins; a default route 0.0.0.0/0 matches everything.
+    attributes:
+      forwarding: per-packet lookup in the data plane
+      routing: computing the table, in the control plane
+      rule: longest matching prefix wins
+      default_route: 0.0.0.0/0
+    requires: [cn.subnetting]
+    documents:
+      - kind: example
+        title: Longest prefix match
+        depth: 2
+        body: |-
+          Table: 10.0.0.0/8 → interface 1, 10.1.0.0/16 → interface 2,
+          10.1.2.0/24 → interface 3, 0.0.0.0/0 → interface 4.
+          10.1.2.7 matches all four; /24 is longest, so interface 3.
+          10.1.9.9 matches /8, /16 and the default; /16 wins: interface 2.
+          11.0.0.1 matches only the default: interface 4.
+    questions:
+      - slug: q.cn.routing.1
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          A router has entries 192.168.0.0/16 → A, 192.168.4.0/22 → B,
+          192.168.5.0/24 → C and 0.0.0.0/0 → D. Where does it send a packet for
+          192.168.6.20?
+        options: [A, B, C, D]
+        answer: {option_index: 1}
+        explanation: >-
+          192.168.4.0/22 covers 192.168.4.0 to 192.168.7.255, so /16 and /22
+          match; the /24 does not. The longer /22 wins.
+      - slug: q.cn.routing.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: When several forwarding entries match a destination, which one does a router use?
+        options: [The first one added, The one with the longest prefix, The one with the shortest prefix, The default route]
+        answer: {option_index: 1}
+        explanation: The most specific match describes the destination most precisely.
+
+  - slug: cn.distance-vector
+    name: Distance-vector routing
+    aliases: [distance vector, RIP, Bellman-Ford routing, count to infinity, split horizon]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      In distance-vector routing each router keeps its best known distance to
+      every destination and periodically shares this vector with its
+      neighbours, updating with D(x, y) = min over neighbours v of
+      (cost(x, v) + D(v, y)). RIP is an example.
+    attributes:
+      shares: its whole distance vector, with neighbours only
+      algorithm: distributed Bellman-Ford
+      problem: slow convergence and count-to-infinity after failures
+      mitigations: split horizon, poisoned reverse, a maximum hop count (16 means unreachable in RIP)
+      example_protocol: RIP
+    requires: [algo.bellman-ford]
+    contrasts: [cn.link-state]
+    documents:
+      - kind: explanation
+        title: Good news travels fast, bad news slowly
+        depth: 3
+        body: |-
+          When a link gets cheaper, the improvement spreads in a few exchanges.
+          When a link fails, neighbours may keep advertising old routes through
+          each other, each raising its estimate a little per round: the
+          count-to-infinity problem. Poisoned reverse (advertising an infinite
+          distance back to the neighbour you route through) fixes the
+          two-router case but not every loop.
+    questions:
+      - slug: q.cn.routing.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which problem is characteristic of distance-vector routing?
+        options: [Count to infinity, Needing the full network map at every router, Flooding link-state packets, Longest prefix match failures]
+        answer: {option_index: 0}
+        explanation: Routers learn only from neighbours' estimates, so bad news can bounce between them.
+
+  - slug: cn.link-state
+    name: Link-state routing
+    aliases: [link state, OSPF, link-state advertisement, LSA]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      In link-state routing every router floods the state of its own links to
+      all routers, so each builds the full network map and computes shortest
+      paths itself with Dijkstra's algorithm. OSPF is an example.
+    attributes:
+      shares: state of its own links, with every router (flooding)
+      algorithm: Dijkstra at each router
+      convergence: faster than distance vector; no count-to-infinity
+      cost: more memory and computation per router
+      example_protocol: OSPF
+    requires: [algo.dijkstra]
+    contrasts: [cn.distance-vector]
+    documents:
+      - kind: explanation
+        title: Distance vector versus link state
+        depth: 2
+        body: |-
+          Distance vector: tell your neighbours about the whole world (your
+          distances to everyone). Link state: tell the whole world about your
+          neighbours (your links). Link state gives each router a complete
+          picture, so it converges quickly, at the price of storing the map
+          and running Dijkstra.
+    questions:
+      - slug: q.cn.routing.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which algorithm does each router run in link-state routing such as OSPF?
+        options: [Bellman-Ford, Dijkstra, Kruskal, Floyd-Warshall]
+        answer: {option_index: 1}
+        explanation: With the full map, each router computes shortest paths from itself using Dijkstra.
+      - slug: q.cn.routing.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which routing protocol is a distance-vector protocol?
+        options: [OSPF, RIP, IS-IS, None of these]
+        answer: {option_index: 1}
+        explanation: RIP exchanges distance vectors with neighbours; OSPF and IS-IS are link-state protocols.

@@ -1,0 +1,215 @@
+topic: cn.transport
+version: "2026.10.1"
+concepts:
+  - slug: cn.tcp
+    name: TCP
+    aliases: [transmission control protocol, TCP protocol, reliable transport, connection-oriented]
+    difficulty: 2
+    further_reading: [kurose-ross, rfc9293]
+    definition: >-
+      TCP is the internet's connection-oriented transport protocol. It
+      delivers a reliable, ordered byte stream between two processes using
+      sequence numbers, acknowledgements and retransmission, and it adds flow
+      control and congestion control.
+    attributes:
+      connection: established with a three-way handshake
+      reliability: acknowledgements and retransmission
+      ordering: in order, using sequence numbers
+      flow_control: receiver-advertised window
+      congestion_control: "yes"
+      header: at least 20 bytes
+      typical_uses: web (HTTP/1.1, HTTP/2), email, file transfer, SSH
+    contrasts: [cn.udp]
+    documents:
+      - kind: explanation
+        title: What TCP guarantees
+        depth: 1
+        body: |-
+          The application writes bytes and the other side reads the same bytes
+          in the same order, or the connection reports an error. Underneath,
+          TCP numbers every byte, the receiver acknowledges what has arrived,
+          and the sender retransmits anything not acknowledged in time.
+
+          TCP does not preserve message boundaries: two writes of 100 bytes may
+          be read as one read of 200, or as 150 and 50.
+    questions:
+      - slug: q.cn.transport.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which transport protocol provides reliable, in-order delivery?
+        options: [UDP, TCP, IP, ICMP]
+        answer: {option_index: 1}
+        explanation: TCP uses sequence numbers, acknowledgements and retransmission.
+
+  - slug: cn.udp
+    name: UDP
+    aliases: [user datagram protocol, UDP protocol, connectionless transport]
+    difficulty: 1
+    further_reading: [kurose-ross, rfc768]
+    definition: >-
+      UDP is a connectionless transport protocol that sends independent
+      datagrams with only port numbers, a length and a checksum. It does not
+      guarantee delivery or order, which makes it simple and low-latency.
+    attributes:
+      connection: none
+      reliability: none - datagrams may be lost, duplicated or reordered
+      message_boundaries: preserved
+      header: 8 bytes
+      typical_uses: DNS queries, live voice and video, online games, DHCP
+    contrasts: [cn.tcp]
+    documents:
+      - kind: explanation
+        title: Why anyone uses an unreliable protocol
+        depth: 1
+        body: |-
+          For a live call, a lost packet is better skipped than retransmitted:
+          by the time it arrived again it would be too late to play. For a
+          small DNS query, one request and one reply are faster than setting up
+          a TCP connection first. Applications that need some reliability on
+          top of UDP can add exactly the amount they need.
+    questions:
+      - slug: q.cn.transport.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Why is UDP often preferred for live video calls?
+        options:
+          - It guarantees delivery
+          - Retransmitting late packets is useless, and UDP avoids that delay
+          - It encrypts data automatically
+          - It has larger headers
+        answer: {option_index: 1}
+        explanation: Real-time media values low latency over complete delivery.
+      - slug: q.cn.transport.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: How large is the UDP header?
+        options: [8 bytes, 20 bytes, 32 bytes, 40 bytes]
+        answer: {option_index: 0}
+        explanation: Source port, destination port, length and checksum, two bytes each.
+
+  - slug: cn.three-way-handshake
+    name: TCP three-way handshake
+    aliases: [three-way handshake, SYN SYN-ACK ACK, connection establishment, TCP connection setup]
+    difficulty: 2
+    further_reading: [kurose-ross, rfc9293]
+    definition: >-
+      TCP opens a connection with three segments: the client sends SYN with its
+      initial sequence number, the server replies SYN-ACK with its own initial
+      sequence number and an acknowledgement, and the client sends ACK.
+    attributes:
+      step_1: client → server, SYN, seq = x
+      step_2: server → client, SYN-ACK, seq = y, ack = x + 1
+      step_3: client → server, ACK, ack = y + 1
+      purpose: both sides agree on initial sequence numbers and confirm two-way reachability
+    requires: [cn.tcp]
+    documents:
+      - kind: explanation
+        title: Why three messages
+        depth: 2
+        body: |-
+          Each side must choose an initial sequence number and learn that the
+          other side received it. The client's SYN carries x; the server's
+          SYN-ACK acknowledges x + 1 and carries y; the client's ACK
+          acknowledges y + 1. Two messages would leave the server unsure
+          whether its SYN arrived.
+    questions:
+      - slug: q.cn.transport.4
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          A client sends SYN with sequence number 1000. What acknowledgement
+          number does the server's SYN-ACK carry?
+        options: ["999", "1000", "1001", The server's own sequence number]
+        answer: {option_index: 2}
+        explanation: The SYN consumes one sequence number, so the server acknowledges 1001.
+      - slug: q.cn.transport.5
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What is the correct order of the TCP three-way handshake?
+        options:
+          - "SYN, ACK, SYN-ACK"
+          - "SYN, SYN-ACK, ACK"
+          - "ACK, SYN, SYN-ACK"
+          - "SYN-ACK, SYN, ACK"
+        answer: {option_index: 1}
+        explanation: Client SYN, server SYN-ACK, client ACK.
+
+  - slug: cn.flow-congestion-control
+    name: Flow control and congestion control
+    aliases: [flow control, congestion control, sliding window, receive window, congestion window, slow start, AIMD]
+    difficulty: 3
+    further_reading: [kurose-ross]
+    definition: >-
+      Flow control stops a sender from overwhelming the receiver, using the
+      receive window the receiver advertises. Congestion control stops senders
+      from overwhelming the network, using a congestion window that grows with
+      slow start and additive increase and shrinks sharply on loss.
+    attributes:
+      flow_control_protects: the receiver's buffer
+      congestion_control_protects: the network
+      send_limit: min(receive window, congestion window)
+      slow_start: congestion window doubles every round-trip time until a threshold
+      aimd: additive increase by one segment per round trip, multiplicative decrease (halve) on loss
+    requires: [cn.tcp]
+    documents:
+      - kind: misconception
+        title: Flow control and congestion control are different
+        depth: 2
+        body: |-
+          A fast server sending to a slow phone needs flow control even on an
+          empty network. Two fast machines on a busy shared link need
+          congestion control even though each receiver is keeping up. TCP does
+          both and sends no more than the smaller of the two windows allows.
+    questions:
+      - slug: q.cn.transport.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What does TCP flow control protect?
+        options: [The network routers, The receiver's buffer, The sender's CPU, The DNS server]
+        answer: {option_index: 1}
+        explanation: The receiver advertises how much buffer space it has left.
+      - slug: q.cn.transport.7
+        kind: multiple_choice
+        difficulty: 3
+        prompt: During TCP slow start, how does the congestion window change?
+        options:
+          - It grows by one segment per round-trip time
+          - It roughly doubles every round-trip time
+          - It stays fixed
+          - It halves every round-trip time
+        answer: {option_index: 1}
+        explanation: Each acknowledged segment adds one segment, so the window doubles per round trip until the threshold.
+
+  - slug: cn.ports
+    name: Port numbers
+    aliases: [port, ports, socket, well-known ports, port number, multiplexing]
+    difficulty: 1
+    further_reading: [kurose-ross]
+    definition: >-
+      A port number is a 16-bit number that identifies a process or service on
+      a host, so the transport layer can deliver data to the right
+      application. A TCP connection is identified by source IP, source port,
+      destination IP and destination port.
+    attributes:
+      size: 16 bits (0–65535)
+      well_known: 0–1023, e.g. 80 HTTP, 443 HTTPS, 53 DNS, 25 SMTP, 22 SSH
+      connection_id: the 4-tuple of addresses and ports
+    requires: [cn.tcp]
+    documents:
+      - kind: explanation
+        title: Many connections, one server port
+        depth: 2
+        body: |-
+          A web server listens on port 443, yet it can serve thousands of
+          clients at once. Each connection is distinguished by the clients'
+          addresses and ports, so the 4-tuple stays unique even though the
+          server's half is the same for all.
+    questions:
+      - slug: q.cn.transport.8
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which port does HTTPS use by default?
+        options: ["53", "80", "443", "8080"]
+        answer: {option_index: 2}
+        explanation: HTTP uses 80 and HTTPS uses 443.

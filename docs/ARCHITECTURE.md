@@ -76,6 +76,52 @@ flowchart LR
   KB --> CT
 ```
 
+### Knowledge base and retrieval *(implemented in Milestone 4)*
+
+```
+content/knowledge/*.yaml --load + validate--> KnowledgeContent --sync--> concepts, documents,
+                                                                         questions, edges
+concepts + documents --analyse--> BM25F-lite index (cached by content fingerprint)
+query --analyse--> terms (+ joined compounds) --BM25--> scores --+ name/alias phrase bonus--> hits
+```
+
+* **Schema** (`knowledge/schema.py`): strict Pydantic models; unknown fields are
+  errors. Multiple-choice questions need 2 to 6 distinct options and an answer
+  index in range.
+* **Loader** (`knowledge/loader.py`): collects every problem before failing:
+  topic not in the curriculum or in the wrong subject folder, duplicate slugs,
+  links or citations to unknown items, self-links and `requires` cycles.
+* **Review**: a concept is `VERIFIED` only when its review block is `verified`
+  and its 12-character content hash still matches; otherwise it is `IMPORTED`
+  (not yet reviewed). Editing reviewed content therefore drops it back to
+  unreviewed automatically. `knowledge/review.py` prints the block to paste.
+* **Sync** (`knowledge/sync.py`): upserts by slug, retires removed items instead
+  of deleting them (quiz history keeps its references), and rebuilds links.
+* **Text analysis** (`retrieval/text.py`): accent folding, tokens that keep
+  `c++`, `c#` and `3nf`, stopwords, `-ise` to `-ize`, Snowball stemming. Queries
+  also drop words that describe the kind of answer wanted (explain, define,
+  difference...).
+* **Ranking** (`retrieval/bm25.py`, `knowledge/index.py`): BM25 (k1 1.2,
+  b 0.75) over a weighted bag of fields (name x3, definition x2, document title
+  x1.5, body x1), plus 4 points per word when a concept name or alias appears
+  as a phrase in the query. Adjacent query words are also tried joined
+  ("quick sort" -> quicksort) when the joined form is in the vocabulary. Each
+  hit reports its per-word contributions and bonus; the Knowledge Base page
+  shows them.
+* **Trust filter**: `SCHOLARIQ_ALLOW_UNREVIEWED_CONTENT` (default true) decides
+  whether unreviewed concepts are searchable. When they are, everything shown
+  from them carries a "not yet reviewed by a person" label.
+* **Evaluation**: `content/eval/retrieval.yaml` (84 queries: names, aliases,
+  paraphrases, misspellings, out-of-scope) and `knowledge/evaluate.py`, which
+  writes [eval/retrieval.md](eval/retrieval.md). A test keeps hit@1 >= 85% and
+  hit@3 >= 90% on in-scope queries so ranking changes cannot regress silently.
+
+Known weaknesses that Milestone 5 must handle: no misspelling tolerance in
+search itself, and unrelated queries that share one common word with the
+content still return weak matches, so the tutor needs its own abstention rule
+(for example, the share of query words the knowledge base covers) rather than
+trusting that search returned something.
+
 ### Question answering pipeline *(planned, Milestone 5)*
 
 ```
@@ -86,16 +132,18 @@ question
   -> intent grammar: definition | explanation | comparison | procedure |
      worked problem | reasoning | prerequisites | practice | plan | follow-up
   -> context resolution against the conversation's structured history
-  -> BM25 retrieval over verified knowledge documents
+  -> BM25 retrieval over knowledge documents (reviewed only, or unreviewed too
+     when allowed, labelled as such)
   -> re-rank: exact concept match, subject context, prerequisite edges, topic
   -> ambiguity check (score margin between top concepts) -> clarify?
   -> handler selection -> answer plan (sections, depth from teaching policy)
-  -> validation: every section must be backed by a verified KB item or solver
+  -> validation: every section must be backed by a KB item or solver
   -> answer + citations + evidence status, or an explicit abstention
 ```
 
-Answers are assembled from verified content, not generated. A handler that
-cannot back a section with verified content leaves that section out and says so.
+Answers are assembled from knowledge-base content, not generated. A handler that
+cannot back a section with content leaves that section out and says so. Answers
+built from content no person has reviewed say so.
 
 ## 4. Repository layout
 
@@ -111,7 +159,7 @@ backend/
     curriculum/        (M3) curriculum schema, YAML sync, subject matching
     analytics/         (M3) subject analytics, topic evidence and classification
     tutoring/          (M5) teaching policy
-    knowledge/         (M4) content loader, graph
+    knowledge/         (M4) content schema, loader, sync, review, index, evaluation
     retrieval/         (M4) tokeniser, stemmer, BM25
     nlu/               (M5) query parsing
     answering/         (M5) handlers and solvers
@@ -121,8 +169,8 @@ backend/
 frontend/
   app/                 Next.js App Router pages and the /api proxy
   components/  lib/  tests/
-content/               versioned knowledge base (M4)
-docs/
+content/               curriculum, knowledge base, sources, retrieval eval set (M4)
+docs/                  architecture, compliance, eval/ reports
 docker-compose.yml
 ```
 

@@ -1,0 +1,228 @@
+topic: ds.complexity
+version: "2026.10.1"
+concepts:
+  - slug: ds.complexity-big-o
+    name: Big-O notation
+    aliases: [big O, big-oh, O notation, asymptotic upper bound, time complexity]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      Big-O notation describes an upper bound on how a function grows: f(n) is
+      O(g(n)) if there are constants c > 0 and n0 such that f(n) ≤ c·g(n) for
+      all n ≥ n0. It is used to state how an algorithm's running time or
+      memory scales with input size.
+    attributes:
+      formal: f(n) ≤ c·g(n) for all n ≥ n0
+      ignores: constant factors and lower-order terms
+      describes: an upper bound, often used for the worst case
+    related: [ds.asymptotic-notation]
+    documents:
+      - kind: explanation
+        title: What big-O means
+        depth: 1
+        body: |-
+          Big-O asks how the cost grows as the input gets large, ignoring
+          details that do not change the shape of the growth. 3n² + 5n + 20 is
+          O(n²): for large n the n² term dominates, and the constant 3 does not
+          change how the cost scales when n doubles.
+
+          Saying an algorithm "is O(n²)" usually means its worst-case running
+          time is bounded above by some constant times n² for large inputs.
+      - kind: procedure
+        title: Finding the big-O of simple code
+        depth: 1
+        body: Estimate how many times the most frequent statement runs.
+        steps:
+          - Count the work done by each loop as (number of iterations) × (work per iteration).
+          - Multiply for nested loops and add for loops that run one after another.
+          - Keep the fastest-growing term and drop constant factors.
+      - kind: example
+        title: Nested loops
+        depth: 1
+        body: |-
+          for i in range(n):
+              for j in range(i):
+                  total += 1
+          The inner line runs 0 + 1 + … + (n − 1) = n(n − 1)/2 times, which is
+          O(n²). The halving from j < i changes the constant, not the order.
+      - kind: misconception
+        title: Big-O is not the exact running time
+        depth: 2
+        body: |-
+          An O(n) algorithm can be slower than an O(n²) one for small inputs if
+          its constant factor is large. Big-O also gives only an upper bound:
+          binary search is technically O(n) as well as O(log n); we quote the
+          tightest bound we can prove.
+    questions:
+      - slug: q.ds.complexity.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What is 4n² + 10n + 7 in big-O notation?
+        options: [O(n), O(n²), O(4n²), O(n³)]
+        answer: {option_index: 1}
+        explanation: Drop the constant factor and the lower-order terms; n² dominates.
+      - slug: q.ds.complexity.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          A loop runs i = 1, 2, 4, 8, … while i < n, doubling i each time. How
+          many iterations does it make, in big-O terms?
+        options: [O(1), O(log n), O(n), O(n log n)]
+        answer: {option_index: 1}
+        explanation: Doubling reaches n after about log2 n steps.
+      - slug: q.ds.complexity.3
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          A function has a loop over n items, and inside it a loop over the
+          same n items. After both loops it runs one more loop over n items.
+          What is its time complexity?
+        options: [O(n), O(n²), O(n² + n) and it cannot be simplified, O(n³)]
+        answer: {option_index: 1}
+        explanation: n·n + n = n² + n, and the n² term dominates.
+
+  - slug: ds.asymptotic-notation
+    name: Big-Omega and Big-Theta
+    aliases: [big omega, big theta, asymptotic notation, tight bound, lower bound notation, Ω, Θ]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      Big-Omega gives a lower bound on growth (f(n) ≥ c·g(n) for large n) and
+      Big-Theta gives a tight bound: f(n) is Θ(g(n)) when it is both O(g(n))
+      and Ω(g(n)).
+    attributes:
+      big_o: upper bound
+      big_omega: lower bound
+      big_theta: both, so the growth rate is pinned down exactly up to constants
+    requires: [ds.complexity-big-o]
+    documents:
+      - kind: explanation
+        title: Upper, lower and tight bounds
+        depth: 2
+        body: |-
+          O, Ω and Θ describe functions, not cases. Merge sort's running time
+          is Θ(n log n) in every case. Insertion sort's worst-case time is
+          Θ(n²) and its best-case time is Θ(n), so its running time overall is
+          O(n²) and Ω(n), but not Θ of a single function.
+
+          Worst case, best case and average case say which inputs we look at;
+          O, Ω and Θ say how tightly we bound the cost on those inputs.
+    questions:
+      - slug: q.ds.complexity.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: If f(n) is both O(n²) and Ω(n²), what can you conclude?
+        options: [f(n) is Θ(n²), f(n) is Θ(n), f(n) = n² exactly, Nothing more]
+        answer: {option_index: 0}
+        explanation: Matching upper and lower bounds give a tight bound.
+
+  - slug: ds.growth-rates
+    name: Common growth rates
+    aliases: [order of growth, complexity classes, logarithmic linear quadratic exponential]
+    difficulty: 1
+    further_reading: [sedgewick-wayne]
+    definition: >-
+      The common orders of growth, from slowest to fastest, are O(1), O(log n),
+      O(n), O(n log n), O(n²), O(n³), O(2^n) and O(n!). Algorithms with
+      exponential or factorial growth become impractical even for modest n.
+    attributes:
+      order: 1 < log n < n < n log n < n² < n³ < 2^n < n!
+      example_constant: array indexing
+      example_logarithmic: binary search
+      example_linear: linear search
+      example_n_log_n: merge sort
+      example_quadratic: insertion sort worst case
+      example_exponential: trying every subset
+    requires: [ds.complexity-big-o]
+    documents:
+      - kind: explanation
+        title: How fast each class grows
+        depth: 1
+        body: |-
+          For n = 1,000: log2 n ≈ 10, n log2 n ≈ 10,000, n² = 1,000,000,
+          n³ = 10^9, and 2^n has about 300 digits. At a billion simple steps a
+          second, the cubic algorithm takes about a second while the exponential
+          one would never finish.
+    questions:
+      - slug: q.ds.complexity.5
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which growth rate is the slowest (best) for large n?
+        options: [O(n), O(n log n), O(log n), O(n²)]
+        answer: {option_index: 2}
+        explanation: The logarithm grows more slowly than any of the others.
+
+  - slug: ds.space-complexity
+    name: Space complexity
+    aliases: [memory complexity, auxiliary space, extra space]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      Space complexity measures how the memory an algorithm needs grows with
+      input size. Auxiliary space counts only the extra memory beyond the input
+      itself, including the recursion stack.
+    attributes:
+      in_place: O(1) auxiliary space
+      recursion: each active call adds a stack frame
+    requires: [ds.complexity-big-o]
+    documents:
+      - kind: explanation
+        title: Counting memory, including recursion
+        depth: 2
+        body: |-
+          Reversing an array by swapping ends uses O(1) auxiliary space.
+          Merge sort's merge step needs an O(n) temporary array. A recursive
+          function that calls itself n levels deep, such as a naive recursive
+          sum of a list, uses O(n) stack space even though it allocates no
+          arrays.
+    questions:
+      - slug: q.ds.complexity.6
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          A recursive function processes a list of n items by handling the first
+          item and recursing on the rest. Ignoring the input, how much stack
+          space does it use?
+        options: [O(1), O(log n), O(n), O(n²)]
+        answer: {option_index: 2}
+        explanation: The recursion is n calls deep and each call keeps a frame on the stack.
+
+  - slug: ds.amortized-analysis
+    name: Amortised analysis
+    aliases: [amortized analysis, amortised cost, amortized cost, aggregate analysis]
+    difficulty: 4
+    further_reading: [clrs]
+    definition: >-
+      Amortised analysis bounds the average cost per operation over any
+      sequence of operations, so occasional expensive operations are paid for
+      by many cheap ones. It is a worst-case guarantee about sequences, not an
+      average over random inputs.
+    attributes:
+      methods: aggregate, accounting, potential
+      classic_example: dynamic array append is O(1) amortised
+    requires: [ds.complexity-big-o]
+    related: [ds.dynamic-array]
+    documents:
+      - kind: explanation
+        title: Amortised versus average case
+        depth: 3
+        body: |-
+          Average-case analysis assumes a probability distribution over
+          inputs. Amortised analysis makes no such assumption: it proves that
+          any sequence of m operations costs at most m × (amortised cost) in
+          total. The aggregate method divides the total cost of n operations by
+          n, as in the dynamic-array doubling argument.
+    questions:
+      - slug: q.ds.complexity.7
+        kind: multiple_choice
+        difficulty: 4
+        prompt: What does "append is O(1) amortised" guarantee?
+        options:
+          - Every single append takes constant time
+          - Any sequence of n appends takes O(n) time in total
+          - Appends are constant time on random inputs only
+          - Appends never trigger a resize
+        answer: {option_index: 1}
+        explanation: Individual appends may cost O(n), but the total over any sequence is bounded.

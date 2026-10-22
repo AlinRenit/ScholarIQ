@@ -1,0 +1,202 @@
+topic: algo.graph-algorithms
+version: "2026.10.1"
+concepts:
+  - slug: algo.dijkstra
+    name: Dijkstra's algorithm
+    aliases: [Dijkstra, Dijkstras algorithm, single-source shortest path, shortest path algorithm]
+    difficulty: 3
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      Dijkstra's algorithm finds shortest paths from one source to every vertex
+      of a graph with non-negative edge weights. It repeatedly settles the
+      unsettled vertex with the smallest known distance and relaxes its
+      outgoing edges.
+    attributes:
+      edge_weights: must be non-negative
+      data_structure: min-priority queue
+      time: O((V + E) log V) with a binary heap
+      strategy: greedy
+    requires: [ds.graph-representation, ds.priority-queue]
+    contrasts: [algo.bellman-ford]
+    related: [ds.bfs, algo.greedy-method]
+    documents:
+      - kind: procedure
+        title: Dijkstra's algorithm from source s
+        depth: 1
+        body: Compute dist[v], the shortest distance from s to every vertex v.
+        steps:
+          - Set dist[s] = 0 and dist[v] = ∞ for every other vertex; put all vertices in a min-priority queue keyed by dist.
+          - Remove the vertex u with the smallest dist; its distance is now final.
+          - For each edge u → v with weight w, if dist[u] + w < dist[v], set dist[v] = dist[u] + w and parent[v] = u (relaxation).
+          - Repeat until the queue is empty.
+      - kind: example
+        title: A four-vertex run
+        depth: 2
+        body: |-
+          Edges: A→B 4, A→C 1, C→B 2, B→D 1, C→D 5. Source A.
+          Settle A (0): B = 4, C = 1.
+          Settle C (1): B = min(4, 1 + 2) = 3, D = 1 + 5 = 6.
+          Settle B (3): D = min(6, 3 + 1) = 4.
+          Settle D (4). Final distances: A 0, C 1, B 3, D 4.
+      - kind: misconception
+        title: Negative edges break Dijkstra
+        depth: 2
+        body: |-
+          Once a vertex is settled, Dijkstra assumes no later path can be
+          shorter. A negative edge discovered later can make that false, so the
+          result may be wrong. Use Bellman-Ford when weights can be negative.
+    questions:
+      - slug: q.algo.graph-algorithms.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Dijkstra's algorithm requires which condition on edge weights?
+        options: [All weights equal, All weights non-negative, All weights integers, No condition]
+        answer: {option_index: 1}
+        explanation: Settling a vertex is only safe if no later edge can reduce its distance.
+      - slug: q.algo.graph-algorithms.2
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Edges S→A 2, S→B 6, A→B 3, A→C 7, B→C 1. What is the shortest distance
+          from S to C?
+        options: ["6", "7", "9", "10"]
+        answer: {option_index: 0}
+        explanation: S→A→B→C costs 2 + 3 + 1 = 6, shorter than S→B→C (7) or S→A→C (9).
+
+  - slug: algo.bellman-ford
+    name: Bellman-Ford algorithm
+    aliases: [Bellman Ford, Bellman-Ford, negative weight shortest path]
+    difficulty: 4
+    further_reading: [clrs]
+    definition: >-
+      The Bellman-Ford algorithm finds single-source shortest paths even when
+      some edge weights are negative, by relaxing every edge V − 1 times. A
+      further pass that still improves a distance reveals a negative cycle.
+    attributes:
+      edge_weights: may be negative
+      time: O(VE)
+      detects: negative cycles reachable from the source
+      strategy: dynamic programming over path length
+    requires: [ds.graph-representation]
+    contrasts: [algo.dijkstra]
+    documents:
+      - kind: explanation
+        title: Why V − 1 passes are enough
+        depth: 3
+        body: |-
+          A shortest path without cycles has at most V − 1 edges. After pass k,
+          every vertex whose shortest path uses at most k edges has its correct
+          distance. So after V − 1 passes all distances are correct, unless a
+          negative cycle makes "shortest" undefined, which a V-th improving
+          pass detects.
+    questions:
+      - slug: q.algo.graph-algorithms.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the running time of Bellman-Ford?
+        options: [O(V + E), O(E log V), O(VE), O(V³)]
+        answer: {option_index: 2}
+        explanation: It relaxes all E edges in each of V − 1 passes.
+
+  - slug: algo.minimum-spanning-tree
+    name: Minimum spanning tree
+    aliases: [MST, minimum spanning trees, Prim's algorithm, Kruskal's algorithm, Prim, Kruskal]
+    difficulty: 3
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A minimum spanning tree of a connected, weighted, undirected graph is a
+      set of V − 1 edges that connects all vertices with the smallest possible
+      total weight. Kruskal's and Prim's algorithms both find one greedily.
+    attributes:
+      edges_in_tree: V − 1
+      kruskal: add edges in increasing weight order, skipping any that would form a cycle (union-find); O(E log E)
+      prim: grow one tree, always adding the cheapest edge leaving it (priority queue); O(E log V)
+      applies_to: connected undirected weighted graphs
+    requires: [ds.graph]
+    related: [algo.greedy-method]
+    documents:
+      - kind: procedure
+        title: Kruskal's algorithm
+        depth: 2
+        body: Build a minimum spanning tree edge by edge.
+        steps:
+          - Sort all edges by weight, smallest first.
+          - Start with each vertex in its own component.
+          - For each edge in order, if its endpoints are in different components, add it to the tree and merge the components.
+          - Stop when the tree has V − 1 edges.
+      - kind: misconception
+        title: A minimum spanning tree is not a shortest-path tree
+        depth: 2
+        body: |-
+          The MST minimises the total weight of all edges together. It does not
+          promise that the path between two vertices inside the tree is the
+          shortest path between them in the graph; Dijkstra's tree does that
+          for a single source.
+    questions:
+      - slug: q.algo.graph-algorithms.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: How many edges does a spanning tree of a connected graph with V vertices have?
+        options: [V − 1, V, V + 1, E − V]
+        answer: {option_index: 0}
+        explanation: Any tree on V vertices has exactly V − 1 edges.
+      - slug: q.algo.graph-algorithms.5
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Undirected edges: A–B 1, B–C 2, A–C 3, C–D 4, B–D 5. What is the total
+          weight of a minimum spanning tree?
+        options: ["6", "7", "8", "10"]
+        answer: {option_index: 1}
+        explanation: Kruskal takes A–B (1), B–C (2), skips A–C (cycle), then takes C–D (4). Total 7.
+
+  - slug: algo.topological-sort
+    name: Topological sort
+    aliases: [topological ordering, topological sorting, toposort, Kahn's algorithm]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      A topological sort orders the vertices of a directed acyclic graph so
+      that every edge goes from an earlier vertex to a later one. It exists
+      only when the graph has no directed cycle.
+    attributes:
+      applies_to: directed acyclic graphs (DAGs)
+      methods: DFS by decreasing finish time, or Kahn's algorithm (repeatedly remove in-degree-0 vertices)
+      time: O(V + E)
+      uses: scheduling tasks with prerequisites, build order, course planning
+    requires: [ds.dfs]
+    documents:
+      - kind: procedure
+        title: Kahn's algorithm
+        depth: 2
+        body: Order the vertices of a DAG so all edges point forward.
+        steps:
+          - Compute the in-degree of every vertex.
+          - Put every vertex with in-degree 0 in a queue.
+          - Remove a vertex from the queue, append it to the output, and decrease the in-degree of each of its successors; enqueue any that reach 0.
+          - If the output has fewer than V vertices when the queue empties, the graph has a cycle.
+    questions:
+      - slug: q.algo.graph-algorithms.6
+        kind: multiple_choice
+        difficulty: 2
+        prompt: For which graphs does a topological ordering exist?
+        options: [All undirected graphs, Directed acyclic graphs, Complete graphs, Trees with weights]
+        answer: {option_index: 1}
+        explanation: A directed cycle would need some vertex to come both before and after another.
+      - slug: q.algo.graph-algorithms.7
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Courses with prerequisites - Maths before Physics, Maths before
+          Programming, Programming before Algorithms. Which order is a valid
+          topological sort?
+        options:
+          - Physics, Maths, Programming, Algorithms
+          - Maths, Algorithms, Programming, Physics
+          - Maths, Programming, Physics, Algorithms
+          - Programming, Maths, Algorithms, Physics
+        answer: {option_index: 2}
+        explanation: Maths comes first, Programming precedes Algorithms, and Physics can go anywhere after Maths.

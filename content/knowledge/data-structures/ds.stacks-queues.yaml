@@ -1,0 +1,209 @@
+topic: ds.stacks-queues
+version: "2026.10.1"
+concepts:
+  - slug: ds.stack
+    name: Stack
+    aliases: [LIFO, stacks, LIFO stack, push down stack]
+    difficulty: 1
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A stack is a collection where the last element added is the first one
+      removed (last in, first out, LIFO). Elements are added with push and
+      removed with pop, both at the same end, called the top.
+    attributes:
+      ordering: LIFO (last in, first out)
+      insert: push, at the top
+      remove: pop, from the top
+      typical_cost: O(1) push and pop
+      typical_uses: function calls, undo, expression evaluation, depth-first search
+    contrasts: [ds.queue]
+    related: [ds.dfs]
+    documents:
+      - kind: explanation
+        title: How a stack works
+        depth: 1
+        body: |-
+          Think of a stack of plates: you put a plate on top and take the top
+          plate off. push(x) places x on the top; pop() removes and returns the
+          top element; peek() looks at it without removing it.
+
+          A stack can be built on an array (the top is the last used index) or
+          on a linked list (the top is the head). Either way push and pop are
+          O(1). Popping an empty stack is an error called underflow; pushing
+          onto a full fixed-size stack is overflow.
+      - kind: example
+        title: Tracing push and pop
+        depth: 1
+        body: |-
+          Start empty. push(3), push(5), push(7) gives [3, 5, 7] with 7 on top.
+          pop() returns 7. push(9) gives [3, 5, 9]. pop() returns 9, then pop()
+          returns 5. The stack now holds [3].
+      - kind: explanation
+        title: The call stack
+        depth: 2
+        body: |-
+          Programs use a stack to manage function calls. Each call pushes a
+          frame holding its parameters, local variables and return address;
+          returning pops it. Recursion that never reaches a base case keeps
+          pushing frames until the stack overflows.
+    questions:
+      - slug: q.ds.stacks-queues.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which order does a stack follow?
+        options: [FIFO, LIFO, Priority order, Sorted order]
+        answer: {option_index: 1}
+        explanation: The element pushed last is popped first.
+      - slug: q.ds.stacks-queues.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          Starting from an empty stack: push(1), push(2), pop(), push(3),
+          push(4), pop(), pop(). Which value does the last pop return?
+        options: ["1", "2", "3", "4"]
+        answer: {option_index: 2}
+        explanation: >-
+          After push 1, push 2, pop (2) the stack is [1]. Push 3 and 4 gives
+          [1, 3, 4]. Pop returns 4, then pop returns 3.
+      - slug: q.ds.stacks-queues.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which of these is a natural use of a stack?
+        options:
+          - Serving print jobs in arrival order
+          - Checking that brackets in an expression are balanced
+          - Breadth-first search of a graph
+          - Round-robin CPU scheduling
+        answer: {option_index: 1}
+        explanation: >-
+          Each closing bracket must match the most recent unmatched opening
+          bracket, which is exactly the top of a stack.
+
+  - slug: ds.queue
+    name: Queue
+    aliases: [FIFO, queues, FIFO queue]
+    difficulty: 1
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A queue is a collection where the first element added is the first one
+      removed (first in, first out, FIFO). Elements join at the rear with
+      enqueue and leave from the front with dequeue.
+    attributes:
+      ordering: FIFO (first in, first out)
+      insert: enqueue, at the rear
+      remove: dequeue, from the front
+      typical_cost: O(1) enqueue and dequeue
+      typical_uses: scheduling, buffering, breadth-first search
+    contrasts: [ds.stack]
+    related: [ds.bfs]
+    documents:
+      - kind: explanation
+        title: How a queue works
+        depth: 1
+        body: |-
+          A queue behaves like a line at a counter: people join at the back and
+          are served from the front. enqueue(x) adds x at the rear; dequeue()
+          removes and returns the front element.
+
+          A linked list with head and tail pointers gives O(1) for both ends.
+          On an array, a circular buffer keeps front and rear indices that wrap
+          around modulo the capacity, so no elements ever need shifting.
+      - kind: misconception
+        title: A plain array queue that shifts is slow
+        depth: 2
+        body: |-
+          Implementing dequeue on an array by removing a[0] and shifting the
+          rest left costs O(n). A circular buffer avoids the shift by moving the
+          front index instead.
+    questions:
+      - slug: q.ds.stacks-queues.4
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          Starting from an empty queue: enqueue(1), enqueue(2), dequeue(),
+          enqueue(3), dequeue(). What does the second dequeue return?
+        options: ["1", "2", "3", "The queue is empty"]
+        answer: {option_index: 1}
+        explanation: >-
+          The first dequeue removes 1, leaving [2]. After enqueue 3 the queue
+          is [2, 3], so the next dequeue returns 2.
+      - slug: q.ds.stacks-queues.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          A circular queue on an array of capacity 8 has its rear index at 7.
+          Where does the next enqueue go if slot 0 is free?
+        options: [Index 8, Index 0, Index 7, It overflows]
+        answer: {option_index: 1}
+        explanation: The rear index wraps around, (7 + 1) mod 8 = 0.
+
+  - slug: ds.deque
+    name: Deque
+    aliases: [double-ended queue, dequeue structure]
+    difficulty: 2
+    further_reading: [sedgewick-wayne]
+    definition: >-
+      A deque (double-ended queue) allows insertion and removal at both the
+      front and the rear, so it can act as a stack or as a queue.
+    attributes:
+      insert: at the front or the rear
+      remove: from the front or the rear
+      typical_cost: O(1) at both ends
+    requires: [ds.queue]
+    related: [ds.stack, ds.doubly-linked-list]
+    documents:
+      - kind: explanation
+        title: What a deque adds
+        depth: 2
+        body: |-
+          A deque supports push_front, push_back, pop_front and pop_back. Using
+          only one end makes it a stack; adding at one end and removing at the
+          other makes it a queue. It is usually built on a doubly linked list
+          or a circular array.
+    questions:
+      - slug: q.ds.stacks-queues.6
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which structure allows insertion and removal at both ends in O(1)?
+        options: [Stack, Queue, Deque, Binary search tree]
+        answer: {option_index: 2}
+        explanation: A double-ended queue supports both operations at both ends.
+
+  - slug: ds.priority-queue
+    name: Priority queue
+    aliases: [priority queues, PQ]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      A priority queue removes elements in order of priority rather than
+      arrival: the element with the highest (or lowest) key leaves first. It is
+      usually implemented with a binary heap.
+    attributes:
+      ordering: by priority key
+      insert: O(log n) with a binary heap
+      remove_top: O(log n) with a binary heap
+      peek_top: O(1) with a binary heap
+    requires: [ds.heap]
+    related: [ds.queue]
+    documents:
+      - kind: explanation
+        title: Priority queues and heaps
+        depth: 2
+        body: |-
+          A priority queue supports insert(x, key) and extract-min (or
+          extract-max). With an unsorted list, insert is O(1) but extract is
+          O(n); with a sorted list it is the other way round. A binary heap
+          balances both at O(log n), which is why it is the standard choice.
+          Dijkstra's algorithm and heapsort both rely on one.
+    questions:
+      - slug: q.ds.stacks-queues.7
+        kind: multiple_choice
+        difficulty: 3
+        prompt: With a binary heap, what does removing the highest-priority element cost?
+        options: [O(1), O(log n), O(n), O(n log n)]
+        answer: {option_index: 1}
+        explanation: >-
+          The last element moves to the root and sifts down one level at a
+          time; a heap of n elements has O(log n) levels.

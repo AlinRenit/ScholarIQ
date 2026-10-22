@@ -1,0 +1,154 @@
+topic: algo.recurrences
+version: "2026.10.1"
+concepts:
+  - slug: algo.recurrence-relation
+    name: Recurrence relation
+    aliases: [recurrence, recurrences, recurrence equation, recursive formula]
+    difficulty: 2
+    further_reading: [clrs, rosen]
+    definition: >-
+      A recurrence relation defines each term of a sequence, or the running
+      time of a recursive algorithm, in terms of smaller instances, together
+      with base cases. T(n) = 2T(n/2) + n is the recurrence for merge sort.
+    attributes:
+      parts: a recursive rule plus one or more base cases
+      solving_methods: substitution, recursion tree, master theorem, characteristic equation
+    documents:
+      - kind: explanation
+        title: Writing a recurrence for a recursive algorithm
+        depth: 1
+        body: |-
+          Describe the cost of a call on input size n as: the cost of its
+          recursive calls plus the work done outside them. Binary search makes
+          one call on half the input and does constant work, so
+          T(n) = T(n/2) + c. Merge sort makes two calls on halves and merges in
+          linear time, so T(n) = 2T(n/2) + cn. Base cases such as T(1) = c
+          stop the recursion.
+      - kind: example
+        title: Unrolling T(n) = T(n − 1) + n
+        depth: 2
+        body: |-
+          With T(1) = 1:
+          T(n) = T(n − 1) + n = T(n − 2) + (n − 1) + n = … = 1 + 2 + … + n
+          = n(n + 1)/2, which is Θ(n²). This is the cost of selection sort or
+          of quicksort with the worst pivots.
+    questions:
+      - slug: q.algo.recurrences.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which recurrence describes binary search on n elements?
+        options: [T(n) = 2T(n/2) + 1, T(n) = T(n/2) + 1, T(n) = T(n − 1) + 1, T(n) = 2T(n − 1) + 1]
+        answer: {option_index: 1}
+        explanation: It recurses on one half and does constant work per call.
+      - slug: q.algo.recurrences.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: Solve T(n) = T(n − 1) + n with T(1) = 1. What is its order of growth?
+        options: [Θ(n), Θ(n log n), Θ(n²), Θ(2^n)]
+        answer: {option_index: 2}
+        explanation: Unrolling gives 1 + 2 + … + n = n(n + 1)/2.
+
+  - slug: algo.master-theorem
+    name: Master theorem
+    aliases: [master method, master theorem for divide and conquer recurrences]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      The master theorem solves recurrences of the form T(n) = aT(n/b) + f(n),
+      with a ≥ 1 and b > 1, by comparing f(n) with n^(log_b a).
+    attributes:
+      form: T(n) = aT(n/b) + f(n)
+      case_1: if f(n) = O(n^(log_b a − ε)) then T(n) = Θ(n^(log_b a))
+      case_2: if f(n) = Θ(n^(log_b a)) then T(n) = Θ(n^(log_b a) · log n)
+      case_3: if f(n) = Ω(n^(log_b a + ε)) and a·f(n/b) ≤ c·f(n) for some c < 1, then T(n) = Θ(f(n))
+    requires: [algo.recurrence-relation, ds.complexity-big-o]
+    documents:
+      - kind: procedure
+        title: Applying the master theorem
+        depth: 2
+        body: Solve T(n) = aT(n/b) + f(n).
+        steps:
+          - Read off a (number of subproblems), b (shrink factor) and f(n) (work outside the calls).
+          - Compute the critical exponent c* = log_b a.
+          - If f(n) grows polynomially slower than n^c*, the answer is Θ(n^c*) (case 1).
+          - If f(n) is Θ(n^c*), the answer is Θ(n^c* · log n) (case 2).
+          - If f(n) grows polynomially faster than n^c* and satisfies the regularity condition, the answer is Θ(f(n)) (case 3).
+      - kind: example
+        title: Three worked cases
+        depth: 2
+        body: |-
+          Merge sort, T(n) = 2T(n/2) + n: log_2 2 = 1 and f(n) = n = Θ(n^1),
+          so case 2 gives Θ(n log n).
+
+          Binary search, T(n) = T(n/2) + 1: log_2 1 = 0 and f(n) = 1 = Θ(n^0),
+          so case 2 gives Θ(log n).
+
+          T(n) = 8T(n/2) + n²: log_2 8 = 3 and n² is polynomially smaller than
+          n³, so case 1 gives Θ(n³).
+      - kind: misconception
+        title: Not every recurrence fits
+        depth: 3
+        body: |-
+          The theorem needs subproblems of equal size n/b. T(n) = T(n − 1) + n
+          does not have that form, and T(n) = 2T(n/2) + n/log n falls in a gap
+          between the cases. Use unrolling or a recursion tree instead.
+    questions:
+      - slug: q.algo.recurrences.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Using the master theorem, what is T(n) = 2T(n/2) + n?
+        options: [Θ(n), Θ(n log n), Θ(n²), Θ(log n)]
+        answer: {option_index: 1}
+        explanation: log_2 2 = 1 and f(n) = Θ(n^1), so case 2 gives Θ(n log n).
+      - slug: q.algo.recurrences.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Using the master theorem, what is T(n) = 4T(n/2) + n?
+        options: [Θ(n), Θ(n log n), Θ(n²), Θ(n² log n)]
+        answer: {option_index: 2}
+        explanation: log_2 4 = 2 and f(n) = n is polynomially smaller than n², so case 1 gives Θ(n²).
+      - slug: q.algo.recurrences.5
+        kind: multiple_choice
+        difficulty: 4
+        prompt: Using the master theorem, what is T(n) = 2T(n/2) + n²?
+        options: [Θ(n), Θ(n log n), Θ(n²), Θ(n² log n)]
+        answer: {option_index: 2}
+        explanation: >-
+          log_2 2 = 1 and n² grows polynomially faster than n. The regularity
+          condition holds (2(n/2)² = n²/2), so case 3 gives Θ(n²).
+
+  - slug: algo.linear-recurrence
+    name: Linear homogeneous recurrence
+    aliases: [characteristic equation, linear recurrence with constant coefficients, Fibonacci recurrence]
+    difficulty: 4
+    further_reading: [rosen]
+    definition: >-
+      A linear homogeneous recurrence with constant coefficients, such as
+      a(n) = c1·a(n−1) + c2·a(n−2), is solved through its characteristic
+      equation r² = c1·r + c2; distinct roots r1 and r2 give
+      a(n) = α·r1^n + β·r2^n, with α and β fixed by the initial terms.
+    attributes:
+      characteristic_equation: r² − c1·r − c2 = 0 for a(n) = c1·a(n−1) + c2·a(n−2)
+      distinct_roots: a(n) = α·r1^n + β·r2^n
+      repeated_root: a(n) = (α + β·n)·r^n
+    requires: [algo.recurrence-relation]
+    documents:
+      - kind: example
+        title: Solving a(n) = 5a(n − 1) − 6a(n − 2)
+        depth: 3
+        body: |-
+          Initial terms a(0) = 1 and a(1) = 4.
+          Characteristic equation: r² − 5r + 6 = 0, so (r − 2)(r − 3) = 0 and
+          r = 2 or 3. General solution: a(n) = α·2^n + β·3^n.
+          From a(0) = 1: α + β = 1. From a(1) = 4: 2α + 3β = 4.
+          Solving gives β = 2 and α = −1, so a(n) = 2·3^n − 2^n.
+          Check: a(2) = 18 − 4 = 14, and 5·4 − 6·1 = 14.
+    questions:
+      - slug: q.algo.recurrences.6
+        kind: multiple_choice
+        difficulty: 4
+        prompt: What are the roots of the characteristic equation of a(n) = a(n − 1) + 6a(n − 2)?
+        options: [2 and 3, −2 and 3, 2 and −3, 1 and 6]
+        answer: {option_index: 1}
+        explanation: r² − r − 6 = 0 factors as (r − 3)(r + 2) = 0.

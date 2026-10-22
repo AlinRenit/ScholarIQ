@@ -68,6 +68,7 @@ Later milestones append rows here as they add packages.
 | PyYAML (M3) | reads curriculum and policy files (`safe_load` only) | no | no | allowed |
 | recharts (M3, frontend) | SVG charts on the dashboard | no | no | allowed |
 | prettier (M3, frontend dev) | code formatting | no | no | allowed |
+| snowballstemmer (M4) | Snowball English stemmer: fixed suffix-stripping rules written by hand, pure Python | no | no | allowed |
 
 Next.js telemetry is disabled in the Docker images (`NEXT_TELEMETRY_DISABLED=1`).
 Set the same variable, or run `npx next telemetry disable`, for local development.

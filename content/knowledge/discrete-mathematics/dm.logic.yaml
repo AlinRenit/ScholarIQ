@@ -1,0 +1,160 @@
+topic: dm.logic
+version: "2026.10.1"
+concepts:
+  - slug: dm.propositional-logic
+    name: Propositional logic
+    aliases: [propositions, logical connectives, truth table, truth tables, conjunction, disjunction, negation]
+    difficulty: 1
+    further_reading: [rosen]
+    definition: >-
+      Propositional logic studies statements that are either true or false,
+      combined with connectives: negation (¬), conjunction (∧, and),
+      disjunction (∨, or), implication (→) and biconditional (↔). A truth table
+      lists a formula's value for every assignment of truth values.
+    attributes:
+      negation: ¬p is true when p is false
+      conjunction: p ∧ q is true only when both are true
+      disjunction: p ∨ q is false only when both are false
+      rows_in_truth_table: 2^n for n variables
+      tautology: true in every row
+      contradiction: false in every row
+    documents:
+      - kind: explanation
+        title: Building a truth table
+        depth: 1
+        body: |-
+          With n variables there are 2^n combinations of truth values, so a
+          truth table has 2^n rows. List them systematically, then compute
+          each sub-formula column by column until you reach the whole formula.
+          A formula true in every row is a tautology, such as p ∨ ¬p; one false
+          in every row is a contradiction, such as p ∧ ¬p.
+    questions:
+      - slug: q.dm.logic.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: How many rows does a truth table for a formula with 4 variables have?
+        options: ["4", "8", "16", "32"]
+        answer: {option_index: 2}
+        explanation: Each variable doubles the number of combinations, 2^4 = 16.
+      - slug: q.dm.logic.2
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which formula is a tautology?
+        options: [p ∧ ¬p, p ∨ ¬p, p → ¬p, p ↔ ¬p]
+        answer: {option_index: 1}
+        explanation: Either p or its negation is true in every case.
+
+  - slug: dm.implication
+    name: Conditional statement
+    aliases: [implication, conditional, if then, converse, contrapositive, inverse, material implication]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      The conditional p → q ("if p then q") is false only when p is true and q
+      is false. It is logically equivalent to its contrapositive ¬q → ¬p, but
+      not to its converse q → p or its inverse ¬p → ¬q.
+    attributes:
+      false_only_when: p true and q false
+      equivalent_form: ¬p ∨ q
+      contrapositive: ¬q → ¬p, equivalent to p → q
+      converse: q → p, not equivalent
+      inverse: ¬p → ¬q, not equivalent (it is equivalent to the converse)
+    requires: [dm.propositional-logic]
+    documents:
+      - kind: misconception
+        title: A false premise makes the implication true
+        depth: 1
+        body: |-
+          "If it rains, the ground is wet" is only broken by rain with a dry
+          ground. When it does not rain, the statement makes no claim, so it
+          counts as true whatever the ground is like. This is why p → q is true
+          whenever p is false (it is "vacuously true").
+      - kind: example
+        title: Converse and contrapositive
+        depth: 2
+        body: |-
+          Statement: if n is divisible by 4, then n is even. (True.)
+          Contrapositive: if n is not even, then n is not divisible by 4.
+          (True, and always has the same truth value.)
+          Converse: if n is even, then n is divisible by 4. (False: n = 6.)
+    questions:
+      - slug: q.dm.logic.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: When is p → q false?
+        options: [p false and q true, p true and q false, Both false, Both true]
+        answer: {option_index: 1}
+        explanation: The only way to break "if p then q" is for p to hold while q fails.
+      - slug: q.dm.logic.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which statement is logically equivalent to p → q?
+        options: [q → p, ¬p → ¬q, ¬q → ¬p, p ∧ q]
+        answer: {option_index: 2}
+        explanation: The contrapositive always has the same truth value as the original.
+
+  - slug: dm.de-morgan
+    name: De Morgan's laws
+    aliases: [De Morgan, de morgans laws, logical equivalences, negating and and or]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      De Morgan's laws state that ¬(p ∧ q) ≡ ¬p ∨ ¬q and ¬(p ∨ q) ≡ ¬p ∧ ¬q:
+      negating a conjunction gives a disjunction of negations, and vice versa.
+    attributes:
+      law_1: ¬(p ∧ q) ≡ ¬p ∨ ¬q
+      law_2: ¬(p ∨ q) ≡ ¬p ∧ ¬q
+      sets_version: complement of A ∩ B is A' ∪ B'; complement of A ∪ B is A' ∩ B'
+    requires: [dm.propositional-logic]
+    related: [dm.sets]
+    documents:
+      - kind: example
+        title: Negating a condition in code
+        depth: 1
+        body: |-
+          The loop while not (done or failed) runs while ¬(done ∨ failed),
+          which by De Morgan is ¬done ∧ ¬failed: while not done and not failed.
+    questions:
+      - slug: q.dm.logic.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: By De Morgan's laws, ¬(p ∨ q) is equivalent to…
+        options: [¬p ∨ ¬q, ¬p ∧ ¬q, p ∧ q, ¬p ∨ q]
+        answer: {option_index: 1}
+        explanation: Negating an "or" gives an "and" of the negations.
+
+  - slug: dm.predicate-logic
+    name: Predicate logic and quantifiers
+    aliases: [predicate logic, first-order logic, quantifiers, universal quantifier, existential quantifier, for all, there exists]
+    difficulty: 3
+    further_reading: [rosen]
+    definition: >-
+      Predicate logic extends propositional logic with predicates such as
+      P(x) and the quantifiers ∀ ("for all") and ∃ ("there exists").
+      Negation swaps them: ¬∀x P(x) ≡ ∃x ¬P(x) and ¬∃x P(x) ≡ ∀x ¬P(x).
+    attributes:
+      universal: ∀x P(x) - P holds for every x in the domain
+      existential: ∃x P(x) - P holds for at least one x
+      negation_rules: ¬∀x P(x) ≡ ∃x ¬P(x); ¬∃x P(x) ≡ ∀x ¬P(x)
+      order_matters: ∀x ∃y and ∃y ∀x can differ
+    requires: [dm.propositional-logic]
+    documents:
+      - kind: example
+        title: Order of quantifiers
+        depth: 3
+        body: |-
+          Over the integers, ∀x ∃y (y > x) says every integer has a larger one:
+          true. ∃y ∀x (y > x) says one integer is larger than all integers:
+          false. Swapping the quantifiers changed the meaning.
+    questions:
+      - slug: q.dm.logic.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the negation of "every student passed"?
+        options:
+          - Every student failed
+          - No student passed
+          - Some student did not pass
+          - Some student passed
+        answer: {option_index: 2}
+        explanation: ¬∀x Passed(x) ≡ ∃x ¬Passed(x).

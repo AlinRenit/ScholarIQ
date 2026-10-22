@@ -2,7 +2,7 @@
 
 ScholarIQ analyses a student's marksheets, works out which subjects and topics
 need attention, and (in later milestones) tutors them with explanations and
-quizzes from a curated local knowledge base.
+quizzes from a curated local knowledge base, which is built and searchable today.
 
 **It does not use AI models.** No OpenAI, Anthropic, Gemini, Hugging Face,
 embedding APIs or local LLMs. Analysis and answers come from deterministic
@@ -18,7 +18,7 @@ Tesseract OCR engine, which runs locally to read scanned marksheets. See
 | 1. Foundation: skeleton, schema, config, health, Docker, compliance tests | **Done** |
 | 2. Marksheet ingestion and review | **Done** |
 | 3. Analytics, topic evidence, dashboard | **Done** |
-| 4. Knowledge base and BM25 retrieval | Not started |
+| 4. Knowledge base and BM25 retrieval | **Done** |
 | 5. Question answering | Not started |
 | 6. Diagnostics and study plans | Not started |
 | 7. Hardening | Not started |
@@ -43,6 +43,15 @@ What works today:
   evidence) from topic-level evidence only. A subject mark counts as one weak
   observation; at least five topic-level observations are needed. Students can
   add topic test results and self-assessments, and remove what they entered.
+* A Computer Science knowledge base (`content/knowledge/`): 151 concepts,
+  201 explanations and worked examples, 242 practice questions and 205
+  prerequisite and related-concept links across all 40 topics, each citing
+  textbooks or RFCs for further reading. None of it has been reviewed by a
+  person yet, and the app labels it that way everywhere.
+* Knowledge Base pages with coverage per topic, concept pages, and search that
+  shows its whole score: BM25 contribution per word plus a bonus when the query
+  names a concept. Retrieval quality is measured in
+  [docs/eval/retrieval.md](docs/eval/retrieval.md).
 
 Sections without a backend yet say so; none show sample data. The roadmap and design are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -140,11 +149,47 @@ not converted without a confirmed scale (and a scale that lacks a grade is
 refused); theory and practical columns become separate components; repeat
 sittings become new attempts.
 
+## Knowledge-base content and review
+
+Content is YAML under `content/knowledge/<subject>/<topic>.yaml`, validated on
+load (unknown references, duplicate slugs, prerequisite cycles and malformed
+questions are errors) and synced into the database by
+`python -m scholariq.curriculum.sync`, which also runs on container start.
+Removed entries are retired, not deleted.
+
+Each concept carries a review block. To sign one off after checking it:
+
+```bash
+cd backend
+python -m scholariq.knowledge.review                  # list concepts and status
+python -m scholariq.knowledge.review db.3nf --by "Your Name"   # prints a review block
+```
+
+Paste the printed block into the concept. It includes a hash of the concept's
+content, so any later edit returns the concept to "not yet reviewed" until it
+is checked again.
+
+`SCHOLARIQ_ALLOW_UNREVIEWED_CONTENT` (default `true`) decides whether search,
+the tutor and quizzes may use unreviewed concepts. When `true`, every answer
+built from one is labelled "not yet reviewed by a person". Set it to `false`
+to use reviewed content only.
+
+To re-measure search after changing content or ranking:
+
+```bash
+cd backend && python -m scholariq.knowledge.evaluate --out ../docs/eval/retrieval.md
+```
+
 ## Known limitations
 
-* The knowledge base and tutor are not built yet (Milestones 4 and 5), and
-  diagnostic quizzes arrive in Milestone 6. Until then topic-level evidence
-  comes only from topic test results the student enters.
+* The tutor is not built yet (Milestone 5), and diagnostic quizzes arrive in
+  Milestone 6. Until then topic-level evidence comes only from topic test
+  results the student enters.
+* No knowledge-base entry has been reviewed by a person yet. The seed content
+  was written for ScholarIQ from standard textbook material.
+* Search is lexical. It handles names, aliases, British and American spellings
+  and word endings, but not misspellings, and some queries about unrelated
+  subjects still return loosely related concepts (2 of 6 in the evaluation).
 * Custom subjects are shared rows. A student cannot change the topics of a custom
   subject that another profile also uses.
 * Profiles have no password. A profile is tied to the browser that created it,

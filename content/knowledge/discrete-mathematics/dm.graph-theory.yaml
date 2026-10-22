@@ -1,0 +1,170 @@
+topic: dm.graph-theory
+version: "2026.10.1"
+concepts:
+  - slug: dm.graph-basics
+    name: Degrees and the handshaking lemma
+    aliases: [handshaking lemma, degree sum formula, vertex degree, simple graph, complete graph]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      In any undirected graph the degrees of all vertices add up to twice the
+      number of edges, because each edge contributes one to the degree of each
+      of its two endpoints. So every graph has an even number of odd-degree
+      vertices.
+    attributes:
+      handshaking_lemma: sum of degrees = 2|E|
+      corollary: the number of odd-degree vertices is even
+      complete_graph_edges: K_n has n(n − 1)/2 edges
+    related: [ds.graph]
+    documents:
+      - kind: example
+        title: Using the handshaking lemma
+        depth: 1
+        body: |-
+          Can a graph have degrees 3, 3, 3, 2, 2? The sum is 13, which is odd,
+          but it must equal 2|E|. So no such graph exists.
+          A graph with 10 vertices each of degree 4 has 10 × 4 / 2 = 20 edges.
+    questions:
+      - slug: q.dm.graph-theory.1
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: A graph has 8 vertices, each of degree 3. How many edges does it have?
+        options: ["8", "11", "12", "24"]
+        answer: {option_index: 2}
+        explanation: The degree sum is 24, which equals 2|E|, so |E| = 12.
+      - slug: q.dm.graph-theory.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which degree sequence is impossible for a simple undirected graph?
+        options: ["2, 2, 2", "1, 1, 2, 2", "3, 3, 2, 1", "1, 1"]
+        answer: {option_index: 2}
+        explanation: Its sum is 9, which is odd, but degree sums must be even.
+
+  - slug: dm.euler-hamilton
+    name: Euler and Hamiltonian paths
+    aliases: [Euler path, Euler circuit, Eulerian, Hamiltonian path, Hamiltonian cycle, Konigsberg bridges]
+    difficulty: 3
+    further_reading: [rosen]
+    definition: >-
+      An Euler circuit uses every edge exactly once and returns to its start;
+      a connected graph has one exactly when every vertex has even degree. A
+      Hamiltonian cycle visits every vertex exactly once; no simple test is
+      known, and deciding whether one exists is NP-complete.
+    attributes:
+      euler_circuit: connected and every vertex has even degree
+      euler_path: connected and exactly 0 or 2 vertices of odd degree (the path runs between them)
+      hamiltonian_cycle: visits each vertex once; deciding existence is NP-complete
+    requires: [dm.graph-basics]
+    related: [algo.np-complete]
+    documents:
+      - kind: explanation
+        title: Edges versus vertices
+        depth: 2
+        body: |-
+          Euler asks about edges: walk every bridge once. Each time the walk
+          passes through a vertex it uses two edges, so all degrees must be
+          even for a closed walk. The Königsberg bridges had four land masses
+          of odd degree, so no such walk exists.
+
+          Hamilton asks about vertices: visit every place once. Despite the
+          similar wording, it is much harder and has no degree-based test.
+    questions:
+      - slug: q.dm.graph-theory.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: A connected graph has an Euler circuit if and only if…
+        options:
+          - every vertex has even degree
+          - exactly two vertices have odd degree
+          - it has a Hamiltonian cycle
+          - it is a complete graph
+        answer: {option_index: 0}
+        explanation: Every visit to a vertex enters and leaves on different edges, pairing them up.
+      - slug: q.dm.graph-theory.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: A connected graph has exactly two vertices of odd degree. What does it have?
+        options:
+          - An Euler circuit
+          - An Euler path between the two odd vertices, but no Euler circuit
+          - A Hamiltonian cycle
+          - Nothing can be said
+        answer: {option_index: 1}
+        explanation: The path must start at one odd vertex and end at the other.
+
+  - slug: dm.trees-graph-theory
+    name: Trees in graph theory
+    aliases: [tree graph, spanning tree, forest, acyclic connected graph, properties of trees]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      In graph theory a tree is a connected graph with no cycles. A tree with n
+      vertices has exactly n − 1 edges, and there is exactly one path between
+      any two vertices.
+    attributes:
+      edges: n − 1 for n vertices
+      unique_path: exactly one simple path between any two vertices
+      adding_an_edge: creates exactly one cycle
+      removing_an_edge: disconnects the tree
+      forest: a graph whose components are trees
+    requires: [dm.graph-basics]
+    related: [ds.binary-tree, algo.minimum-spanning-tree]
+    documents:
+      - kind: explanation
+        title: Equivalent definitions of a tree
+        depth: 2
+        body: |-
+          For a graph with n vertices, these are equivalent: it is connected
+          and acyclic; it is connected with n − 1 edges; it is acyclic with
+          n − 1 edges; there is a unique path between every pair of vertices.
+          Any two of "connected", "acyclic" and "n − 1 edges" imply the third.
+    questions:
+      - slug: q.dm.graph-theory.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: How many edges does a tree with 15 vertices have?
+        options: ["14", "15", "16", "30"]
+        answer: {option_index: 0}
+        explanation: Every tree with n vertices has n − 1 edges.
+
+  - slug: dm.graph-coloring
+    name: Graph colouring
+    aliases: [graph coloring, chromatic number, vertex colouring, bipartite graph, planar graph]
+    difficulty: 3
+    further_reading: [rosen]
+    definition: >-
+      A proper vertex colouring gives adjacent vertices different colours. The
+      chromatic number χ(G) is the fewest colours needed. A graph is
+      2-colourable exactly when it is bipartite, which is when it has no
+      odd-length cycle.
+    attributes:
+      chromatic_number: minimum colours for a proper colouring
+      bipartite: χ ≤ 2; no odd cycles
+      complete_graph: χ(K_n) = n
+      planar_graphs: χ ≤ 4 (four colour theorem)
+      uses: exam timetabling, register allocation, frequency assignment
+    requires: [dm.graph-basics]
+    documents:
+      - kind: example
+        title: Exam timetabling as colouring
+        depth: 2
+        body: |-
+          Make each exam a vertex and join two exams if some student takes
+          both. A proper colouring assigns time slots so no student has two
+          exams at once, and the chromatic number is the fewest slots needed.
+    questions:
+      - slug: q.dm.graph-theory.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the chromatic number of a cycle with 5 vertices?
+        options: ["2", "3", "4", "5"]
+        answer: {option_index: 1}
+        explanation: An odd cycle is not bipartite, so 2 colours fail, but 3 suffice.
+      - slug: q.dm.graph-theory.7
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the chromatic number of the complete graph K_6?
+        options: ["2", "3", "5", "6"]
+        answer: {option_index: 3}
+        explanation: Every pair of vertices is adjacent, so all 6 need different colours.

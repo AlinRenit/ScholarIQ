@@ -1,0 +1,280 @@
+topic: ds.sorting-searching
+version: "2026.10.1"
+concepts:
+  - slug: ds.linear-search
+    name: Linear search
+    aliases: [sequential search]
+    difficulty: 1
+    further_reading: [sedgewick-wayne]
+    definition: >-
+      Linear search checks each element in turn until it finds the target or
+      reaches the end. It works on any list, sorted or not, and takes O(n) time.
+    attributes:
+      time: O(n) worst and average, O(1) best
+      requires_sorted_input: "no"
+    contrasts: [ds.binary-search]
+    documents:
+      - kind: explanation
+        title: When linear search is the right tool
+        depth: 1
+        body: |-
+          Linear search needs no preparation, so it suits small or unsorted
+          collections and one-off searches. If you will search the same large
+          collection many times, sorting it once and using binary search, or
+          building a hash table, pays off.
+    questions:
+      - slug: q.ds.sorting-searching.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What is the worst-case number of comparisons for linear search on n elements?
+        options: ["1", log2 n, n, n²]
+        answer: {option_index: 2}
+        explanation: The target may be last or absent, so every element is checked.
+
+  - slug: ds.binary-search
+    name: Binary search
+    aliases: [binary chop, half-interval search, bisection search]
+    difficulty: 2
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      Binary search finds a target in a sorted array by comparing it with the
+      middle element and discarding the half that cannot contain it, taking
+      O(log n) time.
+    attributes:
+      time: O(log n)
+      requires_sorted_input: "yes"
+      requires_random_access: yes, so it suits arrays rather than linked lists
+    requires: [ds.array]
+    contrasts: [ds.linear-search]
+    related: [algo.divide-and-conquer]
+    documents:
+      - kind: procedure
+        title: Binary search on a sorted array
+        depth: 1
+        body: Find target t in sorted array a[0..n−1].
+        steps:
+          - Set low = 0 and high = n − 1.
+          - While low ≤ high, set mid = low + (high − low) / 2 (integer division).
+          - If a[mid] equals t, return mid.
+          - If a[mid] < t, set low = mid + 1; otherwise set high = mid − 1.
+          - If the loop ends, t is not present.
+      - kind: example
+        title: Searching for 23
+        depth: 1
+        body: |-
+          a = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target 23.
+          low 0, high 9, mid 4: a[4] = 16 < 23, so low = 5.
+          low 5, high 9, mid 7: a[7] = 56 > 23, so high = 6.
+          low 5, high 6, mid 5: a[5] = 23. Found at index 5 after 3 comparisons.
+      - kind: misconception
+        title: Binary search needs sorted input
+        depth: 1
+        body: |-
+          On unsorted data, discarding half the array can throw away the target.
+          Sorting first costs O(n log n), which only pays off if you search many
+          times.
+    questions:
+      - slug: q.ds.sorting-searching.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          About how many comparisons does binary search need in the worst case on
+          a sorted array of 1,000,000 elements?
+        options: ["10", "20", "1,000", "500,000"]
+        answer: {option_index: 1}
+        explanation: Each step halves the range, and 2^20 ≈ 1,000,000.
+      - slug: q.ds.sorting-searching.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What must be true of an array before binary search can be used on it?
+        options: [It must be sorted, It must have no duplicates, Its length must be a power of 2, It must be stored as a linked list]
+        answer: {option_index: 0}
+        explanation: The discard step relies on everything left of mid being smaller and everything right being larger.
+
+  - slug: ds.insertion-sort
+    name: Insertion sort
+    aliases: [insertion sorting]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      Insertion sort builds a sorted prefix one element at a time, inserting
+      each new element into its place among the already sorted ones. It is
+      O(n²) in the worst case but O(n) on input that is already sorted.
+    attributes:
+      worst_case: O(n²)
+      best_case: O(n), on sorted input
+      extra_space: O(1)
+      stable: "yes"
+    related: [ds.merge-sort]
+    documents:
+      - kind: explanation
+        title: How insertion sort works
+        depth: 1
+        body: |-
+          For i from 1 to n − 1, take key = a[i] and shift larger elements of
+          a[0..i−1] one place right until the gap is where key belongs. Like
+          sorting a hand of cards. On nearly sorted data very few shifts happen,
+          which is why many library sorts switch to insertion sort for small or
+          almost-sorted ranges.
+    questions:
+      - slug: q.ds.sorting-searching.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the running time of insertion sort on an array that is already sorted?
+        options: [O(1), O(n), O(n log n), O(n²)]
+        answer: {option_index: 1}
+        explanation: Each new element is compared once with its left neighbour and stays put.
+
+  - slug: ds.merge-sort
+    name: Merge sort
+    aliases: [mergesort, merge sorting]
+    difficulty: 3
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      Merge sort splits the array in half, sorts each half recursively, and
+      merges the two sorted halves. It always takes O(n log n) time and is
+      stable, but the usual array version needs O(n) extra space.
+    attributes:
+      time: O(n log n) in every case
+      extra_space: O(n) for arrays
+      stable: "yes"
+      recurrence: T(n) = 2T(n/2) + Θ(n)
+    related: [algo.divide-and-conquer, ds.quicksort]
+    contrasts: [ds.quicksort]
+    documents:
+      - kind: procedure
+        title: Merging two sorted halves
+        depth: 2
+        body: Combine sorted lists L and R into one sorted list.
+        steps:
+          - Keep an index into L and an index into R, both starting at 0.
+          - Compare the current elements; copy the smaller one to the output and advance its index. On a tie, take from L to keep the sort stable.
+          - When one list runs out, copy the rest of the other list.
+      - kind: explanation
+        title: Why merge sort is O(n log n)
+        depth: 2
+        body: |-
+          The array is halved until pieces have size 1, which takes log2 n
+          levels. At each level the merges together touch every element once,
+          O(n) work. So the total is O(n log n), whatever the input order.
+    questions:
+      - slug: q.ds.sorting-searching.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the worst-case time complexity of merge sort?
+        options: [O(n), O(n log n), O(n²), O(log n)]
+        answer: {option_index: 1}
+        explanation: There are about log2 n levels of halving and each level does O(n) merging work.
+
+  - slug: ds.quicksort
+    name: Quicksort
+    aliases: [quick sort, partition exchange sort]
+    difficulty: 3
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      Quicksort picks a pivot, partitions the array so smaller elements come
+      before it and larger ones after, then sorts the two parts recursively. It
+      averages O(n log n) and sorts in place, but bad pivots give O(n²).
+    attributes:
+      average_time: O(n log n)
+      worst_time: O(n²), e.g. always picking the smallest element as pivot
+      extra_space: O(log n) stack on average
+      stable: no (usual in-place versions)
+    related: [algo.divide-and-conquer]
+    contrasts: [ds.merge-sort]
+    documents:
+      - kind: explanation
+        title: Partitioning and the pivot
+        depth: 2
+        body: |-
+          After partitioning, the pivot sits in its final sorted position and
+          never moves again. If pivots split the array roughly in half, there
+          are O(log n) levels of O(n) work each.
+
+          If the pivot is always the smallest or largest element, for example
+          choosing the first element of an already sorted array, one side is
+          empty and the recursion has n levels: O(n²). Choosing a random pivot
+          or the median of three makes this very unlikely.
+    questions:
+      - slug: q.ds.sorting-searching.6
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Quicksort always uses the first element as the pivot. What is its
+          running time on an array that is already sorted?
+        options: [O(n), O(n log n), O(n²), O(log n)]
+        answer: {option_index: 2}
+        explanation: >-
+          Each partition puts every other element on one side, so the recursion
+          depth is n and the work is n + (n − 1) + … + 1 = O(n²).
+
+  - slug: ds.sort-stability
+    name: Stable sorting
+    aliases: [stable sort, sort stability, stability of sorting]
+    difficulty: 2
+    further_reading: [sedgewick-wayne]
+    definition: >-
+      A sorting algorithm is stable if elements with equal keys keep their
+      original relative order. Merge sort and insertion sort are stable; the
+      usual in-place quicksort and heapsort are not.
+    attributes:
+      stable_examples: merge sort, insertion sort, bubble sort, counting sort
+      unstable_examples: quicksort, heapsort, selection sort
+    related: [ds.merge-sort, ds.quicksort]
+    documents:
+      - kind: example
+        title: Why stability matters
+        depth: 1
+        body: |-
+          Students are already sorted by name. Sorting them by grade with a
+          stable sort keeps students with the same grade in name order, so you
+          get "by grade, then by name" for free. An unstable sort may shuffle
+          students within each grade.
+    questions:
+      - slug: q.ds.sorting-searching.7
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which of these sorting algorithms is stable?
+        options: [Heapsort, Merge sort, Selection sort, In-place quicksort]
+        answer: {option_index: 1}
+        explanation: Merge sort takes from the left half on ties, so equal keys keep their order.
+
+  - slug: ds.comparison-sort-lower-bound
+    name: Lower bound for comparison sorting
+    aliases: [comparison sort lower bound, n log n lower bound, decision tree lower bound]
+    difficulty: 4
+    further_reading: [clrs]
+    definition: >-
+      Any sorting algorithm that only compares pairs of elements needs
+      Ω(n log n) comparisons in the worst case, because it must distinguish all
+      n! possible orderings and each comparison has two outcomes.
+    attributes:
+      bound: Ω(n log n) comparisons
+      escape: non-comparison sorts such as counting sort and radix sort can be faster for suitable keys
+    requires: [ds.complexity-big-o]
+    documents:
+      - kind: explanation
+        title: The decision-tree argument
+        depth: 3
+        body: |-
+          Model a comparison sort as a binary decision tree: each internal node
+          is a comparison and each leaf is one output ordering. All n!
+          orderings must appear as leaves, and a binary tree of height h has at
+          most 2^h leaves, so 2^h ≥ n!, giving h ≥ log2(n!) = Θ(n log n). The
+          height is the worst-case number of comparisons.
+
+          Counting sort and radix sort avoid the bound because they inspect
+          key values directly instead of only comparing them.
+    questions:
+      - slug: q.ds.sorting-searching.8
+        kind: multiple_choice
+        difficulty: 4
+        prompt: Why can counting sort beat the Ω(n log n) lower bound?
+        options:
+          - It uses a better pivot
+          - It does not sort by comparing elements with each other
+          - It only works on already sorted input
+          - The lower bound only applies to linked lists
+        answer: {option_index: 1}
+        explanation: The bound applies only to algorithms that learn about the order solely through comparisons.

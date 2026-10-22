@@ -1,0 +1,257 @@
+topic: ds.trees-bst
+version: "2026.10.1"
+concepts:
+  - slug: ds.binary-tree
+    name: Binary tree
+    aliases: [binary trees, tree data structure]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      A binary tree is a hierarchy of nodes in which each node has at most two
+      children, called left and right. The top node is the root and nodes with
+      no children are leaves.
+    attributes:
+      max_children: "2"
+      height: number of edges on the longest root-to-leaf path
+      max_nodes_of_height_h: 2^(h+1) − 1
+      min_height_with_n_nodes: floor(log2 n)
+    documents:
+      - kind: explanation
+        title: Tree vocabulary
+        depth: 1
+        body: |-
+          The root has no parent; every other node has exactly one. A node's
+          depth is the number of edges from the root to it, and the tree's
+          height is the greatest depth of any leaf. A full binary tree has
+          every node with 0 or 2 children. A complete binary tree fills every
+          level except possibly the last, which is filled from the left.
+
+          A binary tree of height h has at most 2^(h+1) − 1 nodes, so n nodes
+          need height at least floor(log2 n). This is why balanced trees give
+          logarithmic operations.
+    questions:
+      - slug: q.ds.trees-bst.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the maximum number of nodes in a binary tree of height 3 (height counted in edges)?
+        options: ["7", "8", "15", "16"]
+        answer: {option_index: 2}
+        explanation: 2^(3+1) − 1 = 15 (levels of 1, 2, 4 and 8 nodes).
+
+  - slug: ds.tree-traversal
+    name: Tree traversal
+    aliases: [inorder traversal, preorder traversal, postorder traversal, level order traversal,
+              in-order, pre-order, post-order]
+    difficulty: 2
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A traversal visits every node of a tree once. Depth-first orders are
+      preorder (node, left, right), inorder (left, node, right) and postorder
+      (left, right, node); level order visits nodes level by level using a
+      queue.
+    attributes:
+      preorder: node, left subtree, right subtree
+      inorder: left subtree, node, right subtree
+      postorder: left subtree, right subtree, node
+      level_order: breadth-first, top level first, using a queue
+      time: O(n) for every order
+    requires: [ds.binary-tree]
+    related: [ds.queue, ds.stack]
+    documents:
+      - kind: example
+        title: The three depth-first orders on one tree
+        depth: 1
+        body: |-
+          Take the tree with root A, whose left child B has children D and E,
+          and whose right child is C.
+
+          Preorder (node, left, right): A B D E C
+          Inorder (left, node, right): D B E A C
+          Postorder (left, right, node): D E B C A
+          Level order: A B C D E
+      - kind: misconception
+        title: Inorder is sorted only for search trees
+        depth: 2
+        body: |-
+          Inorder traversal lists keys in sorted order only when the tree is a
+          binary search tree. For an arbitrary binary tree it is just one fixed
+          visiting order.
+    questions:
+      - slug: q.ds.trees-bst.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          A tree has root 1; 1's left child is 2 and right child is 3; 2's left
+          child is 4. What is the postorder traversal?
+        options: ["1 2 4 3", "4 2 1 3", "4 2 3 1", "1 2 3 4"]
+        answer: {option_index: 2}
+        explanation: >-
+          Postorder visits the left subtree (4, then 2), the right subtree (3),
+          then the root (1).
+      - slug: q.ds.trees-bst.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which data structure does a level-order traversal use?
+        options: [Stack, Queue, Hash table, Heap]
+        answer: {option_index: 1}
+        explanation: >-
+          Nodes are visited in the order they are discovered, level by level,
+          which is first in, first out.
+
+  - slug: ds.bst
+    name: Binary search tree
+    aliases: [BST, binary search trees, ordered binary tree]
+    difficulty: 3
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A binary search tree is a binary tree in which every key in a node's left
+      subtree is smaller than the node's key and every key in its right subtree
+      is larger, so search can discard one subtree at each step.
+    attributes:
+      search_insert_delete: O(h), where h is the height
+      balanced_height: O(log n)
+      worst_case_height: O(n), e.g. after inserting sorted keys
+      inorder_traversal: keys in sorted order
+    requires: [ds.binary-tree]
+    related: [ds.binary-search, ds.balanced-bst]
+    documents:
+      - kind: procedure
+        title: Searching a binary search tree
+        depth: 1
+        body: Find key k starting from the root.
+        steps:
+          - Start at the root.
+          - If the current node is null, k is not in the tree.
+          - If k equals the node's key, return the node.
+          - If k is smaller, move to the left child; otherwise move to the right child.
+          - Repeat from the second step.
+      - kind: explanation
+        title: Why a BST can degrade to a list
+        depth: 2
+        body: |-
+          Every operation follows one root-to-leaf path, so it costs O(h). With
+          random insertions h stays near log n. But inserting keys in sorted
+          order (1, 2, 3, …) makes every new key the right child of the last,
+          producing a chain of height n − 1, and operations become O(n).
+          Self-balancing trees such as AVL and red-black trees prevent this.
+      - kind: procedure
+        title: Deleting a node from a BST
+        depth: 2
+        body: There are three cases, depending on how many children the node has.
+        steps:
+          - No children - remove the node.
+          - One child - replace the node with its child.
+          - Two children - find the inorder successor (smallest key in the right subtree), copy its key into the node, then delete the successor, which has at most one child.
+    questions:
+      - slug: q.ds.trees-bst.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which traversal of a binary search tree lists its keys in ascending order?
+        options: [Preorder, Inorder, Postorder, Level order]
+        answer: {option_index: 1}
+        explanation: >-
+          Inorder visits the left subtree (smaller keys), then the node, then
+          the right subtree (larger keys).
+      - slug: q.ds.trees-bst.5
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Keys 10, 20, 30, 40, 50 are inserted in that order into an empty
+          (non-balancing) BST. What is the height of the result, in edges?
+        options: ["2", "3", "4", "5"]
+        answer: {option_index: 2}
+        explanation: >-
+          Each key becomes the right child of the previous one, forming a chain
+          of 5 nodes with 4 edges.
+      - slug: q.ds.trees-bst.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the worst-case time to search a non-balanced BST with n keys?
+        options: [O(1), O(log n), O(n), O(n log n)]
+        answer: {option_index: 2}
+        explanation: The tree can degenerate into a chain of height n − 1.
+
+  - slug: ds.balanced-bst
+    name: Self-balancing binary search tree
+    aliases: [AVL tree, red-black tree, balanced BST, height-balanced tree]
+    difficulty: 4
+    further_reading: [clrs]
+    definition: >-
+      A self-balancing binary search tree, such as an AVL tree or a red-black
+      tree, restructures itself with rotations after insertions and deletions
+      so that its height stays O(log n).
+    attributes:
+      height: O(log n) guaranteed
+      search_insert_delete: O(log n) worst case
+      avl_rule: heights of the two subtrees of every node differ by at most 1
+      rebalancing: rotations
+    requires: [ds.bst]
+    documents:
+      - kind: explanation
+        title: How balancing works
+        depth: 3
+        body: |-
+          An AVL tree stores a balance factor (left height minus right height)
+          at each node and requires it to be −1, 0 or 1. After an insertion,
+          the first node on the path back to the root whose balance factor
+          becomes ±2 is fixed with a single or double rotation. A rotation
+          changes a few pointers in O(1) and keeps the BST ordering.
+
+          Red-black trees colour nodes and enforce rules that keep the longest
+          path at most twice the shortest. They rebalance less strictly than
+          AVL trees, which makes insertion and deletion slightly cheaper.
+    questions:
+      - slug: q.ds.trees-bst.7
+        kind: multiple_choice
+        difficulty: 3
+        prompt: In an AVL tree, what is the allowed difference between the heights of a node's two subtrees?
+        options: [At most 0, At most 1, At most 2, Any, as long as keys are ordered]
+        answer: {option_index: 1}
+        explanation: Every node's balance factor must be −1, 0 or 1.
+
+  - slug: ds.heap
+    name: Binary heap
+    aliases: [heap, min-heap, max-heap, min heap, max heap, heaps]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      A binary heap is a complete binary tree stored in an array where every
+      parent's key is no larger than its children's (min-heap) or no smaller
+      (max-heap), so the minimum or maximum is always at the root.
+    attributes:
+      shape: complete binary tree stored in an array
+      children_of_index_i: 2i + 1 and 2i + 2 (0-based)
+      parent_of_index_i: floor((i − 1) / 2) (0-based)
+      insert: O(log n)
+      extract_root: O(log n)
+      build_heap: O(n)
+    requires: [ds.binary-tree]
+    related: [ds.priority-queue]
+    contrasts: [ds.bst]
+    documents:
+      - kind: explanation
+        title: Heap order and the array layout
+        depth: 2
+        body: |-
+          Because a heap is complete, it fits in an array with no gaps: with
+          0-based indexing the children of index i are at 2i + 1 and 2i + 2 and
+          its parent is at floor((i − 1)/2).
+
+          Insert places the new key at the end and sifts it up while it beats
+          its parent. Extracting the root moves the last element to the root and
+          sifts it down, swapping with the better child. Both follow one path of
+          length O(log n).
+
+          A heap is only partially ordered: siblings and cousins are in no
+          particular order, so searching for an arbitrary key is O(n), unlike a
+          balanced BST.
+    questions:
+      - slug: q.ds.trees-bst.8
+        kind: multiple_choice
+        difficulty: 2
+        prompt: In a 0-based array heap, where are the children of the element at index 3?
+        options: [Indices 6 and 7, Indices 7 and 8, Indices 4 and 5, Indices 1 and 2]
+        answer: {option_index: 1}
+        explanation: The children are at 2 × 3 + 1 = 7 and 2 × 3 + 2 = 8.

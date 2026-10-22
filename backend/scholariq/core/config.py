@@ -63,6 +63,9 @@ class Settings(BaseSettings):
 
     # Refuse to start when AI-provider credentials are present in the environment.
     strict_ai_env_check: bool = True
+    # Whether knowledge-base entries that no person has reviewed yet may be used
+    # by search, the tutor and quizzes. They are always labelled as unreviewed.
+    allow_unreviewed_content: bool = True
 
     log_level: str = "INFO"
 

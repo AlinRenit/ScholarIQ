@@ -17,6 +17,8 @@ from scholariq.compliance.policy import PROHIBITED_ENV_VARS
 from scholariq.core.config import Settings, get_settings
 from scholariq.curriculum.sync import load_files, sync_curricula
 from scholariq.db.session import build_engine, get_engine
+from scholariq.knowledge.loader import KnowledgeContent, load_content
+from scholariq.knowledge.sync import sync_knowledge
 from scholariq.main import create_app
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -106,6 +108,19 @@ def curriculum(settings: Settings, engine: Engine) -> None:
     """Load the seed curriculum from the (copied) content directory."""
     with Session(engine) as session:
         sync_curricula(session, load_files(settings.content_dir))
+
+
+@pytest.fixture(scope="session")
+def knowledge_content() -> KnowledgeContent:
+    """The repository's knowledge files, parsed and validated once per run."""
+    return load_content(REPO_ROOT / "content")
+
+
+@pytest.fixture
+def knowledge(curriculum: None, engine: Engine, knowledge_content: KnowledgeContent) -> None:
+    """Load the seed knowledge base (after the curriculum it refers to)."""
+    with Session(engine) as session:
+        sync_knowledge(session, knowledge_content)
 
 
 @pytest.fixture

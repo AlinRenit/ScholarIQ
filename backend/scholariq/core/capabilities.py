@@ -33,7 +33,7 @@ CAPABILITIES: list[Capability] = [
     _c("foundation", "Health checks, configuration and database schema", 1, _A),
     _c("marksheet_import", "Marksheet import (PDF, image, CSV, XLSX) with review", 2, _A),
     _c("analytics", "Subject analytics and topic evidence classification", 3, _A),
-    _c("knowledge_base", "Computer Science knowledge base and lexical retrieval", 4, _P),
+    _c("knowledge_base", "Computer Science knowledge base and lexical retrieval", 4, _A),
     _c("tutor", "Question understanding and answer handlers", 5, _P),
     _c("diagnostics", "Diagnostic quizzes and study plans", 6, _P),
     _c("hardening", "Security, offline and accessibility hardening", 7, _P),

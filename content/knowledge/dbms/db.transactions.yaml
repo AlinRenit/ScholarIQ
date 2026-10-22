@@ -1,0 +1,150 @@
+topic: db.transactions
+version: "2026.10.1"
+concepts:
+  - slug: db.acid
+    name: ACID properties
+    aliases: [ACID, atomicity, consistency, isolation, durability, transaction properties, transaction]
+    difficulty: 2
+    further_reading: [silberschatz-db]
+    definition: >-
+      A transaction is a unit of work that the database executes with the ACID
+      properties: atomicity (all or nothing), consistency (it takes the
+      database from one valid state to another), isolation (concurrent
+      transactions do not see each other's partial work) and durability
+      (committed changes survive failures).
+    attributes:
+      atomicity: all of the transaction's changes happen, or none do; ensured by undo logging
+      consistency: integrity constraints hold before and after
+      isolation: the result is as if transactions ran one at a time; ensured by concurrency control
+      durability: committed data survives crashes; ensured by redo logging and stable storage
+    documents:
+      - kind: example
+        title: ACID in a bank transfer
+        depth: 1
+        body: |-
+          Transfer 500 from account A to account B: read A, subtract 500,
+          write A, read B, add 500, write B.
+          Atomicity: if the system crashes after writing A, the debit must be
+          undone. Consistency: A + B is the same before and after.
+          Isolation: another transaction summing all balances must not see A
+          debited but B not yet credited. Durability: once the bank says
+          "done", a power cut must not undo it.
+    questions:
+      - slug: q.db.transactions.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: >-
+          A crash happens halfway through a transfer, after money left account
+          A but before it reached account B. Which property requires the
+          partial change to be undone?
+        options: [Atomicity, Consistency, Isolation, Durability]
+        answer: {option_index: 0}
+        explanation: Atomicity means a transaction happens completely or not at all.
+      - slug: q.db.transactions.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which ACID property guarantees that a committed transaction survives a power failure?
+        options: [Atomicity, Consistency, Isolation, Durability]
+        answer: {option_index: 3}
+        explanation: Durability is provided by writing the log to stable storage before reporting the commit.
+
+  - slug: db.serializability
+    name: Serializability
+    aliases: [conflict serializability, serializable schedule, precedence graph, conflicting operations, schedule]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      A schedule of concurrent transactions is serializable if its effect
+      equals that of some serial schedule. It is conflict serializable when
+      its precedence graph, with an edge Ti → Tj for each pair of conflicting
+      operations where Ti's comes first, has no cycle.
+    attributes:
+      conflict: two operations on the same item from different transactions, at least one a write
+      precedence_graph: edge Ti → Tj when an operation of Ti conflicts with and precedes one of Tj
+      test: conflict serializable if and only if the precedence graph is acyclic
+      equivalent_serial_order: any topological order of the precedence graph
+    requires: [db.acid]
+    related: [algo.topological-sort]
+    documents:
+      - kind: procedure
+        title: Testing conflict serializability
+        depth: 2
+        body: Decide whether a schedule is conflict serializable.
+        steps:
+          - Create a node for each transaction.
+          - For every pair of operations from different transactions on the same item where at least one is a write, add an edge from the earlier transaction to the later one.
+          - If the graph has a cycle, the schedule is not conflict serializable.
+          - Otherwise, a topological order of the graph gives an equivalent serial schedule.
+      - kind: example
+        title: A non-serializable schedule
+        depth: 2
+        body: |-
+          T1: R(A), T2: R(A), T1: W(A), T2: W(A).
+          T1's R(A) precedes T2's W(A): edge T1 → T2.
+          T2's R(A) precedes T1's W(A): edge T2 → T1.
+          The cycle T1 → T2 → T1 means the schedule is not conflict
+          serializable; it is the classic lost-update pattern.
+    questions:
+      - slug: q.db.transactions.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which pair of operations conflicts?
+        options:
+          - T1 reads X, T2 reads X
+          - T1 reads X, T2 writes Y
+          - T1 writes X, T2 reads X
+          - T1 reads X, T1 writes X
+        answer: {option_index: 2}
+        explanation: Conflicts need different transactions, the same item, and at least one write.
+      - slug: q.db.transactions.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Schedule - T1: R(A), T1: W(A), T2: R(A), T2: W(A), T1: R(B), T2: R(B).
+          Is it conflict serializable?
+        options:
+          - Yes, equivalent to T1 then T2
+          - Yes, equivalent to T2 then T1
+          - No, the precedence graph has a cycle
+          - It cannot be decided
+        answer: {option_index: 0}
+        explanation: >-
+          All conflicts on A go from T1 to T2, and the two reads of B do not
+          conflict. The only edge is T1 → T2.
+
+  - slug: db.recovery-log
+    name: Log-based recovery
+    aliases: [write-ahead logging, WAL, undo and redo, recovery, checkpoint, transaction log]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      Log-based recovery records every change in a log before the change
+      reaches the database on disk (write-ahead logging). After a crash, the
+      system redoes changes of committed transactions and undoes changes of
+      uncommitted ones.
+    attributes:
+      write_ahead_rule: the log record must reach stable storage before the data page it describes
+      redo: committed transactions, for durability
+      undo: uncommitted transactions, for atomicity
+      checkpoint: limits how much of the log must be scanned after a crash
+    requires: [db.acid]
+    documents:
+      - kind: explanation
+        title: Why write-ahead logging works
+        depth: 2
+        body: |-
+          Each log record holds the transaction, the item, the old value and
+          the new value. Because the log is written first, after a crash the
+          system always knows what might have reached the disk. Transactions
+          with a commit record are redone using new values; those without are
+          undone using old values. Checkpoints record a point at which all
+          earlier changes were safely on disk, so recovery can start there.
+    questions:
+      - slug: q.db.transactions.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: After a crash, what does recovery do with a transaction that has no commit record in the log?
+        options: [Redo it, Undo it, Ignore it, Restart it automatically]
+        answer: {option_index: 1}
+        explanation: Its changes may have reached disk, so they are rolled back to preserve atomicity.

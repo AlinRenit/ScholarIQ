@@ -309,6 +309,9 @@ class Concept(IdMixin, TimestampMixin, Base):
     trust_status: Mapped[TrustStatus] = mapped_column(
         _enum(TrustStatus, "trust_status"), default=TrustStatus.DRAFT
     )
+    # Who reviewed this entry, when, and the content hash they reviewed.
+    reviewed_by: Mapped[str | None] = mapped_column(String(120))
+    reviewed_on: Mapped[date | None] = mapped_column(Date)
     source_id: Mapped[str | None] = mapped_column(
         FK, ForeignKey("source_references.id", ondelete="SET NULL")
     )
@@ -360,6 +363,9 @@ class KnowledgeDocument(IdMixin, TimestampMixin, Base):
     trust_status: Mapped[TrustStatus] = mapped_column(
         _enum(TrustStatus, "trust_status"), default=TrustStatus.DRAFT
     )
+    # Who reviewed this entry, when, and the content hash they reviewed.
+    reviewed_by: Mapped[str | None] = mapped_column(String(120))
+    reviewed_on: Mapped[date | None] = mapped_column(Date)
     source_id: Mapped[str | None] = mapped_column(
         FK, ForeignKey("source_references.id", ondelete="SET NULL")
     )
@@ -387,6 +393,9 @@ class Question(IdMixin, TimestampMixin, Base):
     trust_status: Mapped[TrustStatus] = mapped_column(
         _enum(TrustStatus, "trust_status"), default=TrustStatus.DRAFT
     )
+    # Who reviewed this entry, when, and the content hash they reviewed.
+    reviewed_by: Mapped[str | None] = mapped_column(String(120))
+    reviewed_on: Mapped[date | None] = mapped_column(Date)
 
     answer: Mapped[VerifiedAnswer | None] = relationship(
         back_populates="question", cascade="all, delete-orphan", uselist=False

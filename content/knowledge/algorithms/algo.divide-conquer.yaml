@@ -1,0 +1,150 @@
+topic: algo.divide-conquer
+version: "2026.10.1"
+concepts:
+  - slug: algo.divide-and-conquer
+    name: Divide and conquer
+    aliases: [divide-and-conquer, divide and conquer paradigm, D&C]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      Divide and conquer solves a problem by splitting it into smaller
+      independent subproblems of the same kind, solving them recursively, and
+      combining their answers. Merge sort, quicksort and binary search follow
+      this pattern.
+    attributes:
+      steps: divide, conquer (recurse), combine
+      subproblems: independent of each other
+      analysis: usually a recurrence such as T(n) = aT(n/b) + f(n)
+      examples: merge sort, quicksort, binary search, Karatsuba multiplication, Strassen
+    related: [algo.master-theorem]
+    contrasts: [algo.dynamic-programming]
+    documents:
+      - kind: explanation
+        title: The three steps
+        depth: 1
+        body: |-
+          Divide the input into parts. Conquer each part by calling the same
+          algorithm recursively, until parts are small enough to solve
+          directly. Combine the partial answers into the answer for the whole.
+
+          In merge sort the divide step is trivial (split in half) and the
+          combine step does the real work (merge). In quicksort it is the other
+          way round: partitioning does the work and combining is nothing at all.
+      - kind: misconception
+        title: Divide and conquer versus dynamic programming
+        depth: 2
+        body: |-
+          Both break problems into subproblems. Divide and conquer suits
+          subproblems that do not overlap, such as the two halves in merge sort.
+          When the same subproblems recur many times, as in computing Fibonacci
+          numbers recursively, plain recursion repeats work exponentially;
+          dynamic programming stores each subproblem's answer once.
+    questions:
+      - slug: q.algo.divide-conquer.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which three steps make up the divide-and-conquer approach?
+        options:
+          - Sort, search, merge
+          - Divide, conquer, combine
+          - Choose, verify, repeat
+          - Initialise, relax, finalise
+        answer: {option_index: 1}
+        explanation: Split the problem, solve the parts recursively, then combine the results.
+      - slug: q.algo.divide-conquer.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: In merge sort, which step does most of the work?
+        options: [Divide, Conquer base case, Combine (merging), None - the work is equal]
+        answer: {option_index: 2}
+        explanation: Splitting is just computing a midpoint; merging touches every element at each level.
+      - slug: q.algo.divide-conquer.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: >-
+          Why is plain recursive divide and conquer a poor fit for computing the
+          n-th Fibonacci number?
+        options:
+          - The subproblems overlap, so the same values are recomputed many times
+          - Fibonacci numbers cannot be defined recursively
+          - The combine step is too expensive
+          - It needs a sorted input
+        answer: {option_index: 0}
+        explanation: >-
+          fib(n) calls fib(n − 1) and fib(n − 2), which both call fib(n − 3),
+          and so on, giving exponentially many calls.
+
+  - slug: algo.max-subarray
+    name: Maximum subarray problem
+    aliases: [maximum subarray, max subarray sum, Kadane's algorithm, largest sum contiguous subarray]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      The maximum subarray problem asks for the contiguous part of an array
+      with the largest sum. A divide-and-conquer solution runs in
+      O(n log n); Kadane's algorithm solves it in O(n) by tracking the best sum
+      ending at each position.
+    attributes:
+      divide_and_conquer: O(n log n), best of left half, right half, or a subarray crossing the middle
+      kadane: O(n) time, O(1) space
+    requires: [algo.divide-and-conquer]
+    documents:
+      - kind: procedure
+        title: Kadane's algorithm
+        depth: 2
+        body: Find the largest sum of a non-empty contiguous subarray.
+        steps:
+          - Set best = current = a[0].
+          - For each later element x, set current = max(x, current + x) - either extend the previous run or start fresh at x.
+          - Set best = max(best, current).
+          - After the loop, best is the answer.
+      - kind: example
+        title: Kadane on a short array
+        depth: 2
+        body: |-
+          a = [−2, 1, −3, 4, −1, 2, 1, −5, 4].
+          current after each element: −2, 1, −2, 4, 3, 5, 6, 1, 5.
+          best ends at 6, from the subarray [4, −1, 2, 1].
+    questions:
+      - slug: q.algo.divide-conquer.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: What is the maximum subarray sum of [3, −4, 5, −1, 2, −6, 1]?
+        options: ["5", "6", "7", "8"]
+        answer: {option_index: 1}
+        explanation: The best contiguous run is [5, −1, 2] with sum 6.
+
+  - slug: algo.karatsuba
+    name: Karatsuba multiplication
+    aliases: [Karatsuba algorithm, fast integer multiplication]
+    difficulty: 4
+    further_reading: [clrs]
+    definition: >-
+      Karatsuba's algorithm multiplies two n-digit numbers with three
+      recursive multiplications of n/2-digit numbers instead of four, giving
+      T(n) = 3T(n/2) + O(n) = O(n^log2 3) ≈ O(n^1.585).
+    attributes:
+      recurrence: T(n) = 3T(n/2) + O(n)
+      time: O(n^1.585)
+      schoolbook: O(n²)
+    requires: [algo.divide-and-conquer, algo.master-theorem]
+    documents:
+      - kind: explanation
+        title: Saving one multiplication
+        depth: 3
+        body: |-
+          Split x = a·10^m + b and y = c·10^m + d. Then
+          xy = ac·10^(2m) + (ad + bc)·10^m + bd. Computing ac, bd and
+          (a + b)(c + d) is enough, because ad + bc = (a + b)(c + d) − ac − bd.
+          Three half-size products instead of four turn the recurrence from
+          4T(n/2) + O(n) (still Θ(n²)) into 3T(n/2) + O(n), which is
+          Θ(n^log2 3).
+    questions:
+      - slug: q.algo.divide-conquer.5
+        kind: multiple_choice
+        difficulty: 4
+        prompt: Which recurrence describes Karatsuba multiplication?
+        options: [T(n) = 4T(n/2) + O(n), T(n) = 3T(n/2) + O(n), T(n) = 2T(n/2) + O(n), T(n) = T(n − 1) + O(n)]
+        answer: {option_index: 1}
+        explanation: It makes three recursive multiplications of half-size numbers plus linear-time additions.

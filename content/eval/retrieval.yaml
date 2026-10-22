@@ -1,0 +1,111 @@
+# Retrieval evaluation set for the knowledge-base search.
+#
+# Each case is a student-style query and the concept(s) a correct search should
+# rank first. A case passes at rank k when any expected concept is in the top k.
+# Out-of-scope cases expect no results at all.
+#
+# kinds:
+#   name          the query names the concept
+#   alias         the query uses an alias or a common alternative spelling
+#   paraphrase    the query describes the idea without naming the concept
+#   misspelling   the query contains a spelling mistake (lexical search has no
+#                 fuzzy matching, so these are expected to be hard)
+#   out_of_scope  nothing in the knowledge base answers it
+#
+# Do not tune the search against this file and then report its score as if it
+# were unseen data: add new cases first, run the evaluation, then tune.
+version: 1
+cases:
+  # --- names ---
+  - {q: "What is a stack?", expect: [ds.stack], kind: name}
+  - {q: "explain quick sort", expect: [ds.quicksort], kind: name}
+  - {q: "merge sort time complexity", expect: [ds.merge-sort], kind: name}
+  - {q: "how does binary search work", expect: [ds.binary-search], kind: name}
+  - {q: "what is a binary heap", expect: [ds.heap], kind: name}
+  - {q: "Dijkstra's algorithm", expect: [algo.dijkstra], kind: name}
+  - {q: "bellman ford negative edges", expect: [algo.bellman-ford], kind: name}
+  - {q: "master theorem cases", expect: [algo.master-theorem], kind: name}
+  - {q: "huffman coding example", expect: [algo.huffman-coding], kind: name}
+  - {q: "longest common subsequence", expect: [algo.lcs], kind: name}
+  - {q: "what is 3NF", expect: [db.3nf], kind: name}
+  - {q: "BCNF definition", expect: [db.bcnf], kind: name}
+  - {q: "ACID properties of a transaction", expect: [db.acid], kind: name}
+  - {q: "two phase locking", expect: [db.two-phase-locking], kind: name}
+  - {q: "B+ tree index", expect: [db.b-plus-tree], kind: name}
+  - {q: "banker's algorithm", expect: [os.bankers-algorithm], kind: name}
+  - {q: "round robin scheduling time quantum", expect: [os.round-robin], kind: name}
+  - {q: "what is a semaphore", expect: [os.semaphore], kind: name}
+  - {q: "explain thrashing", expect: [os.thrashing], kind: name}
+  - {q: "translation lookaside buffer", expect: [os.tlb], kind: name}
+  - {q: "TCP three way handshake", expect: [cn.three-way-handshake], kind: name}
+  - {q: "what does DNS do", expect: [cn.dns], kind: name}
+  - {q: "subnetting and CIDR", expect: [cn.subnetting], kind: name}
+  - {q: "distance vector routing", expect: [cn.distance-vector], kind: name}
+  - {q: "pigeonhole principle", expect: [dm.pigeonhole], kind: name}
+  - {q: "De Morgan's laws", expect: [dm.de-morgan], kind: name}
+  - {q: "mathematical induction proof", expect: [dm.mathematical-induction], kind: name}
+  - {q: "binomial theorem", expect: [dm.binomial-theorem], kind: name}
+  - {q: "topological sort", expect: [algo.topological-sort], kind: name}
+  - {q: "difference between TCP and UDP", expect: [cn.tcp, cn.udp], kind: name}
+  - {q: "stack vs queue", expect: [ds.stack, ds.queue], kind: name}
+
+  # --- aliases and alternative spellings ---
+  - {q: "LIFO", expect: [ds.stack], kind: alias}
+  - {q: "FIFO data structure", expect: [ds.queue], kind: alias}
+  - {q: "third normal form", expect: [db.3nf], kind: alias}
+  - {q: "memoization", expect: [algo.memoization], kind: alias}
+  - {q: "amortized analysis", expect: [ds.amortized-analysis], kind: alias}
+  - {q: "graph coloring", expect: [dm.graph-coloring], kind: alias}
+  - {q: "DFS", expect: [ds.dfs], kind: alias}
+  - {q: "BFS traversal", expect: [ds.bfs], kind: alias}
+  - {q: "MST", expect: [algo.minimum-spanning-tree], kind: alias}
+  - {q: "kruskal's algorithm", expect: [algo.minimum-spanning-tree], kind: alias}
+  - {q: "AVL tree", expect: [ds.balanced-bst], kind: alias}
+  - {q: "big O notation", expect: [ds.complexity-big-o], kind: alias}
+  - {q: "theta notation", expect: [ds.asymptotic-notation], kind: alias}
+  - {q: "NAT", expect: [cn.private-addresses-nat], kind: alias}
+  - {q: "SSL", expect: [cn.tls], kind: alias}
+  - {q: "RSA", expect: [cn.public-key-encryption], kind: alias}
+  - {q: "LRU page replacement", expect: [os.page-replacement], kind: alias}
+  - {q: "SJF", expect: [os.sjf], kind: alias}
+  - {q: "inner join", expect: [db.sql-joins], kind: alias}
+  - {q: "GROUP BY", expect: [db.sql-aggregation], kind: alias}
+  - {q: "bijection", expect: [dm.functions], kind: alias}
+  - {q: "equivalence relation", expect: [dm.relations], kind: alias}
+
+  # --- paraphrases ---
+  - {q: "which sort picks a pivot and partitions the array", expect: [ds.quicksort], kind: paraphrase}
+  - {q: "find the shortest path from one vertex when all edge weights are positive", expect: [algo.dijkstra], kind: paraphrase}
+  - {q: "why do two threads updating the same counter give wrong results", expect: [os.race-condition], kind: paraphrase}
+  - {q: "processes waiting for each other forever", expect: [os.deadlock], kind: paraphrase}
+  - {q: "how is a virtual address turned into a physical one", expect: [os.address-translation, os.paging], kind: paraphrase}
+  - {q: "a table where a non-key column depends on another non-key column", expect: [db.3nf], kind: paraphrase}
+  - {q: "which attributes can be derived from a set of attributes using functional dependencies", expect: [db.closure], kind: paraphrase}
+  - {q: "how does a computer get an IP address automatically", expect: [cn.dhcp], kind: paraphrase}
+  - {q: "how does the sender avoid overwhelming the network", expect: [cn.flow-congestion-control], kind: paraphrase}
+  - {q: "how many ways to choose 3 people from 10", expect: [dm.permutations-combinations], kind: paraphrase}
+  - {q: "sum of degrees of all vertices", expect: [dm.graph-basics], kind: paraphrase}
+  - {q: "visit every edge exactly once", expect: [dm.euler-hamilton], kind: paraphrase}
+  - {q: "store solutions to overlapping subproblems", expect: [algo.dynamic-programming, algo.memoization], kind: paraphrase}
+  - {q: "detect a loop in a linked list with two pointers", expect: [ds.cycle-detection], kind: paraphrase}
+  - {q: "two keys map to the same bucket", expect: [ds.collision-resolution], kind: paraphrase}
+  - {q: "why can't comparison sorting beat n log n", expect: [ds.comparison-sort-lower-bound], kind: paraphrase}
+  - {q: "free memory is split into small unusable pieces", expect: [os.fragmentation], kind: paraphrase}
+  - {q: "which page should be evicted when memory is full", expect: [os.page-replacement], kind: paraphrase}
+  - {q: "only one process may be in the critical section at a time", expect: [os.critical-section, os.mutex], kind: paraphrase}
+  - {q: "if p then q truth table", expect: [dm.implication], kind: paraphrase}
+  - {q: "for all and there exists", expect: [dm.predicate-logic], kind: paraphrase}
+
+  # --- misspellings (lexical search has no fuzzy matching) ---
+  - {q: "dijkstra algorithim", expect: [algo.dijkstra], kind: misspelling}
+  - {q: "semafore", expect: [os.semaphore], kind: misspelling}
+  - {q: "normalisation 2nf", expect: [db.2nf], kind: misspelling}
+  - {q: "hash tabel collisions", expect: [ds.collision-resolution, ds.hash-table], kind: misspelling}
+
+  # --- out of scope ---
+  - {q: "photosynthesis", expect: [], kind: out_of_scope}
+  - {q: "who won the world cup", expect: [], kind: out_of_scope}
+  - {q: "capital of France", expect: [], kind: out_of_scope}
+  - {q: "how do vaccines work", expect: [], kind: out_of_scope}
+  - {q: "explain the French revolution", expect: [], kind: out_of_scope}
+  - {q: "what is a black hole", expect: [], kind: out_of_scope}

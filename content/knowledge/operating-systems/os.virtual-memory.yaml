@@ -1,0 +1,165 @@
+topic: os.virtual-memory
+version: "2026.10.1"
+concepts:
+  - slug: os.virtual-memory-concept
+    name: Virtual memory and demand paging
+    aliases: [virtual memory, demand paging, page fault, page faults, swap space, valid-invalid bit]
+    difficulty: 3
+    further_reading: [silberschatz-os, ostep]
+    definition: >-
+      Virtual memory lets a process use an address space larger than physical
+      memory by keeping only some of its pages in RAM. With demand paging a
+      page is loaded only when it is first used; touching a page that is not in
+      memory causes a page fault, which the OS handles by bringing it in.
+    attributes:
+      page_fault: access to a page marked invalid (not in memory)
+      fault_handling: find a free frame (or evict a page), read the page from disk, update the page table, restart the instruction
+      benefit: programs larger than RAM, more processes in memory, faster start-up
+    requires: [os.paging]
+    documents:
+      - kind: procedure
+        title: Handling a page fault
+        depth: 2
+        body: What the OS does when a process touches a page that is not in memory.
+        steps:
+          - The MMU finds the page-table entry marked invalid and traps to the OS.
+          - The OS checks that the address is legal; an illegal one terminates the process.
+          - It finds a free frame, or chooses a victim page with the replacement algorithm and writes it out if it was modified.
+          - It reads the needed page from disk into the frame.
+          - It updates the page table to mark the page valid and restarts the faulting instruction.
+      - kind: explanation
+        title: Why page faults are expensive
+        depth: 2
+        body: |-
+          A memory access takes on the order of 100 ns; reading a page from
+          disk takes milliseconds, tens of thousands of times longer. Even a
+          fault rate of one in a million accesses noticeably slows a program,
+          which is why the replacement policy matters.
+    questions:
+      - slug: q.os.virtual-memory.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What causes a page fault?
+        options:
+          - Accessing a page that is not currently in physical memory
+          - Dividing by zero
+          - Two processes sharing a page
+          - A TLB hit
+        answer: {option_index: 0}
+        explanation: The page-table entry is invalid, so the OS must load the page first.
+
+  - slug: os.page-replacement
+    name: Page replacement algorithms
+    aliases: [page replacement, FIFO page replacement, LRU, least recently used, optimal page replacement, OPT, Belady's anomaly]
+    difficulty: 3
+    further_reading: [silberschatz-os]
+    definition: >-
+      When memory is full, a page replacement algorithm chooses which page to
+      evict. FIFO evicts the oldest page, LRU evicts the page unused for the
+      longest time, and the optimal algorithm (OPT) evicts the page whose next
+      use is furthest in the future.
+    attributes:
+      fifo: evict the page loaded earliest; can suffer Belady's anomaly
+      lru: evict the least recently used page; no Belady's anomaly
+      optimal: evict the page used furthest in the future; fewest faults but needs future knowledge
+      beladys_anomaly: more frames giving more page faults, possible with FIFO
+    requires: [os.virtual-memory-concept]
+    documents:
+      - kind: example
+        title: FIFO and LRU on the same reference string
+        depth: 2
+        body: |-
+          Reference string 7, 0, 1, 2, 0, 3, 0, 4 with 3 frames.
+          FIFO: 7, 0, 1 fault (3 faults); 2 faults and evicts 7; 0 hits;
+          3 faults and evicts 0; 0 faults and evicts 1; 4 faults and evicts 2.
+          Total 7 faults.
+          LRU: 7, 0, 1 fault; 2 evicts 7; 0 hits; 3 evicts 1 (least recently
+          used); 0 hits; 4 evicts 2. Total 6 faults.
+      - kind: example
+        title: Belady's anomaly
+        depth: 3
+        body: |-
+          With FIFO on 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5, three frames give 9
+          page faults but four frames give 10. Adding memory made things worse.
+          LRU and OPT never behave this way, because the pages they keep with n
+          frames are always a subset of those they keep with n + 1.
+    questions:
+      - slug: q.os.virtual-memory.2
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Using FIFO with 3 frames, initially empty, how many page faults occur
+          for the reference string 1, 2, 3, 1, 4, 1, 5?
+        options: ["4", "5", "6", "7"]
+        answer: {option_index: 2}
+        explanation: >-
+          1, 2, 3 fault. 1 hits. 4 faults and evicts 1. 1 faults and evicts 2.
+          5 faults and evicts 3. Total 6.
+      - slug: q.os.virtual-memory.3
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Using LRU with 3 frames, initially empty, how many page faults occur
+          for 1, 2, 3, 1, 4, 1, 5?
+        options: ["4", "5", "6", "7"]
+        answer: {option_index: 1}
+        explanation: >-
+          1, 2, 3 fault. 1 hits. 4 faults and evicts 2 (least recently used).
+          1 hits. 5 faults and evicts 3. Total 5.
+      - slug: q.os.virtual-memory.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which page replacement algorithm can suffer from Belady's anomaly?
+        options: [Optimal, LRU, FIFO, None of them]
+        answer: {option_index: 2}
+        explanation: With FIFO, adding frames can increase the number of faults on some reference strings.
+      - slug: q.os.virtual-memory.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Why is the optimal page replacement algorithm not used directly in real systems?
+        options:
+          - It causes too many page faults
+          - It needs to know future page references
+          - It suffers from Belady's anomaly
+          - It only works with one frame
+        answer: {option_index: 1}
+        explanation: It is used as a benchmark to compare practical algorithms against.
+
+  - slug: os.thrashing
+    name: Thrashing
+    aliases: [thrash, working set, working-set model]
+    difficulty: 3
+    further_reading: [silberschatz-os]
+    definition: >-
+      Thrashing is when a system spends more time paging than doing useful
+      work, because processes do not have enough frames for the pages they are
+      actively using (their working sets).
+    attributes:
+      cause: total working-set size exceeds available frames
+      symptom: very high page-fault rate and low CPU utilisation
+      remedies: reduce the number of processes, working-set model, page-fault-frequency control
+    requires: [os.page-replacement]
+    documents:
+      - kind: explanation
+        title: How thrashing spirals
+        depth: 2
+        body: |-
+          Processes short of frames fault constantly and wait on disk, so CPU
+          utilisation drops. A naive scheduler sees an idle CPU and admits more
+          processes, which takes frames from everyone and makes faulting worse.
+          The fix is the opposite: suspend some processes so the rest have
+          room for their working sets.
+    questions:
+      - slug: q.os.virtual-memory.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the right response when a system is thrashing?
+        options:
+          - Admit more processes to raise CPU utilisation
+          - Reduce the degree of multiprogramming
+          - Increase the time quantum
+          - Switch to FIFO replacement
+        answer: {option_index: 1}
+        explanation: Fewer processes means each has enough frames for its working set.

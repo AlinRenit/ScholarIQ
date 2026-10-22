@@ -1,0 +1,204 @@
+topic: os.cpu-scheduling
+version: "2026.10.1"
+concepts:
+  - slug: os.scheduling-criteria
+    name: Scheduling criteria
+    aliases: [waiting time, turnaround time, response time, throughput, CPU utilisation, scheduling metrics]
+    difficulty: 2
+    further_reading: [silberschatz-os]
+    definition: >-
+      CPU schedulers are compared by CPU utilisation, throughput, turnaround
+      time (completion minus arrival), waiting time (time spent in the ready
+      queue) and response time (time until the first run).
+    attributes:
+      turnaround_time: completion time − arrival time
+      waiting_time: turnaround time − CPU burst time (for a CPU-only job)
+      response_time: first time on the CPU − arrival time
+      throughput: processes completed per unit of time
+    documents:
+      - kind: explanation
+        title: Which metric matters when
+        depth: 1
+        body: |-
+          Batch systems care about throughput and turnaround. Interactive
+          systems care about response time: a user notices a delay before
+          anything happens more than a slightly longer total time. Waiting time
+          isolates the scheduler's effect, because a job's own burst time is
+          the same under every algorithm.
+    questions:
+      - slug: q.os.cpu-scheduling.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: A process arrives at time 2 and completes at time 15. What is its turnaround time?
+        options: ["2", "13", "15", "17"]
+        answer: {option_index: 1}
+        explanation: Turnaround is completion minus arrival, 15 − 2 = 13.
+
+  - slug: os.fcfs
+    name: First-come, first-served scheduling
+    aliases: [FCFS, FIFO scheduling, first come first serve, first come first served]
+    difficulty: 2
+    further_reading: [silberschatz-os]
+    definition: >-
+      First-come, first-served scheduling runs processes in arrival order, each
+      to completion. It is simple and non-preemptive, but short jobs stuck
+      behind a long one wait a long time (the convoy effect).
+    attributes:
+      preemptive: "no"
+      order: arrival order
+      weakness: convoy effect - short jobs wait behind long ones
+    requires: [os.scheduling-criteria]
+    contrasts: [os.sjf, os.round-robin]
+    documents:
+      - kind: example
+        title: The convoy effect in numbers
+        depth: 1
+        body: |-
+          P1 (burst 24), P2 (3) and P3 (3) all arrive at time 0 in that order.
+          FCFS runs P1 0–24, P2 24–27, P3 27–30. Waiting times are 0, 24 and
+          27, average 17.
+          If the short jobs had arrived first, the waits would be 0, 3 and 6,
+          average 3. The order of arrival alone changes the average almost
+          sixfold.
+    questions:
+      - slug: q.os.cpu-scheduling.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          Three processes arrive at time 0 in the order P1, P2, P3 with CPU
+          bursts 5, 3 and 8. Under FCFS, what is the average waiting time?
+        options: ["3.00", "4.33", "5.33", "8.00"]
+        answer: {option_index: 1}
+        explanation: Waits are 0, 5 and 8, so the average is 13 / 3 ≈ 4.33.
+
+  - slug: os.sjf
+    name: Shortest-job-first scheduling
+    aliases: [SJF, shortest job first, SRTF, shortest remaining time first, shortest job next]
+    difficulty: 3
+    further_reading: [silberschatz-os]
+    definition: >-
+      Shortest-job-first scheduling runs the ready process with the smallest
+      next CPU burst. It gives the minimum average waiting time for a set of
+      jobs, but needs burst lengths to be known or predicted and can starve
+      long jobs. Its preemptive form is shortest-remaining-time-first.
+    attributes:
+      preemptive: non-preemptive SJF; preemptive variant is SRTF
+      optimal_for: minimum average waiting time
+      weakness: needs burst estimates; long jobs can starve
+    requires: [os.scheduling-criteria]
+    contrasts: [os.fcfs]
+    documents:
+      - kind: example
+        title: SJF with four jobs
+        depth: 2
+        body: |-
+          All arrive at 0 with bursts P1 6, P2 8, P3 7, P4 3. SJF runs
+          P4 0–3, P1 3–9, P3 9–16, P2 16–24. Waiting times: P4 0, P1 3, P3 9,
+          P2 16. Average 28 / 4 = 7. FCFS in the order P1–P4 would give
+          (0 + 6 + 14 + 21) / 4 = 10.25.
+    questions:
+      - slug: q.os.cpu-scheduling.3
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Four processes arrive at time 0 with bursts 6, 2, 8 and 3. What is the
+          average waiting time under non-preemptive SJF?
+        options: ["4.5", "5.0", "6.25", "7.75"]
+        answer: {option_index: 0}
+        explanation: The order is 2, 3, 6, 8 with waits 0, 2, 5 and 11, so 18 / 4 = 4.5.
+      - slug: q.os.cpu-scheduling.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the main practical difficulty with SJF scheduling?
+        options:
+          - It has a high average waiting time
+          - The length of the next CPU burst is not known in advance
+          - It needs a time quantum
+          - It cannot handle more than two processes
+        answer: {option_index: 1}
+        explanation: Real schedulers must predict the next burst, typically from an average of past bursts.
+
+  - slug: os.round-robin
+    name: Round-robin scheduling
+    aliases: [RR, round robin, time slicing, time quantum, time slice]
+    difficulty: 2
+    further_reading: [silberschatz-os, ostep]
+    definition: >-
+      Round-robin scheduling gives each ready process the CPU for at most one
+      time quantum, then moves it to the back of the ready queue. It is
+      preemptive and gives good response time for interactive systems.
+    attributes:
+      preemptive: "yes"
+      parameter: time quantum
+      large_quantum: behaves like FCFS
+      small_quantum: good response, but many context switches
+    requires: [os.scheduling-criteria]
+    contrasts: [os.fcfs]
+    documents:
+      - kind: example
+        title: Round robin with quantum 4
+        depth: 1
+        body: |-
+          P1 (24), P2 (3), P3 (3) arrive at 0. With quantum 4:
+          P1 0–4, P2 4–7 (done), P3 7–10 (done), then P1 runs from 10 to 30.
+          Waiting times: P1 30 − 24 = 6, P2 4, P3 7. Average 17 / 3 ≈ 5.67,
+          and every process starts within 7 time units.
+      - kind: misconception
+        title: A smaller quantum is not always better
+        depth: 2
+        body: |-
+          Each switch costs time. If the quantum is close to the context-switch
+          cost, much of the CPU goes to switching. A common guideline is that
+          most CPU bursts should finish within one quantum.
+    questions:
+      - slug: q.os.cpu-scheduling.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What happens to round-robin scheduling as the time quantum becomes very large?
+        options: [It behaves like FCFS, It behaves like SJF, It stops being fair, Context switches increase]
+        answer: {option_index: 0}
+        explanation: If no process ever uses up its quantum, processes simply run in queue order.
+      - slug: q.os.cpu-scheduling.6
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          P1 (burst 5) and P2 (burst 3) arrive at time 0, P1 first. Round robin
+          with quantum 2. At what time does P2 finish?
+        options: ["5", "6", "7", "8"]
+        answer: {option_index: 2}
+        explanation: P1 0–2, P2 2–4, P1 4–6, P2 6–7 (done), P1 7–8.
+
+  - slug: os.priority-scheduling
+    name: Priority scheduling
+    aliases: [priority scheduler, starvation, aging, priority inversion]
+    difficulty: 2
+    further_reading: [silberschatz-os]
+    definition: >-
+      Priority scheduling runs the ready process with the highest priority. Low
+      priority processes can starve; aging, which gradually raises the
+      priority of processes that have waited long, prevents this.
+    attributes:
+      preemptive: either form exists
+      weakness: starvation of low-priority processes
+      fix: aging
+      note: SJF is priority scheduling with priority = predicted burst length
+    requires: [os.scheduling-criteria]
+    documents:
+      - kind: explanation
+        title: Starvation and aging
+        depth: 1
+        body: |-
+          If high-priority work keeps arriving, a low-priority process may never
+          run. Aging increases a waiting process's priority over time, so
+          eventually it becomes the highest and runs.
+    questions:
+      - slug: q.os.cpu-scheduling.7
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which technique prevents starvation in priority scheduling?
+        options: [Paging, Aging, Thrashing, Spooling]
+        answer: {option_index: 1}
+        explanation: Aging raises the priority of processes the longer they wait.

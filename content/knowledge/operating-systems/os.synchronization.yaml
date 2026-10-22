@@ -1,0 +1,192 @@
+topic: os.synchronization
+version: "2026.10.1"
+concepts:
+  - slug: os.race-condition
+    name: Race condition
+    aliases: [race conditions, data race, lost update]
+    difficulty: 2
+    further_reading: [silberschatz-os, ostep]
+    definition: >-
+      A race condition occurs when the result of a computation depends on the
+      timing of threads or processes that access shared data concurrently,
+      and at least one of them writes it.
+    attributes:
+      cause: unsynchronised access to shared data with at least one writer
+      symptom: results that vary between runs
+      fix: make the critical section mutually exclusive
+    documents:
+      - kind: example
+        title: Two threads incrementing a counter
+        depth: 1
+        body: |-
+          counter++ is really three steps: load counter into a register, add 1,
+          store it back. Suppose counter = 5:
+          Thread A loads 5. Thread B loads 5. A adds 1 and stores 6. B adds 1
+          and stores 6. Two increments ran, but counter is 6, not 7. One update
+          was lost because the steps interleaved.
+    questions:
+      - slug: q.os.synchronization.1
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          Two threads each run counter++ 1000 times on a shared counter that
+          starts at 0, without any locking. Which final values are possible?
+        options:
+          - Exactly 2000 every time
+          - Any value up to 2000, and values below 2000 do occur
+          - Exactly 1000 every time
+          - More than 2000
+        answer: {option_index: 1}
+        explanation: Interleaved load-add-store sequences can lose updates, so the total can fall short.
+
+  - slug: os.critical-section
+    name: Critical section problem
+    aliases: [critical section, critical region, mutual exclusion, progress, bounded waiting]
+    difficulty: 3
+    further_reading: [silberschatz-os]
+    definition: >-
+      A critical section is code that accesses shared data. A solution to the
+      critical-section problem must provide mutual exclusion, progress and
+      bounded waiting.
+    attributes:
+      mutual_exclusion: at most one process is in its critical section at a time
+      progress: if none is inside, a process that wants to enter is not postponed indefinitely by others that do not
+      bounded_waiting: there is a limit on how many times others can enter before a waiting process gets its turn
+      software_solution: Peterson's algorithm (for two processes)
+    requires: [os.race-condition]
+    documents:
+      - kind: explanation
+        title: The three requirements
+        depth: 2
+        body: |-
+          Mutual exclusion alone is easy to get by never letting anyone in, so
+          we also need progress: the decision about who enters next must be made
+          by processes that want to enter, and must not be postponed forever.
+          Bounded waiting adds fairness: a process that has asked to enter will
+          get in after a bounded number of other entries.
+    questions:
+      - slug: q.os.synchronization.2
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which requirement says a waiting process will enter after a limited number of other entries?
+        options: [Mutual exclusion, Progress, Bounded waiting, Atomicity]
+        answer: {option_index: 2}
+        explanation: Bounded waiting rules out a process being overtaken forever.
+
+  - slug: os.mutex
+    name: Mutex lock
+    aliases: [mutex, lock, mutual exclusion lock, spinlock, spin lock]
+    difficulty: 2
+    further_reading: [ostep]
+    definition: >-
+      A mutex is a lock that at most one thread can hold. A thread acquires it
+      before entering a critical section and releases it on leaving; other
+      threads that try to acquire it wait.
+    attributes:
+      operations: acquire (lock) and release (unlock)
+      holder: only one thread at a time; the holder releases it
+      spinlock: waits by looping (busy waiting), good only for very short critical sections
+    requires: [os.critical-section]
+    related: [os.semaphore]
+    documents:
+      - kind: explanation
+        title: Using a mutex
+        depth: 1
+        body: |-
+          lock(m); counter++; unlock(m);
+          Only the thread holding m can run the increment, so the
+          load-add-store steps can no longer interleave. Locks must be acquired
+          by every thread that touches the shared data, and every acquire needs
+          a matching release, including on error paths.
+    questions:
+      - slug: q.os.synchronization.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What does a spinlock do while it waits for the lock?
+        options:
+          - Sleeps until woken by the scheduler
+          - Repeatedly checks the lock in a loop (busy waiting)
+          - Terminates the thread
+          - Copies the shared data
+        answer: {option_index: 1}
+        explanation: Spinning wastes CPU, so spinlocks suit only very short critical sections, usually on multiprocessors.
+
+  - slug: os.semaphore
+    name: Semaphore
+    aliases: [semaphores, counting semaphore, binary semaphore, wait and signal, P and V operations]
+    difficulty: 3
+    further_reading: [silberschatz-os, ostep]
+    definition: >-
+      A semaphore is an integer variable accessed only through two atomic
+      operations: wait (P), which decrements it and blocks if the result is
+      negative, and signal (V), which increments it and wakes a waiting
+      process if any.
+    attributes:
+      wait_P: decrement; block if the value becomes negative
+      signal_V: increment; wake one waiting process if any
+      binary_semaphore: values 0 and 1, used like a lock
+      counting_semaphore: counts available units of a resource
+    requires: [os.critical-section]
+    related: [os.mutex]
+    documents:
+      - kind: example
+        title: A counting semaphore for three printers
+        depth: 2
+        body: |-
+          Initialise S = 3. Each process calls wait(S) before using a printer
+          and signal(S) afterwards. The first three waits take S to 2, 1 and 0
+          and proceed. A fourth wait takes S to −1 and blocks; the negative
+          value records one waiting process. When a printer is released,
+          signal(S) raises S to 0 and wakes the blocked process.
+    questions:
+      - slug: q.os.synchronization.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          A counting semaphore starts at 5. Processes perform 8 wait operations
+          and 3 signal operations. Assuming none of the waits blocks forever,
+          what is the final value?
+        options: ["0", "−3", "2", "16"]
+        answer: {option_index: 0}
+        explanation: 5 − 8 + 3 = 0.
+      - slug: q.os.synchronization.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What value should a binary semaphore used for mutual exclusion start with?
+        options: ["0", "1", "−1", The number of processes]
+        answer: {option_index: 1}
+        explanation: Starting at 1 lets exactly one process pass the first wait.
+
+  - slug: os.producer-consumer
+    name: Producer-consumer problem
+    aliases: [bounded buffer problem, producer consumer, bounded-buffer]
+    difficulty: 3
+    further_reading: [silberschatz-os]
+    definition: >-
+      In the producer-consumer (bounded-buffer) problem, producers add items to
+      a fixed-size buffer and consumers remove them. The classic solution uses
+      a mutex for the buffer and two counting semaphores, empty and full.
+    attributes:
+      semaphores: mutex = 1, empty = buffer size, full = 0
+      producer: wait(empty), wait(mutex), add item, signal(mutex), signal(full)
+      consumer: wait(full), wait(mutex), remove item, signal(mutex), signal(empty)
+    requires: [os.semaphore]
+    documents:
+      - kind: misconception
+        title: The order of waits matters
+        depth: 3
+        body: |-
+          If a producer did wait(mutex) before wait(empty) and the buffer was
+          full, it would block while holding the mutex. No consumer could then
+          enter to free a slot, and both would wait forever: a deadlock. Always
+          wait on the counting semaphore first, then on the mutex.
+    questions:
+      - slug: q.os.synchronization.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: In the bounded-buffer solution with a buffer of size N, what is the initial value of the "empty" semaphore?
+        options: ["0", "1", N, N − 1]
+        answer: {option_index: 2}
+        explanation: Initially all N slots are empty.

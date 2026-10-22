@@ -1,0 +1,166 @@
+topic: cn.application-layer
+version: "2026.10.1"
+concepts:
+  - slug: cn.dns
+    name: DNS
+    aliases: [domain name system, DNS resolution, name server, DNS lookup, recursive resolver]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      The Domain Name System translates host names such as www.example.com
+      into IP addresses. It is a distributed, hierarchical database of root,
+      top-level-domain and authoritative servers, with caching at resolvers.
+    attributes:
+      purpose: name to address translation
+      hierarchy: root servers, top-level domain servers (.com, .in), authoritative servers
+      transport: mostly UDP port 53; TCP for large responses
+      caching: answers are cached for their time-to-live (TTL)
+      record_types: A (IPv4), AAAA (IPv6), CNAME (alias), MX (mail server), NS (name server)
+    requires: [cn.udp]
+    documents:
+      - kind: procedure
+        title: Resolving www.example.com
+        depth: 2
+        body: What happens when the local resolver has nothing cached.
+        steps:
+          - The host asks its local (recursive) resolver.
+          - The resolver asks a root server, which refers it to the .com top-level-domain servers.
+          - It asks a .com server, which refers it to example.com's authoritative servers.
+          - It asks an authoritative server, which returns the A record with the IP address.
+          - The resolver caches the answer for its TTL and returns it to the host.
+    questions:
+      - slug: q.cn.application-layer.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What is the main job of DNS?
+        options:
+          - Assigning IP addresses to hosts
+          - Translating domain names into IP addresses
+          - Encrypting web traffic
+          - Routing packets between networks
+        answer: {option_index: 1}
+        explanation: DNS maps names to addresses; DHCP is what assigns addresses to hosts.
+      - slug: q.cn.application-layer.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which DNS record type gives the mail server for a domain?
+        options: [A, AAAA, CNAME, MX]
+        answer: {option_index: 3}
+        explanation: MX (mail exchanger) records name the domain's mail servers.
+
+  - slug: cn.http
+    name: HTTP
+    aliases: [hypertext transfer protocol, HTTP methods, GET and POST, HTTP status codes, HTTPS, web protocol]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      HTTP is the request-response protocol of the web. A client sends a
+      request with a method (such as GET or POST), a path and headers; the
+      server replies with a status code, headers and a body. HTTP is stateless;
+      HTTPS is HTTP carried over TLS.
+    attributes:
+      model: request-response, stateless
+      methods: GET (read), POST (submit), PUT (replace), DELETE (remove)
+      status_2xx: success, e.g. 200 OK
+      status_3xx: redirection, e.g. 301 Moved Permanently
+      status_4xx: client error, e.g. 404 Not Found
+      status_5xx: server error, e.g. 500 Internal Server Error
+      state: kept with cookies, since HTTP itself is stateless
+    requires: [cn.tcp]
+    documents:
+      - kind: explanation
+        title: Stateless requests and cookies
+        depth: 1
+        body: |-
+          Each HTTP request stands alone; the server does not remember the
+          previous one. To keep a user logged in, the server sends a cookie in
+          a response header and the browser returns it with every later request
+          to that site, so the server can look up the session.
+    questions:
+      - slug: q.cn.application-layer.3
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What does HTTP status code 404 mean?
+        options: [Success, Moved permanently, Not found, Internal server error]
+        answer: {option_index: 2}
+        explanation: 4xx codes are client errors; 404 means the requested resource does not exist.
+      - slug: q.cn.application-layer.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: HTTP is described as stateless. What does that mean?
+        options:
+          - It cannot transfer data
+          - The server keeps no memory of earlier requests by itself
+          - It never uses TCP
+          - Requests cannot have headers
+        answer: {option_index: 1}
+        explanation: Sessions are built on top with cookies or tokens.
+
+  - slug: cn.email-protocols
+    name: Email protocols
+    aliases: [SMTP, POP3, IMAP, email, mail transfer]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      SMTP pushes email from the sender's client to mail servers and between
+      mail servers. POP3 and IMAP are used by a recipient's client to fetch
+      mail from their server; IMAP keeps mail and folders on the server.
+    attributes:
+      smtp: sending and relaying, a push protocol, port 25 (587 for client submission)
+      pop3: download to the client, port 110
+      imap: access and manage mail kept on the server, port 143
+    requires: [cn.tcp]
+    documents:
+      - kind: explanation
+        title: Push to send, pull to read
+        depth: 1
+        body: |-
+          Sending is a push: your client hands the message to your mail server
+          with SMTP, and that server pushes it to the recipient's server, also
+          with SMTP. Reading is a pull: the recipient's client fetches it with
+          IMAP or POP3. IMAP suits several devices because everything stays
+          synchronised on the server.
+    questions:
+      - slug: q.cn.application-layer.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which protocol transfers email between mail servers?
+        options: [IMAP, POP3, SMTP, HTTP]
+        answer: {option_index: 2}
+        explanation: SMTP is the push protocol for sending and relaying mail.
+
+  - slug: cn.dhcp
+    name: DHCP
+    aliases: [dynamic host configuration protocol, DHCP server, DORA, automatic IP assignment]
+    difficulty: 2
+    further_reading: [kurose-ross]
+    definition: >-
+      DHCP automatically gives a host joining a network its IP address, subnet
+      mask, default gateway and DNS server, for a limited lease time, using a
+      four-message exchange of discover, offer, request and acknowledge.
+    attributes:
+      messages: discover, offer, request, acknowledge (DORA)
+      transport: UDP (server port 67, client port 68)
+      provides: IP address, subnet mask, default gateway, DNS servers, lease time
+    requires: [cn.udp, cn.ipv4-address]
+    documents:
+      - kind: explanation
+        title: Getting an address with no address
+        depth: 2
+        body: |-
+          A new host has no IP address yet, so it broadcasts a DHCP discover
+          message. Servers reply with offers, the host broadcasts a request for
+          one of them, and that server acknowledges it. The host then uses the
+          address until the lease expires or is renewed.
+    questions:
+      - slug: q.cn.application-layer.6
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the order of DHCP messages when a host obtains an address?
+        options:
+          - Request, offer, discover, acknowledge
+          - Discover, offer, request, acknowledge
+          - Offer, discover, acknowledge, request
+          - Discover, request, offer, acknowledge
+        answer: {option_index: 1}
+        explanation: Discover, offer, request, acknowledge - often remembered as DORA.

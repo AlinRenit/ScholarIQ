@@ -1,0 +1,143 @@
+topic: db.concurrency-control
+version: "2026.10.1"
+concepts:
+  - slug: db.two-phase-locking
+    name: Two-phase locking
+    aliases: [2PL, two phase locking, strict two-phase locking, shared and exclusive locks, growing and shrinking phase]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      Two-phase locking requires each transaction to acquire all its locks
+      before releasing any: a growing phase followed by a shrinking phase. It
+      guarantees conflict-serializable schedules but does not prevent
+      deadlock.
+    attributes:
+      shared_lock: for reading; many transactions can hold it together
+      exclusive_lock: for writing; only one holder, no other locks
+      growing_phase: may acquire, may not release
+      shrinking_phase: may release, may not acquire
+      strict_2pl: hold exclusive locks until commit, which avoids cascading rollbacks
+      deadlock: still possible
+    requires: [db.serializability]
+    related: [os.deadlock]
+    contrasts: [db.timestamp-ordering]
+    documents:
+      - kind: explanation
+        title: Why two phases give serializability
+        depth: 3
+        body: |-
+          The moment a transaction acquires its last lock (its lock point)
+          orders it relative to others: any transaction that conflicts with it
+          must wait for one of its locks, so all conflicts point in lock-point
+          order. Ordering transactions by lock point gives an equivalent
+          serial schedule.
+
+          Two transactions can still each hold a lock the other needs, so
+          systems using 2PL also need deadlock detection or prevention.
+    questions:
+      - slug: q.db.concurrency-control.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Under two-phase locking, what may a transaction NOT do after it releases its first lock?
+        options: [Read data it already locked, Acquire any new lock, Commit, Release another lock]
+        answer: {option_index: 1}
+        explanation: Once the shrinking phase starts, no new locks may be acquired.
+      - slug: q.db.concurrency-control.2
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which problem can still occur under basic two-phase locking?
+        options: [Non-serializable schedules, Deadlock, Lost updates between committed transactions, Violation of shared-lock compatibility]
+        answer: {option_index: 1}
+        explanation: 2PL guarantees serializability, but transactions may wait for each other's locks in a cycle.
+      - slug: q.db.concurrency-control.3
+        kind: multiple_choice
+        difficulty: 2
+        prompt: T1 holds a shared lock on X. Which request by T2 is granted immediately?
+        options: [A shared lock on X, An exclusive lock on X, Both, Neither]
+        answer: {option_index: 0}
+        explanation: Shared locks are compatible with each other; an exclusive lock must wait.
+
+  - slug: db.isolation-levels
+    name: Isolation levels and read anomalies
+    aliases: [dirty read, non-repeatable read, phantom read, read uncommitted, read committed, repeatable read, serializable isolation]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      SQL isolation levels trade consistency for concurrency. Read uncommitted
+      allows dirty reads; read committed prevents them; repeatable read also
+      prevents non-repeatable reads; serializable also prevents phantoms.
+    attributes:
+      dirty_read: reading data written by a transaction that has not committed
+      non_repeatable_read: reading the same row twice and getting different committed values
+      phantom: re-running a query and getting new rows that match it
+      read_uncommitted: allows all three
+      read_committed: prevents dirty reads
+      repeatable_read: prevents dirty and non-repeatable reads
+      serializable: prevents all three
+    requires: [db.acid]
+    documents:
+      - kind: example
+        title: A dirty read
+        depth: 2
+        body: |-
+          T1 sets a balance from 1000 to 0 but has not committed. T2 reads 0
+          and refuses a payment. T1 then aborts and the balance goes back to
+          1000. T2 acted on a value that never officially existed.
+    questions:
+      - slug: q.db.concurrency-control.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: >-
+          A transaction reads a row, another transaction updates and commits
+          that row, and the first reads it again and sees a different value.
+          What is this called?
+        options: [Dirty read, Non-repeatable read, Phantom read, Lost update]
+        answer: {option_index: 1}
+        explanation: The same row gave two different committed values within one transaction.
+      - slug: q.db.concurrency-control.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the lowest standard isolation level that prevents dirty reads?
+        options: [Read uncommitted, Read committed, Repeatable read, Serializable]
+        answer: {option_index: 1}
+        explanation: Read committed only lets a transaction see committed data.
+
+  - slug: db.timestamp-ordering
+    name: Timestamp ordering protocol
+    aliases: [timestamp-based protocol, timestamp ordering, Thomas write rule]
+    difficulty: 4
+    further_reading: [silberschatz-db]
+    definition: >-
+      The timestamp-ordering protocol gives each transaction a timestamp when
+      it starts and ensures conflicting operations happen in timestamp order,
+      rolling back any transaction whose operation arrives too late. It uses
+      no locks, so it cannot deadlock.
+    attributes:
+      read_rule: reject a read of X if a younger transaction already wrote X
+      write_rule: reject a write of X if a younger transaction already read or wrote X
+      deadlock: impossible, because transactions never wait
+      cost: more rollbacks
+    requires: [db.serializability]
+    contrasts: [db.two-phase-locking]
+    documents:
+      - kind: explanation
+        title: Rolling back instead of waiting
+        depth: 3
+        body: |-
+          Each item X records the largest timestamps that have read it and
+          written it. If an older transaction tries to write X after a younger
+          one has read it, the younger one has already acted as if the write
+          had not happened, so the older transaction is rolled back and
+          restarted with a new timestamp.
+    questions:
+      - slug: q.db.concurrency-control.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Why can the basic timestamp-ordering protocol not deadlock?
+        options:
+          - It locks every item in advance
+          - Transactions never wait; conflicting late operations cause a rollback instead
+          - It runs transactions one at a time
+          - It only allows reads
+        answer: {option_index: 1}
+        explanation: Deadlock needs waiting; timestamp ordering aborts instead of blocking.

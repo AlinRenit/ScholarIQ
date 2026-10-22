@@ -1,0 +1,57 @@
+# Further reading for knowledge-base entries.
+#
+# Seed entries are original text written for ScholarIQ. They follow the
+# conventions of these standard references, which students can use to read
+# further. Entries are not quotations from them.
+
+sources:
+  - slug: clrs
+    title: Introduction to Algorithms (4th edition)
+    authors: Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein
+    citation: MIT Press, 2022
+  - slug: sedgewick-wayne
+    title: Algorithms (4th edition)
+    authors: Robert Sedgewick, Kevin Wayne
+    citation: Addison-Wesley, 2011
+    url: https://algs4.cs.princeton.edu/
+  - slug: silberschatz-os
+    title: Operating System Concepts (10th edition)
+    authors: Abraham Silberschatz, Peter B. Galvin, Greg Gagne
+    citation: Wiley, 2018
+  - slug: ostep
+    title: "Operating Systems: Three Easy Pieces"
+    authors: Remzi H. Arpaci-Dusseau, Andrea C. Arpaci-Dusseau
+    citation: Arpaci-Dusseau Books, 2018 (free online)
+    url: https://pages.cs.wisc.edu/~remzi/OSTEP/
+  - slug: silberschatz-db
+    title: Database System Concepts (7th edition)
+    authors: Abraham Silberschatz, Henry F. Korth, S. Sudarshan
+    citation: McGraw-Hill, 2019
+  - slug: kurose-ross
+    title: "Computer Networking: A Top-Down Approach (8th edition)"
+    authors: James F. Kurose, Keith W. Ross
+    citation: Pearson, 2021
+  - slug: rfc791
+    title: "RFC 791: Internet Protocol"
+    citation: IETF, 1981
+    url: https://www.rfc-editor.org/rfc/rfc791
+  - slug: rfc9293
+    title: "RFC 9293: Transmission Control Protocol (TCP)"
+    citation: IETF, 2022
+    url: https://www.rfc-editor.org/rfc/rfc9293
+  - slug: rfc768
+    title: "RFC 768: User Datagram Protocol"
+    citation: IETF, 1980
+    url: https://www.rfc-editor.org/rfc/rfc768
+  - slug: rfc4632
+    title: "RFC 4632: Classless Inter-domain Routing (CIDR)"
+    citation: IETF, 2006
+    url: https://www.rfc-editor.org/rfc/rfc4632
+  - slug: rfc1918
+    title: "RFC 1918: Address Allocation for Private Internets"
+    citation: IETF, 1996
+    url: https://www.rfc-editor.org/rfc/rfc1918
+  - slug: rosen
+    title: Discrete Mathematics and Its Applications (8th edition)
+    authors: Kenneth H. Rosen
+    citation: McGraw-Hill, 2019

@@ -1,4 +1,4 @@
-import type { Band, MasteryClass } from "@/lib/api";
+import type { Band, MasteryClass, TrustStatus } from "@/lib/api";
 
 // Labels always pair with a symbol so status is never conveyed by colour alone.
 export const MASTERY: Record<MasteryClass, { label: string; symbol: string; cls: string }> = {
@@ -53,3 +53,13 @@ export function Pill({ symbol, label, cls }: { symbol: string; label: string; cl
     </span>
   );
 }
+
+export const TRUST: Record<TrustStatus, { label: string; symbol: string; cls: string }> = {
+  verified: { label: "Reviewed by a person", symbol: "✓", cls: "bg-ok-soft text-ok" },
+  imported: {
+    label: "Not yet reviewed by a person",
+    symbol: "!",
+    cls: "bg-warn-soft text-warn",
+  },
+  retired: { label: "Retired", symbol: "×", cls: "bg-canvas text-ink-muted border border-line" },
+};

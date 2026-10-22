@@ -19,6 +19,7 @@ dependencies = [
   "openpyxl>=3.1,<4",
   "rapidfuzz>=3.9,<4",
   "pyyaml>=6.0,<7",
+  "snowballstemmer>=2.2,<4",
 ]
 
 [project.optional-dependencies]
@@ -61,5 +62,5 @@ strict = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["pypdfium2.*", "pytesseract.*", "pdfplumber.*"]
+module = ["pypdfium2.*", "pytesseract.*", "pdfplumber.*", "snowballstemmer.*"]
 ignore_missing_imports = true

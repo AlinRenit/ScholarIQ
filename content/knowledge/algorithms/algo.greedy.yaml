@@ -1,0 +1,182 @@
+topic: algo.greedy
+version: "2026.10.1"
+concepts:
+  - slug: algo.greedy-method
+    name: Greedy algorithm
+    aliases: [greedy method, greedy approach, greedy strategy, greedy algorithms, greedy choice property]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      A greedy algorithm builds a solution step by step, always taking the
+      choice that looks best right now and never revisiting it. It is correct
+      only for problems with the greedy-choice property and optimal
+      substructure.
+    attributes:
+      decision_rule: take the locally best choice and never undo it
+      correct_when: greedy-choice property and optimal substructure both hold
+      examples: activity selection, fractional knapsack, Huffman coding, Prim, Kruskal, Dijkstra
+    contrasts: [algo.dynamic-programming]
+    documents:
+      - kind: explanation
+        title: When greedy works and when it fails
+        depth: 1
+        body: |-
+          Greedy is fast and simple, but it needs proof. The greedy-choice
+          property says some optimal solution begins with the greedy choice;
+          optimal substructure says the rest of an optimal solution is optimal
+          for the subproblem that remains.
+
+          Making change shows both sides. With coins 1, 5, 10 and 25, always
+          taking the largest coin that fits gives the fewest coins. With coins
+          1, 3 and 4, greedy makes 6 as 4 + 1 + 1 (three coins), but 3 + 3 uses
+          two. For such coin systems you need dynamic programming.
+    questions:
+      - slug: q.algo.greedy.1
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          With coins of value 1, 3 and 4, how many coins does the greedy method
+          (largest coin first) use to make 6, and what is the true minimum?
+        options:
+          - "Greedy uses 2; the minimum is 2"
+          - "Greedy uses 3; the minimum is 2"
+          - "Greedy uses 3; the minimum is 3"
+          - "Greedy uses 2; the minimum is 1"
+        answer: {option_index: 1}
+        explanation: Greedy picks 4 + 1 + 1; the optimum is 3 + 3.
+      - slug: q.algo.greedy.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What does a greedy algorithm do at each step?
+        options:
+          - Tries every option and keeps the best complete solution
+          - Takes the choice that looks best now and never reconsiders it
+          - Stores answers to overlapping subproblems in a table
+          - Splits the problem into equal halves
+        answer: {option_index: 1}
+        explanation: That locally optimal, irrevocable choice is what makes an algorithm greedy.
+
+  - slug: algo.activity-selection
+    name: Activity selection
+    aliases: [interval scheduling, activity selection problem, maximum non-overlapping intervals]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      The activity-selection problem picks the largest set of non-overlapping
+      intervals. Repeatedly choosing the compatible activity that finishes
+      earliest is optimal.
+    attributes:
+      greedy_rule: earliest finish time first
+      time: O(n log n), dominated by sorting by finish time
+    requires: [algo.greedy-method]
+    documents:
+      - kind: procedure
+        title: Earliest-finish-first
+        depth: 2
+        body: Select a maximum set of mutually compatible activities.
+        steps:
+          - Sort the activities by finish time.
+          - Select the first activity.
+          - For each later activity, select it if its start time is at least the finish time of the last selected activity.
+      - kind: misconception
+        title: Shortest or earliest-starting first does not work
+        depth: 2
+        body: |-
+          Picking the earliest start can choose one long activity that blocks
+          many short ones. Picking the shortest can choose a short activity
+          that overlaps two others which could both have been kept. Earliest
+          finish leaves the most room for what follows, which is why it is
+          optimal.
+    questions:
+      - slug: q.algo.greedy.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which greedy rule is optimal for selecting the most non-overlapping activities?
+        options: [Earliest start time, Shortest duration, Earliest finish time, Fewest overlaps]
+        answer: {option_index: 2}
+        explanation: Finishing earliest leaves the most time for the remaining activities.
+      - slug: q.algo.greedy.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          Activities (start, finish): (1, 4), (3, 5), (0, 6), (5, 7), (6, 9),
+          (8, 10). How many can earliest-finish-first select?
+        options: ["2", "3", "4", "5"]
+        answer: {option_index: 1}
+        explanation: It picks (1, 4), then (5, 7), then (8, 10).
+
+  - slug: algo.fractional-knapsack
+    name: Fractional knapsack
+    aliases: [fractional knapsack problem, continuous knapsack]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      In the fractional knapsack problem you may take parts of items. Taking
+      items in decreasing order of value per unit weight, and a fraction of the
+      last one that fits, is optimal. The 0/1 version, where items cannot be
+      split, needs dynamic programming instead.
+    attributes:
+      greedy_rule: highest value-to-weight ratio first
+      time: O(n log n)
+      zero_one_version: greedy is not optimal; use dynamic programming
+    requires: [algo.greedy-method]
+    contrasts: [algo.knapsack-01]
+    documents:
+      - kind: example
+        title: Filling a knapsack of capacity 50
+        depth: 2
+        body: |-
+          Items (value, weight): A (60, 10), B (100, 20), C (120, 30).
+          Ratios: A 6, B 5, C 4. Take all of A (weight 10, value 60) and all of
+          B (weight 30 so far, value 160). 20 units of capacity remain, so take
+          20/30 of C for value 80. Total 240.
+          In the 0/1 version the same greedy order gives A + B = 160, but B + C
+          = 220 is better.
+    questions:
+      - slug: q.algo.greedy.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: For which problem is choosing by highest value-to-weight ratio guaranteed optimal?
+        options: [0/1 knapsack, Fractional knapsack, Both, Neither]
+        answer: {option_index: 1}
+        explanation: Only when items can be split can the best-ratio item always be used fully first.
+
+  - slug: algo.huffman-coding
+    name: Huffman coding
+    aliases: [Huffman code, Huffman tree, optimal prefix code]
+    difficulty: 3
+    further_reading: [clrs]
+    definition: >-
+      Huffman coding builds an optimal prefix-free binary code by repeatedly
+      merging the two least frequent symbols into a new node, so frequent
+      symbols get short codewords.
+    attributes:
+      greedy_rule: merge the two lowest-frequency nodes
+      time: O(n log n) with a priority queue
+      property: no codeword is a prefix of another
+    requires: [algo.greedy-method, ds.priority-queue]
+    documents:
+      - kind: procedure
+        title: Building a Huffman tree
+        depth: 2
+        body: Construct an optimal prefix code for symbols with known frequencies.
+        steps:
+          - Put every symbol in a min-priority queue keyed by frequency.
+          - Remove the two lowest-frequency nodes and create a parent whose frequency is their sum.
+          - Insert the parent back into the queue.
+          - Repeat until one node remains; it is the root.
+          - Label left edges 0 and right edges 1; a symbol's code is the labels on its root-to-leaf path.
+    questions:
+      - slug: q.algo.greedy.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: At each step of Huffman's algorithm, which nodes are merged?
+        options:
+          - The two most frequent
+          - The two least frequent
+          - The most and the least frequent
+          - Two nodes chosen alphabetically
+        answer: {option_index: 1}
+        explanation: Merging the rarest symbols first pushes them deepest, giving them the longest codes.

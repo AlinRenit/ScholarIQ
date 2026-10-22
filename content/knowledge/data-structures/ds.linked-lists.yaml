@@ -1,0 +1,162 @@
+topic: ds.linked-lists
+version: "2026.10.1"
+concepts:
+  - slug: ds.linked-list
+    name: Linked list
+    aliases: [singly linked list, linked lists, SLL]
+    difficulty: 2
+    further_reading: [clrs, sedgewick-wayne]
+    definition: >-
+      A linked list is a sequence of nodes where each node holds a value and a
+      pointer to the next node. The nodes can be anywhere in memory; the list
+      is reached through a pointer to its first node, the head.
+    attributes:
+      access_by_index: O(n), by walking from the head
+      insert_or_delete_at_head: O(1)
+      insert_after_known_node: O(1)
+      memory_layout: scattered nodes joined by pointers
+      size: grows and shrinks one node at a time
+    contrasts: [ds.array]
+    documents:
+      - kind: explanation
+        title: How a singly linked list works
+        depth: 1
+        body: |-
+          Each node stores data and a next pointer. The last node's next
+          pointer is null. To reach the k-th element you start at the head and
+          follow k pointers, so indexed access is O(n).
+
+          Insertion is cheap once you are at the right place: to insert after
+          node p, create node x, set x.next = p.next, then p.next = x. No other
+          nodes move. Inserting at the head is the same idea with the head
+          pointer and costs O(1).
+      - kind: procedure
+        title: Deleting the node after p
+        depth: 1
+        body: Remove p.next from a singly linked list without breaking the chain.
+        steps:
+          - If p.next is null there is nothing to delete.
+          - Let victim = p.next.
+          - Set p.next = victim.next so the list skips the victim.
+          - Free the victim's memory (or let garbage collection reclaim it).
+      - kind: misconception
+        title: Deleting a node needs its predecessor
+        depth: 2
+        body: |-
+          In a singly linked list, a node does not know which node points to
+          it. To delete node x you need the node before x, which may mean
+          walking from the head in O(n). A doubly linked list stores a prev
+          pointer as well, so deleting a known node is O(1).
+    questions:
+      - slug: q.ds.linked-lists.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What is the worst-case time to access the k-th element of a singly linked list of n nodes?
+        options: [O(1), O(log n), O(n), O(n²)]
+        answer: {option_index: 2}
+        explanation: >-
+          You must follow next pointers from the head one node at a time; in
+          the worst case that is n steps.
+      - slug: q.ds.linked-lists.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          To insert node x right after node p in a singly linked list, which
+          order of assignments is correct?
+        options:
+          - p.next = x, then x.next = p.next
+          - x.next = p.next, then p.next = x
+          - x.next = p, then p.next = x
+          - p.next = x.next, then x.next = p
+        answer: {option_index: 1}
+        explanation: >-
+          x must first take over p's old successor. Doing p.next = x first
+          loses the pointer to the rest of the list.
+      - slug: q.ds.linked-lists.3
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          Which operation is O(1) for a singly linked list but O(n) for an
+          array of n elements?
+        options:
+          - Reading the element at index n/2
+          - Inserting a new first element
+          - Finding the maximum element
+          - Reading the last element when only the head pointer is kept
+        answer: {option_index: 1}
+        explanation: >-
+          A new head node just points at the old head. An array must shift all
+          n elements right.
+
+  - slug: ds.doubly-linked-list
+    name: Doubly linked list
+    aliases: [DLL, two-way linked list, doubly linked lists]
+    difficulty: 2
+    further_reading: [clrs]
+    definition: >-
+      A doubly linked list is a linked list whose nodes store pointers to both
+      the next and the previous node, so it can be walked in either direction
+      and a known node can be removed in O(1).
+    attributes:
+      delete_known_node: O(1)
+      extra_memory: one extra pointer per node
+    requires: [ds.linked-list]
+    related: [ds.deque]
+    documents:
+      - kind: procedure
+        title: Removing a known node x from a doubly linked list
+        depth: 2
+        body: Unlink x by joining its neighbours to each other.
+        steps:
+          - If x.prev is not null, set x.prev.next = x.next; otherwise x was the head, so set head = x.next.
+          - If x.next is not null, set x.next.prev = x.prev; otherwise x was the tail, so set tail = x.prev.
+          - Free x.
+    questions:
+      - slug: q.ds.linked-lists.4
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          You hold a pointer to a node x in the middle of a list. Removing x is
+          O(1) in which structure?
+        options:
+          - A singly linked list
+          - A doubly linked list
+          - Both
+          - Neither
+        answer: {option_index: 1}
+        explanation: >-
+          Only a doubly linked list gives you x.prev directly. In a singly
+          linked list you must search from the head for x's predecessor.
+
+  - slug: ds.cycle-detection
+    name: Cycle detection in a linked list
+    aliases: [Floyd's cycle detection, tortoise and hare, detect loop in linked list]
+    difficulty: 3
+    further_reading: [sedgewick-wayne]
+    definition: >-
+      Floyd's tortoise-and-hare method detects a cycle in a linked list by
+      moving one pointer one step and another two steps at a time; they meet
+      if and only if the list has a cycle.
+    attributes:
+      time: O(n)
+      extra_space: O(1)
+    requires: [ds.linked-list]
+    documents:
+      - kind: procedure
+        title: Floyd's tortoise and hare
+        depth: 2
+        body: Detect whether following next pointers ever revisits a node.
+        steps:
+          - Set slow = head and fast = head.
+          - While fast and fast.next are not null, move slow = slow.next and fast = fast.next.next.
+          - If slow and fast point to the same node, the list has a cycle.
+          - If fast reaches null, the list ends, so there is no cycle.
+    questions:
+      - slug: q.ds.linked-lists.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: How much extra memory does Floyd's tortoise-and-hare cycle detection use?
+        options: [O(1), O(log n), O(n), O(n²)]
+        answer: {option_index: 0}
+        explanation: It keeps only two pointers, whatever the list length.

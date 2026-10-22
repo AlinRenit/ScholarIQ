@@ -1,0 +1,148 @@
+topic: db.indexing
+version: "2026.10.1"
+concepts:
+  - slug: db.index
+    name: Database index
+    aliases: [index, indexes, indices, clustered index, primary index, secondary index, dense index, sparse index]
+    difficulty: 2
+    further_reading: [silberschatz-db]
+    definition: >-
+      An index is an auxiliary structure that maps search-key values to the
+      locations of matching records, so queries can find rows without scanning
+      the whole table. Indexes speed up reads but cost space and slow down
+      inserts, updates and deletes.
+    attributes:
+      clustered_primary: the file is stored in the order of the index key; at most one per table
+      secondary: file order differs from the index key; must be dense
+      dense: an index entry for every search-key value
+      sparse: entries for only some values (e.g. one per block); needs a file sorted on the key
+      trade_off: faster lookups, slower writes, more storage
+    documents:
+      - kind: explanation
+        title: Dense and sparse indexes
+        depth: 2
+        body: |-
+          A dense index has an entry for every key value. A sparse index has
+          entries for only some, typically the first key in each block; to find
+          a key you locate the largest entry not greater than it and scan that
+          block. Sparse indexes are smaller but only work when the file is
+          sorted on the search key, so a secondary index must be dense.
+      - kind: misconception
+        title: More indexes are not always better
+        depth: 1
+        body: |-
+          Every insert, update and delete must also update every index on the
+          table. Index the columns that queries actually filter, join or sort
+          on, and avoid indexes that are rarely used.
+    questions:
+      - slug: q.db.indexing.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: What is the main cost of adding an index to a table?
+        options:
+          - Slower SELECT queries
+          - Slower inserts, updates and deletes, and extra storage
+          - Loss of the primary key
+          - Data can no longer be sorted
+        answer: {option_index: 1}
+        explanation: Every write must also maintain the index.
+      - slug: q.db.indexing.2
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Why must a secondary index be dense?
+        options:
+          - The file is not sorted on its key, so records with a key cannot be found from a neighbouring entry
+          - Secondary indexes store the data itself
+          - Sparse indexes are not allowed in SQL
+          - Dense indexes are always smaller
+        answer: {option_index: 0}
+        explanation: Sparse lookup relies on scanning forward in key order, which only works for the file's sort key.
+
+  - slug: db.b-plus-tree
+    name: B+ tree index
+    aliases: [B+ tree, B plus tree, B-tree, B tree, multilevel index]
+    difficulty: 3
+    further_reading: [silberschatz-db, clrs]
+    definition: >-
+      A B+ tree is a balanced multiway search tree used for disk-based
+      indexes. Every leaf is at the same depth, all records (or pointers to
+      them) are in the leaves, and the leaves are linked for range scans.
+      With a large fan-out the tree stays very shallow.
+    attributes:
+      balance: all leaves at the same depth
+      data_location: leaves only; internal nodes hold keys to guide the search
+      leaf_links: leaves form a linked list, good for range queries
+      height: about log_f(n) for fan-out f
+      node_size: usually one disk page
+    requires: [db.index, ds.bst]
+    contrasts: [db.hash-index]
+    documents:
+      - kind: explanation
+        title: Why B+ trees suit disks
+        depth: 2
+        body: |-
+          Reading a disk page is far slower than comparing keys in memory, so
+          the goal is to read as few pages as possible. A B+ tree node fills a
+          page and can hold hundreds of keys, so the fan-out f is large and the
+          height log_f(n) is tiny: with f = 100, three levels cover a million
+          keys. Because leaves are linked in key order, a range query finds its
+          first key and then walks along the leaves.
+    questions:
+      - slug: q.db.indexing.3
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          A B+ tree has a fan-out of 100. Roughly how many levels are needed to
+          index 1,000,000 keys?
+        options: ["2", "3", "20", "100"]
+        answer: {option_index: 1}
+        explanation: 100³ = 1,000,000, so three levels are enough.
+      - slug: q.db.indexing.4
+        kind: multiple_choice
+        difficulty: 3
+        prompt: Which feature of a B+ tree makes range queries efficient?
+        options:
+          - Data in internal nodes
+          - Leaves linked in key order
+          - Hashing of keys
+          - Unbalanced height
+        answer: {option_index: 1}
+        explanation: After finding the start of the range, the scan follows the leaf links.
+
+  - slug: db.hash-index
+    name: Hash index
+    aliases: [hash-based index, static hashing, extendible hashing]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      A hash index places entries in buckets chosen by a hash function on the
+      search key. It answers equality lookups in about one bucket access but
+      cannot help with range queries or ordering.
+    attributes:
+      equality_lookup: about one bucket access
+      range_query: not supported
+      growth: extendible or linear hashing avoid full rebuilds
+    requires: [db.index, ds.hash-table]
+    contrasts: [db.b-plus-tree]
+    documents:
+      - kind: explanation
+        title: Choosing between hash and B+ tree indexes
+        depth: 2
+        body: |-
+          If a column is only ever looked up by exact value, a hash index is
+          fast. Queries such as WHERE marks BETWEEN 60 AND 80, ORDER BY marks
+          or prefix matches need key order, which only a tree index keeps.
+          This is why B+ trees are the default in most database systems.
+    questions:
+      - slug: q.db.indexing.5
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Which query can a hash index NOT speed up?
+        options:
+          - WHERE id = 42
+          - WHERE marks BETWEEN 60 AND 80
+          - WHERE email = 'a@b.com'
+          - WHERE roll_no = 'CS101'
+        answer: {option_index: 1}
+        explanation: Hashing scatters neighbouring values, so ranges need a structure that keeps order.

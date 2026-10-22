@@ -1,0 +1,156 @@
+topic: os.deadlocks
+version: "2026.10.1"
+concepts:
+  - slug: os.deadlock
+    name: Deadlock
+    aliases: [deadlocks, deadlock conditions, Coffman conditions, necessary conditions for deadlock]
+    difficulty: 2
+    further_reading: [silberschatz-os]
+    definition: >-
+      A deadlock is a state in which a set of processes are all waiting for
+      resources held by others in the same set, so none of them can proceed.
+      It can arise only if mutual exclusion, hold and wait, no preemption and
+      circular wait all hold at once.
+    attributes:
+      mutual_exclusion: at least one resource can be held by only one process at a time
+      hold_and_wait: a process holds resources while waiting for more
+      no_preemption: resources cannot be taken away; they are only released voluntarily
+      circular_wait: a cycle of processes, each waiting for a resource the next one holds
+      handling: prevention, avoidance, detection and recovery, or ignoring it
+    related: [os.mutex]
+    documents:
+      - kind: explanation
+        title: The four necessary conditions
+        depth: 1
+        body: |-
+          Deadlock needs all four conditions together. Mutual exclusion: some
+          resource cannot be shared. Hold and wait: a process keeps what it has
+          while asking for more. No preemption: nothing can be forcibly taken
+          away. Circular wait: P1 waits for P2, P2 for P3, …, Pn for P1.
+
+          Because all four are necessary, breaking any one of them prevents
+          deadlock. That is the idea behind deadlock prevention.
+      - kind: example
+        title: Two threads, two locks
+        depth: 1
+        body: |-
+          Thread 1 locks A then tries to lock B. Thread 2 locks B then tries to
+          lock A. If each gets its first lock before the other's second
+          request, both wait forever. Making every thread acquire locks in the
+          same global order (always A before B) removes the circular wait.
+    questions:
+      - slug: q.os.deadlocks.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: Which of these is NOT one of the four necessary conditions for deadlock?
+        options: [Mutual exclusion, Hold and wait, Preemption, Circular wait]
+        answer: {option_index: 2}
+        explanation: The condition is NO preemption. Being able to preempt resources prevents deadlock.
+      - slug: q.os.deadlocks.2
+        kind: multiple_choice
+        difficulty: 2
+        prompt: Requiring every thread to acquire locks in the same fixed order breaks which condition?
+        options: [Mutual exclusion, Hold and wait, No preemption, Circular wait]
+        answer: {option_index: 3}
+        explanation: With a global order, no cycle of waiting can form.
+
+  - slug: os.resource-allocation-graph
+    name: Resource-allocation graph
+    aliases: [RAG, resource allocation graph, wait-for graph]
+    difficulty: 3
+    further_reading: [silberschatz-os]
+    definition: >-
+      A resource-allocation graph has process and resource nodes, with request
+      edges from processes to resources and assignment edges from resources to
+      processes. With one instance of each resource, a cycle means deadlock.
+    attributes:
+      request_edge: process → resource
+      assignment_edge: resource instance → process
+      single_instance_resources: a cycle means deadlock
+      multiple_instance_resources: a cycle means deadlock is possible, not certain
+    requires: [os.deadlock]
+    documents:
+      - kind: misconception
+        title: A cycle is not always a deadlock
+        depth: 2
+        body: |-
+          With several instances of a resource type, a cycle can exist while
+          some process outside it holds an instance it will release. When it
+          does, the cycle breaks. So a cycle is necessary for deadlock, and
+          sufficient only when every resource has a single instance.
+    questions:
+      - slug: q.os.deadlocks.3
+        kind: multiple_choice
+        difficulty: 3
+        prompt: In a resource-allocation graph where every resource has exactly one instance, what does a cycle indicate?
+        options: [Deadlock is possible but not certain, A deadlock exists, The system is safe, Starvation only]
+        answer: {option_index: 1}
+        explanation: With single instances, every process on the cycle waits for a resource held by the next.
+
+  - slug: os.bankers-algorithm
+    name: Banker's algorithm
+    aliases: [bankers algorithm, deadlock avoidance, safe state, safe sequence]
+    difficulty: 4
+    further_reading: [silberschatz-os]
+    definition: >-
+      The banker's algorithm avoids deadlock by granting a request only if the
+      resulting state is safe, meaning there is some order (a safe sequence) in
+      which every process can obtain its maximum need and finish.
+    attributes:
+      need: Max − Allocation
+      safe_state: a safe sequence of all processes exists
+      unsafe_state: may lead to deadlock, but is not itself a deadlock
+      requires_in_advance: each process's maximum claim
+    requires: [os.deadlock]
+    documents:
+      - kind: procedure
+        title: Safety check
+        depth: 3
+        body: Decide whether the current state is safe.
+        steps:
+          - Set Work = Available and mark every process unfinished.
+          - Find an unfinished process whose Need ≤ Work (for every resource type).
+          - Pretend it runs to completion - add its Allocation to Work and mark it finished.
+          - Repeat until no such process exists.
+          - The state is safe if every process was marked finished; the order you marked them is a safe sequence.
+      - kind: example
+        title: Banker's algorithm with three resource types
+        depth: 3
+        body: |-
+          Available (A, B, C) = (3, 3, 2).
+          Allocation: P0 (0,1,0), P1 (2,0,0), P2 (3,0,2), P3 (2,1,1), P4 (0,0,2).
+          Max: P0 (7,5,3), P1 (3,2,2), P2 (9,0,2), P3 (2,2,2), P4 (4,3,3).
+          Need = Max − Allocation: P0 (7,4,3), P1 (1,2,2), P2 (6,0,0),
+          P3 (0,1,1), P4 (4,3,1).
+          P1 fits (1,2,2) ≤ (3,3,2), so Work becomes (5,3,2). P3 fits, Work
+          (7,4,3). P4 fits, Work (7,4,5). P2 fits, Work (10,4,7). P0 fits,
+          Work (10,5,7). Safe sequence: P1, P3, P4, P2, P0.
+    questions:
+      - slug: q.os.deadlocks.4
+        kind: multiple_choice
+        style: application
+        difficulty: 4
+        prompt: >-
+          A system has 12 units of one resource. P0 holds 5 and may need up to
+          10, P1 holds 2 and may need up to 4, P2 holds 2 and may need up to 9.
+          Which is a safe sequence?
+        options:
+          - "P0, P1, P2"
+          - "P1, P0, P2"
+          - "P2, P1, P0"
+          - No safe sequence exists
+        answer: {option_index: 1}
+        explanation: >-
+          3 units are free. P1 needs 2 more, finishes and frees 4 (5 free). P0
+          needs 5, finishes and frees 10. P2 needs 7, which is now available.
+      - slug: q.os.deadlocks.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What does it mean that a system is in an unsafe state?
+        options:
+          - It is already deadlocked
+          - Deadlock may occur, because no safe sequence is guaranteed
+          - A process has crashed
+          - Resources are being preempted
+        answer: {option_index: 1}
+        explanation: Unsafe states are not necessarily deadlocked, but the OS can no longer guarantee avoiding deadlock.

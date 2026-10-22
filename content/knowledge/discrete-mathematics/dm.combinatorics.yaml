@@ -1,0 +1,157 @@
+topic: dm.combinatorics
+version: "2026.10.1"
+concepts:
+  - slug: dm.counting-principles
+    name: Sum and product rules
+    aliases: [counting, product rule, sum rule, rule of product, rule of sum, fundamental counting principle]
+    difficulty: 1
+    further_reading: [rosen]
+    definition: >-
+      The product rule says a task done in a sequence of steps with m and then
+      n choices can be done in m × n ways. The sum rule says choosing one
+      option from disjoint groups of m and n options gives m + n ways.
+    attributes:
+      product_rule: independent successive choices multiply
+      sum_rule: mutually exclusive alternatives add
+    documents:
+      - kind: example
+        title: Counting passwords
+        depth: 1
+        body: |-
+          A code is 2 letters (A–Z) followed by 3 digits. By the product rule
+          there are 26 × 26 × 10 × 10 × 10 = 676,000 codes. If a code may be
+          either 4 digits or 3 letters, the sum rule gives
+          10^4 + 26^3 = 10,000 + 17,576 = 27,576 codes.
+    questions:
+      - slug: q.dm.combinatorics.1
+        kind: multiple_choice
+        difficulty: 1
+        prompt: How many different 8-bit strings are there?
+        options: ["8", "16", "64", "256"]
+        answer: {option_index: 3}
+        explanation: Each of the 8 positions has 2 choices, so 2^8 = 256.
+
+  - slug: dm.permutations-combinations
+    name: Permutations and combinations
+    aliases: [permutations, combinations, nPr, nCr, binomial coefficient, n choose r, arrangements, selections]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      A permutation is an ordered arrangement and a combination an unordered
+      selection. The number of r-permutations of n distinct objects is
+      P(n, r) = n!/(n − r)!, and the number of r-combinations is
+      C(n, r) = n!/(r!(n − r)!).
+    attributes:
+      permutation: order matters, P(n, r) = n!/(n − r)!
+      combination: order does not matter, C(n, r) = n!/(r!(n − r)!)
+      relationship: P(n, r) = C(n, r) × r!
+      symmetry: C(n, r) = C(n, n − r)
+    requires: [dm.counting-principles]
+    documents:
+      - kind: explanation
+        title: Does order matter?
+        depth: 1
+        body: |-
+          Choosing a president, secretary and treasurer from 10 people is a
+          permutation: the roles differ, so order matters. P(10, 3) =
+          10 × 9 × 8 = 720.
+          Choosing a 3-person committee is a combination: the same three
+          people in any order are the same committee. C(10, 3) = 720 / 3! =
+          120.
+      - kind: misconception
+        title: Repeated letters
+        depth: 2
+        body: |-
+          The letters of BOOK can be arranged in 4!/2! = 12 ways, not 4! = 24,
+          because swapping the two O's gives the same word. Divide by the
+          factorial of each repeat count.
+    questions:
+      - slug: q.dm.combinatorics.2
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: In how many ways can a team of 4 be chosen from 9 students?
+        options: ["36", "126", "3024", "6561"]
+        answer: {option_index: 1}
+        explanation: Order does not matter, so C(9, 4) = 9·8·7·6 / 4! = 126.
+      - slug: q.dm.combinatorics.3
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: In how many ways can gold, silver and bronze go to 3 of 8 runners?
+        options: ["24", "56", "336", "512"]
+        answer: {option_index: 2}
+        explanation: Order matters, so P(8, 3) = 8 × 7 × 6 = 336.
+      - slug: q.dm.combinatorics.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: How many distinct arrangements are there of the letters of LEVEL?
+        options: ["20", "30", "60", "120"]
+        answer: {option_index: 1}
+        explanation: 5! / (2! × 2!) = 120 / 4 = 30, dividing for the repeated L's and E's.
+
+  - slug: dm.pigeonhole
+    name: Pigeonhole principle
+    aliases: [pigeonhole, box principle, Dirichlet principle, generalised pigeonhole principle]
+    difficulty: 2
+    further_reading: [rosen]
+    definition: >-
+      The pigeonhole principle says that if more than n objects go into n
+      boxes, some box holds at least two. In general, N objects in k boxes put
+      at least ⌈N/k⌉ objects in some box.
+    attributes:
+      basic: n + 1 objects in n boxes - some box has at least 2
+      generalised: N objects in k boxes - some box has at least ⌈N/k⌉
+    requires: [dm.counting-principles]
+    documents:
+      - kind: example
+        title: Birthdays and socks
+        depth: 1
+        body: |-
+          Among 367 people, two must share a birthday, since there are at most
+          366 possible birthdays.
+          A drawer has black and white socks. Taking 3 socks guarantees a
+          matching pair: 2 colours are the boxes, 3 socks the objects.
+    questions:
+      - slug: q.dm.combinatorics.5
+        kind: multiple_choice
+        style: application
+        difficulty: 2
+        prompt: >-
+          What is the minimum number of students needed to guarantee that at
+          least 3 were born in the same month?
+        options: ["13", "24", "25", "36"]
+        answer: {option_index: 2}
+        explanation: With 24, each month could have exactly 2. The 25th forces a third, since ⌈25/12⌉ = 3.
+
+  - slug: dm.binomial-theorem
+    name: Binomial theorem
+    aliases: [binomial expansion, Pascal's triangle, binomial theorem]
+    difficulty: 3
+    further_reading: [rosen]
+    definition: >-
+      The binomial theorem states (x + y)^n = Σ C(n, k) x^(n−k) y^k for
+      k = 0 to n. The coefficients C(n, k) form Pascal's triangle, where each
+      entry is the sum of the two above it.
+    attributes:
+      formula: (x + y)^n = sum over k of C(n, k) x^(n−k) y^k
+      pascal_identity: C(n, k) = C(n − 1, k − 1) + C(n − 1, k)
+      sum_of_coefficients: 2^n
+    requires: [dm.permutations-combinations]
+    documents:
+      - kind: example
+        title: Expanding (x + y)^4
+        depth: 2
+        body: |-
+          The row of Pascal's triangle for n = 4 is 1, 4, 6, 4, 1, so
+          (x + y)^4 = x^4 + 4x³y + 6x²y² + 4xy³ + y^4. Setting x = y = 1 shows
+          the coefficients add up to 2^4 = 16.
+    questions:
+      - slug: q.dm.combinatorics.6
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the coefficient of x²y³ in (x + y)^5?
+        options: ["5", "10", "15", "20"]
+        answer: {option_index: 1}
+        explanation: It is C(5, 3) = 10.

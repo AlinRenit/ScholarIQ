@@ -1,0 +1,240 @@
+topic: db.normalization
+version: "2026.10.1"
+concepts:
+  - slug: db.anomalies
+    name: Update anomalies
+    aliases: [insertion anomaly, deletion anomaly, update anomaly, modification anomaly, redundancy, why normalise]
+    difficulty: 2
+    further_reading: [silberschatz-db]
+    definition: >-
+      Redundant storage of the same fact causes update anomalies: an
+      insertion anomaly (cannot record a fact without an unrelated one), a
+      deletion anomaly (deleting one fact loses another) and an update anomaly
+      (changing a fact in one row but not its copies leaves inconsistent data).
+    attributes:
+      insertion: cannot add a fact without unrelated data
+      deletion: removing one fact accidentally removes another
+      update: the same fact stored in many rows can become inconsistent
+      remedy: normalisation by decomposition
+    documents:
+      - kind: example
+        title: Anomalies in one wide table
+        depth: 1
+        body: |-
+          Enrolment(roll_no, name, course_id, course_title, instructor).
+          Insertion: a new course with no students yet cannot be recorded
+          without a fake student. Deletion: if the only student in a course
+          drops it, the course's title and instructor disappear. Update:
+          renaming a course means changing every row for every student in it,
+          and missing one leaves two titles.
+    questions:
+      - slug: q.db.normalization.1
+        kind: multiple_choice
+        difficulty: 2
+        prompt: >-
+          Deleting the last student enrolled in a course also deletes the only
+          record of who teaches it. What is this called?
+        options: [Insertion anomaly, Deletion anomaly, Update anomaly, Lost update]
+        answer: {option_index: 1}
+        explanation: Removing one fact (the enrolment) unintentionally removed another (the instructor).
+
+  - slug: db.1nf
+    name: First normal form
+    aliases: [1NF, first normal form, atomic values]
+    difficulty: 1
+    further_reading: [silberschatz-db]
+    definition: >-
+      A relation is in first normal form (1NF) when every attribute holds a
+      single atomic value: no repeating groups and no lists or sets inside a
+      cell.
+    attributes:
+      rule: every cell holds one atomic value
+      violation_example: a phones column containing "98400, 98401"
+    requires: [db.relation]
+    documents:
+      - kind: example
+        title: Fixing a multi-valued column
+        depth: 1
+        body: |-
+          Student(roll_no, name, phones) with phones = "98400, 98401" is not in
+          1NF. Move phones to its own relation StudentPhone(roll_no, phone),
+          with one row per number.
+    questions:
+      - slug: q.db.normalization.2
+        kind: multiple_choice
+        difficulty: 1
+        prompt: What does first normal form require?
+        options:
+          - No partial dependencies
+          - Every attribute value is atomic
+          - No transitive dependencies
+          - Every determinant is a superkey
+        answer: {option_index: 1}
+        explanation: 1NF only rules out multi-valued or composite cells.
+
+  - slug: db.2nf
+    name: Second normal form
+    aliases: [2NF, second normal form, partial dependency, partial dependencies]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      A relation is in second normal form (2NF) when it is in 1NF and no
+      non-prime attribute depends on only part of a candidate key (no partial
+      dependency). It matters only when some candidate key has more than one
+      attribute.
+    attributes:
+      prime_attribute: belongs to some candidate key
+      partial_dependency: a non-prime attribute determined by a proper subset of a candidate key
+      single_attribute_keys: a 1NF relation whose keys are all single attributes is automatically in 2NF
+    requires: [db.1nf, db.closure]
+    documents:
+      - kind: example
+        title: Removing a partial dependency
+        depth: 2
+        body: |-
+          Enrolment(roll_no, course_id, name, grade) with key (roll_no,
+          course_id), roll_no → name and (roll_no, course_id) → grade.
+          name depends on roll_no alone, part of the key, so this is not 2NF.
+          Decompose into Student(roll_no, name) and Enrolment(roll_no,
+          course_id, grade).
+    questions:
+      - slug: q.db.normalization.3
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          R(A, B, C, D) has candidate key AB and FDs AB → C and B → D. Which
+          normal form does it violate first?
+        options: [1NF, 2NF, 3NF only, It is in BCNF]
+        answer: {option_index: 1}
+        explanation: D depends on B, a proper part of the key AB - a partial dependency.
+
+  - slug: db.3nf
+    name: Third normal form
+    aliases: [3NF, third normal form, transitive dependency, transitive dependencies]
+    difficulty: 3
+    further_reading: [silberschatz-db]
+    definition: >-
+      A relation is in third normal form (3NF) when, for every non-trivial
+      functional dependency X → A, either X is a superkey or A is a prime
+      attribute. Informally: it is in 2NF and no non-prime attribute depends
+      transitively on a key through another non-prime attribute.
+    attributes:
+      rule: for every non-trivial X → A, X is a superkey or A is prime
+      removes: transitive dependencies of non-prime attributes
+      guarantee: a lossless, dependency-preserving 3NF decomposition always exists
+    requires: [db.2nf]
+    contrasts: [db.bcnf]
+    documents:
+      - kind: example
+        title: Removing a transitive dependency
+        depth: 2
+        body: |-
+          Student(roll_no, dept_id, dept_name) with roll_no → dept_id and
+          dept_id → dept_name. The key is roll_no, and dept_name depends on it
+          only through dept_id, a non-key attribute. Every student row repeats
+          the department name.
+          Decompose into Student(roll_no, dept_id) and Department(dept_id,
+          dept_name). Both are in 3NF (in fact BCNF).
+    questions:
+      - slug: q.db.normalization.4
+        kind: multiple_choice
+        style: application
+        difficulty: 3
+        prompt: >-
+          R(A, B, C) with key A and FDs A → B and B → C. Which normal form is
+          the highest it satisfies?
+        options: [1NF, 2NF, 3NF, BCNF]
+        answer: {option_index: 1}
+        explanation: >-
+          The key is a single attribute, so there are no partial dependencies
+          (2NF holds). B → C has a non-superkey determinant and C is not prime,
+          so 3NF fails.
+
+  - slug: db.bcnf
+    name: Boyce-Codd normal form
+    aliases: [BCNF, Boyce Codd normal form, 3.5NF]
+    difficulty: 4
+    further_reading: [silberschatz-db]
+    definition: >-
+      A relation is in Boyce-Codd normal form (BCNF) when the determinant of
+      every non-trivial functional dependency is a superkey. BCNF is stricter
+      than 3NF; a lossless BCNF decomposition always exists, but it may not
+      preserve every dependency.
+    attributes:
+      rule: for every non-trivial X → Y, X is a superkey
+      versus_3nf: drops the "or A is prime" escape clause
+      trade_off: may lose dependency preservation
+    requires: [db.3nf]
+    contrasts: [db.3nf]
+    documents:
+      - kind: example
+        title: In 3NF but not BCNF
+        depth: 3
+        body: |-
+          Teaches(student, course, instructor). Each instructor teaches one
+          course (instructor → course), and for each course a student has one
+          instructor ((student, course) → instructor).
+          Candidate keys: (student, course) and (student, instructor), so all
+          three attributes are prime. instructor → course is allowed by 3NF
+          (course is prime) but violates BCNF (instructor is not a superkey).
+          Decomposing into (instructor, course) and (student, instructor) is
+          lossless and in BCNF, but the dependency (student, course) →
+          instructor can no longer be checked within a single table.
+    questions:
+      - slug: q.db.normalization.5
+        kind: multiple_choice
+        difficulty: 3
+        prompt: What is the condition for BCNF?
+        options:
+          - Every attribute is atomic
+          - No non-prime attribute depends on part of a key
+          - Every determinant of a non-trivial FD is a superkey
+          - Every attribute is part of a candidate key
+        answer: {option_index: 2}
+        explanation: BCNF requires the left side of every non-trivial dependency to be a superkey.
+      - slug: q.db.normalization.6
+        kind: multiple_choice
+        difficulty: 4
+        prompt: Which guarantee can be lost when decomposing into BCNF but is always achievable for 3NF?
+        options: [Lossless join, Dependency preservation, Atomic values, Having a primary key]
+        answer: {option_index: 1}
+        explanation: Both can be made lossless, but only 3NF guarantees every FD stays checkable in a single relation.
+
+  - slug: db.lossless-decomposition
+    name: Lossless-join decomposition
+    aliases: [lossless decomposition, lossless join, lossy decomposition, dependency preservation]
+    difficulty: 4
+    further_reading: [silberschatz-db]
+    definition: >-
+      A decomposition of R into R1 and R2 is lossless when joining R1 and R2
+      always gives back exactly R. This holds if the common attributes
+      R1 ∩ R2 functionally determine all of R1 or all of R2.
+    attributes:
+      test: (R1 ∩ R2) → R1 or (R1 ∩ R2) → R2
+      lossy_result: the join produces extra, spurious tuples
+    requires: [db.closure]
+    documents:
+      - kind: misconception
+        title: Lossy means extra rows, not missing rows
+        depth: 3
+        body: |-
+          A lossy decomposition loses information because the natural join
+          creates spurious tuples that were never in the original relation,
+          so you can no longer tell which combinations were real. It does not
+          drop original rows.
+    questions:
+      - slug: q.db.normalization.7
+        kind: multiple_choice
+        style: application
+        difficulty: 4
+        prompt: >-
+          R(A, B, C) with A → B is decomposed into R1(A, B) and R2(A, C). Is the
+          decomposition lossless?
+        options:
+          - Yes, because A → AB, so the common attribute determines R1
+          - No, because B and C are separated
+          - Only if C → A
+          - It cannot be decided without data
+        answer: {option_index: 0}
+        explanation: The common attribute A determines all of R1 = {A, B}.

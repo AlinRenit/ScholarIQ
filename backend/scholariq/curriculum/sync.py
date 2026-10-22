@@ -1,6 +1,6 @@
 """Load curriculum files into the database (idempotent).
 
-Run:  python -m scholariq.curriculum.sync
+Run:  python -m scholariq.curriculum.sync   (then loads the knowledge base too)
 
 Subjects and topics are upserted by slug. Topic links of curriculum subjects
 are replaced to match the file. Custom subjects created during imports are
@@ -129,6 +129,11 @@ def main() -> None:
     with Session(get_engine()) as session:
         report = sync_curricula(session, files)
     logger.info("curriculum sync: %s", report)
+
+    # Knowledge files reference curriculum topics, so they load second.
+    from scholariq.knowledge import sync as knowledge_sync
+
+    knowledge_sync.main()
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from alembic import command
 from fastapi.testclient import TestClient
+from sqlalchemy import Engine
 
 from scholariq.core.config import Settings
 from scholariq.db.session import build_engine
@@ -34,7 +35,8 @@ def test_ready_fails_when_schema_is_behind(settings: Settings, tmp_path: Path) -
     url = f"sqlite:///{tmp_path / 'old.db'}"
     command.upgrade(alembic_config(url), "head")
     command.downgrade(alembic_config(url), "base")
-    stale = settings.model_copy(update={"database_url": url})
+    # Warming the tutor caches fails on this database; start-up must survive it.
+    stale = settings.model_copy(update={"database_url": url, "warm_caches_on_start": True})
     engine = build_engine(url)
     app = create_app(stale)
     from scholariq.core.config import get_settings
@@ -66,4 +68,20 @@ def test_system_info_is_honest(client: TestClient) -> None:
     assert caps["tutor"] == "available"
     assert caps["diagnostics"] == "available"
     # Features that do not exist yet must not be reported as available.
-    assert caps["hardening"] == "planned"
+    assert caps["hardening"] == "available"
+
+
+def test_start_up_builds_the_tutor_index(
+    settings: Settings, engine: Engine, knowledge: None
+) -> None:
+    from scholariq.core.config import get_settings
+    from scholariq.db.session import get_engine
+    from scholariq.knowledge import index
+
+    index._cache.clear()
+    warm = settings.model_copy(update={"warm_caches_on_start": True})
+    app = create_app(warm)
+    app.dependency_overrides[get_settings] = lambda: warm
+    app.dependency_overrides[get_engine] = lambda: engine
+    with TestClient(app):
+        assert warm.allow_unreviewed_content in index._cache

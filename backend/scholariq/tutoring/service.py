@@ -77,6 +77,12 @@ def owned(session: Session, student_id: str, conversation_id: str) -> Conversati
     return conv
 
 
+def warm_up(session: Session, settings: Settings) -> None:
+    """Build the cached retrieval index and lexicon before the first question."""
+    index = get_index(session, settings.allow_unreviewed_content)
+    get_lexicon(session, index, settings.content_dir)
+
+
 def ask(
     session: Session,
     settings: Settings,

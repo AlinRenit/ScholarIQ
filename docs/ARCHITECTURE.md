@@ -420,8 +420,16 @@ model in the system and is used only to turn pixels into characters.
 * Startup fails if AI-provider credentials are present (`SCHOLARIQ_STRICT_AI_ENV_CHECK`).
 * Deleting a student cascades to every student-owned row, and the same service
   deletes their uploaded files. Expired files are purged after uploads.
-* Students are identified by an HMAC-signed HttpOnly cookie (local profile, no
-  password). Every document and record query is scoped to that student, and
-  another student's ids return 404. Password or SSO login is planned for
-  Milestone 7; until then the app must not be exposed publicly.
+* Students are identified by an HMAC-signed HttpOnly cookie carrying the
+  profile's session version. An optional email and scrypt-hashed password allow
+  sign-in from another browser; changing the password or "sign out everywhere"
+  bumps the version and invalidates older cookies. Sign-in is rate limited.
+  Every document and record query is scoped to that student, and another
+  student's ids return 404.
+* The Next.js forwarder refuses cross-site state-changing requests; pages carry
+  a Content Security Policy and the API sets nosniff, frame and no-store
+  headers. The full review and residual risks are in [SECURITY.md](SECURITY.md).
+* The Playwright suite (`frontend/e2e/`) runs the definition-of-done walkthrough,
+  sign-in and axe accessibility checks against a throwaway stack whose API and
+  web server refuse and record any non-loopback connection.
 * Uploads are rate limited per student (20 per 10 minutes, in process).

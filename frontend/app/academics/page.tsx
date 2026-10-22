@@ -1,3 +1,4 @@
+import { SignIn } from "@/components/account/SignIn";
 import { CreateProfile } from "@/components/academics/CreateProfile";
 import { DocumentList } from "@/components/academics/DocumentList";
 import { ResultsTable } from "@/components/academics/ResultsTable";
@@ -19,7 +20,10 @@ export default async function AcademicsPage() {
       <>
         <PageHeader title={item.label} description={item.description} />
         {profile.status === 401 ? (
-          <CreateProfile />
+          <div className="grid gap-6 lg:grid-cols-2">
+            <CreateProfile />
+            <SignIn />
+          </div>
         ) : (
           <Notice tone="error" title="The ScholarIQ API is not reachable.">
             {profile.message}

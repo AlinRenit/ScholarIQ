@@ -76,11 +76,25 @@ parse (never run) student code, and `sqlite3` with an authorizer for the
 practice SQL database, which lives in memory and cannot read files or the
 application database.
 
+Milestone 7 adds development tools only, none shipped in the app:
+
+| Dependency | Purpose | AI? | Network at runtime? | Verdict |
+| --- | --- | --- | --- | --- |
+| @playwright/test (M7, frontend dev) | drives Chromium in the end-to-end tests | no | no (tests run offline) | allowed |
+| @axe-core/playwright (M7, frontend dev) | rule-based WCAG checks (axe-core) in the end-to-end tests | no | no | allowed |
+
+Password hashing uses `hashlib.scrypt` from the Python standard library.
+
 Next.js telemetry is disabled in the Docker images (`NEXT_TELEMETRY_DISABLED=1`).
 Set the same variable, or run `npx next telemetry disable`, for local development.
 
 ## Offline operation
 
-After installation and content setup, nothing in the intelligence pipeline needs
-the internet. Milestone 7 adds an end-to-end test that runs the full stack on a
-Docker network with no external route.
+After installation and content setup, nothing in ScholarIQ needs the internet.
+The end-to-end suite (`frontend/e2e/`) checks this on every run: the API and the
+web server start with guards that refuse and record any connection or DNS
+lookup for a host other than this machine (`e2e/offline/sitecustomize.py` for
+Python, `e2e/offline/net-guard.cjs` for Node.js), the browser's requests to
+other hosts are blocked, and the run fails if anything was attempted or if
+either guard was not loaded. The backend unit tests block outbound sockets
+the same way.

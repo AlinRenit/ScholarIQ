@@ -36,5 +36,5 @@ CAPABILITIES: list[Capability] = [
     _c("knowledge_base", "Computer Science knowledge base and lexical retrieval", 4, _A),
     _c("tutor", "Question understanding and answer handlers", 5, _A),
     _c("diagnostics", "Diagnostic quizzes and study plans", 6, _A),
-    _c("hardening", "Security, offline and accessibility hardening", 7, _P),
+    _c("hardening", "Security, offline and accessibility hardening", 7, _A),
 ]

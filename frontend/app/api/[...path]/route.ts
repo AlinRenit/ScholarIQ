@@ -5,11 +5,14 @@
 import type { NextRequest } from "next/server";
 
 import { apiBaseUrl } from "@/lib/api";
+import { crossSite } from "@/lib/proxy";
 
 const FORWARDED_REQUEST_HEADERS = ["content-type", "accept", "authorization", "cookie"];
-const FORWARDED_RESPONSE_HEADERS = ["content-type", "set-cookie", "cache-control"];
-
+const FORWARDED_RESPONSE_HEADERS = ["content-type", "cache-control"];
 async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
+  if (crossSite(req)) {
+    return Response.json({ detail: "Cross-site request refused." }, { status: 403 });
+  }
   const { path } = await ctx.params;
   const target = new URL(`/api/${path.map(encodeURIComponent).join("/")}`, apiBaseUrl());
   target.search = req.nextUrl.search;
@@ -41,6 +44,8 @@ async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }
     const value = upstream.headers.get(name);
     if (value) out.set(name, value);
   }
+  // Each cookie must stay a separate header; joining them breaks Expires dates.
+  for (const cookie of upstream.headers.getSetCookie()) out.append("set-cookie", cookie);
   return new Response(upstream.body, { status: upstream.status, headers: out });
 }
 

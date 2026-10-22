@@ -1,3 +1,4 @@
+import { AccountSecurity } from "@/components/account/AccountSecurity";
 import { DeleteMyData } from "@/components/DeleteMyData";
 import { CapabilityPanel, ReadinessPanel } from "@/components/SystemPanels";
 import { Card, Notice, PageHeader } from "@/components/ui";
@@ -8,7 +9,12 @@ import { serverGet } from "@/lib/server";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Settings" };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
+  const deleted = (await searchParams).deleted === "1";
   const item = navItem("/settings");
   const [readiness, info, profile] = await Promise.all([
     load(() => api.readiness()),
@@ -36,6 +42,11 @@ export default async function SettingsPage() {
             <li>Extracted text is discarded once you confirm an import.</li>
           </ul>
         </Card>
+        {profile.ok && (
+          <Card title="Sign-in and security">
+            <AccountSecurity profile={profile.data} />
+          </Card>
+        )}
         <Card title="Your data">
           {profile.ok ? (
             <div className="space-y-3 text-sm text-ink-muted">
@@ -47,7 +58,9 @@ export default async function SettingsPage() {
               <DeleteMyData />
             </div>
           ) : (
-            <p className="text-sm text-ink-muted">No profile on this browser.</p>
+            <p role="status" className="text-sm text-ink-muted">
+              {deleted ? "All your data has been deleted." : "No profile on this browser."}
+            </p>
           )}
         </Card>
       </div>

@@ -92,6 +92,7 @@ def settings(tmp_path: Path, migrated_url: str) -> Settings:
         database_url=migrated_url,
         upload_dir=tmp_path / "uploads",
         content_dir=content,
+        warm_caches_on_start=False,
         _env_file=None,  # type: ignore[call-arg]
     )
 

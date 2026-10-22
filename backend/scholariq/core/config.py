@@ -70,6 +70,10 @@ class Settings(BaseSettings):
     # until the student deletes them.
     conversation_retention_days: int = Field(default=30, ge=0, le=3650)
 
+    # Build the retrieval index and tutor vocabulary at start-up, so the first
+    # question is as fast as the rest. Off in the test suite to keep it quick.
+    warm_caches_on_start: bool = True
+
     log_level: str = "INFO"
 
     @field_validator("database_url")

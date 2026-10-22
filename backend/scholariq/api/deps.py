@@ -21,6 +21,9 @@ SessionDep = Annotated[Session, Depends(get_session)]
 upload_limiter = RateLimiter(limit=20, window_seconds=600)
 # The tutor is cheap per question, but cap bursts so one client cannot hog a worker.
 tutor_limiter = RateLimiter(limit=60, window_seconds=60)
+# Sign-in attempts per email address and in total, to slow password guessing.
+login_limiter = RateLimiter(limit=10, window_seconds=15 * 60)
+login_limiter_total = RateLimiter(limit=200, window_seconds=15 * 60)
 
 
 def get_store(settings: SettingsDep) -> Iterator[FileStore]:
@@ -42,9 +45,9 @@ def current_student(
     session: SessionDep,
     token: Annotated[str | None, Cookie(alias=COOKIE_NAME)] = None,
 ) -> Student:
-    student_id = unsign(settings.secret_key, token)
-    student = session.get(Student, student_id) if student_id else None
-    if student is None:
+    claim = unsign(settings.secret_key, token)
+    student = session.get(Student, claim[0]) if claim else None
+    if student is None or claim is None or claim[1] != student.session_version:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "No profile. Create one to continue.")
     return student
 

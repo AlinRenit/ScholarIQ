@@ -85,7 +85,13 @@ export async function load<T>(
 // Profiles, imports and academic records
 // --------------------------------------------------------------------------- //
 
-export type Profile = { id: string; display_name: string; consented_at: string | null };
+export type Profile = {
+  id: string;
+  display_name: string;
+  consented_at: string | null;
+  email?: string | null;
+  has_password?: boolean;
+};
 
 export type DocumentStatus = "uploaded" | "extracted" | "confirmed" | "failed";
 

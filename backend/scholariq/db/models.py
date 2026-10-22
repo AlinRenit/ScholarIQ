@@ -76,6 +76,8 @@ class Student(IdMixin, TimestampMixin, Base):
     display_name: Mapped[str] = mapped_column(String(120))
     email: Mapped[str | None] = mapped_column(String(254), unique=True)
     password_hash: Mapped[str | None] = mapped_column(String(255))
+    # Part of every session cookie; raising it signs the profile out everywhere.
+    session_version: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     consented_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     goals: Mapped[list[str]] = mapped_column(JSON, default=list)
 

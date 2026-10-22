@@ -38,8 +38,8 @@ export function CreateProfile() {
       <div>
         <h2 className="font-semibold">Create your local profile</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Your profile stays on this ScholarIQ server and is tied to this browser. There is no
-          password yet, so use ScholarIQ on a device you trust.
+          Your profile stays on this ScholarIQ server and is tied to this browser. You can add a
+          password later in Settings to sign in from another browser.
         </p>
       </div>
       <label className="block text-sm">

@@ -18,8 +18,14 @@ export function DeleteMyData() {
       return;
     setState("busy");
     const res = await fetch("/api/profile", { method: "DELETE" }).catch(() => null);
-    setState(res?.status === 204 || res?.status === 401 ? "done" : "error");
-    router.refresh();
+    if (res?.status === 204 || res?.status === 401) {
+      setState("done");
+      // The page re-renders without a profile; the flag keeps the confirmation on screen.
+      router.replace("/settings?deleted=1");
+      router.refresh();
+    } else {
+      setState("error");
+    }
   }
 
   if (state === "done") return <p className="text-sm text-ok">All your data has been deleted.</p>;

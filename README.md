@@ -22,11 +22,13 @@ Tesseract OCR engine, which runs locally to read scanned marksheets. See
 | 4. Knowledge base and BM25 retrieval | **Done** |
 | 5. Question answering (AI-free tutor) | **Done** |
 | 6. Diagnostics and study plans | **Done** |
-| 7. Hardening | Not started |
+| 7. Hardening: security review, offline and end-to-end tests, accessibility, performance | **Done** |
 
 What works today:
 
-* A local student profile (consent required, signed HttpOnly cookie).
+* A local student profile (consent required, signed HttpOnly cookie). An
+  optional email and password let the student sign in from another browser,
+  sign out, and sign out everywhere (see [docs/SECURITY.md](docs/SECURITY.md)).
 * Marksheet import from digital PDF, scanned PDF, PNG/JPEG (local Tesseract OCR),
   XLSX, CSV and TXT, with per-field confidence and warnings.
 * A review screen where every value can be corrected, rows added or excluded,
@@ -80,7 +82,10 @@ What works today:
   can mark a topic as studied or skip it; that is progress, not evidence, and
   never changes a classification.
 
-Sections without a backend yet say so; none show sample data. The roadmap and design are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+No page shows sample data. The design is in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), the security review in
+[docs/SECURITY.md](docs/SECURITY.md) and measured timings in
+[docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 ## Quick start with Docker
 
@@ -90,7 +95,13 @@ docker compose up --build
 ```
 
 Open http://localhost:3000. The API is at http://localhost:8000 (OpenAPI docs at
-`/docs`). Migrations run automatically when the API container starts.
+`/docs` outside production). Migrations and content loading run automatically
+when the API container starts.
+
+Before exposing ScholarIQ beyond your own machine, set
+`SCHOLARIQ_ENVIRONMENT=production`, a long random `SCHOLARIQ_SECRET_KEY`, and
+put it behind a reverse proxy that terminates HTTPS. See
+[docs/SECURITY.md](docs/SECURITY.md) for what that does and does not protect.
 
 ## Local development
 
@@ -114,7 +125,17 @@ make migrate api
 ```
 
 The frontend finds the API through `SCHOLARIQ_API_URL` (default
-`http://localhost:8000`).
+`http://localhost:8000`). Set `NEXT_TELEMETRY_DISABLED=1` (or run
+`npx next telemetry disable`) so the Next.js tooling does not contact Vercel;
+the Docker images already do.
+
+### Running offline
+
+Everything needs the network once: installing Python and npm packages (or
+building the Docker images). After that ScholarIQ runs with no network at all:
+the knowledge base, curriculum, OCR engine and fonts are local, and nothing in
+the app makes outbound requests. The end-to-end tests prove this on every run
+(below).
 
 ## Tests and checks
 
@@ -127,6 +148,48 @@ make compliance   # no-external-AI scan, prints violations
 Backend tests run against SQLite by default. Set
 `SCHOLARIQ_TEST_POSTGRES_URL` to also run the migration round-trip on
 PostgreSQL. All backend tests run with outbound network access blocked.
+
+### End-to-end tests
+
+```bash
+cd frontend
+npm run build
+npx playwright install chromium   # once; skip if a Chromium is already set up
+npm run e2e
+```
+
+`npm run e2e` starts a throwaway stack (`e2e/start-stack.sh`: fresh SQLite
+database in a temporary folder, migrations, content, the API on port 8100 and
+the production web build on port 3100) and drives it with Chromium:
+
+* `definition-of-done.spec.ts` walks the whole product as a student: create a
+  profile, upload the sample marksheet, correct a mark, confirm, check the
+  dashboard and subjects needing attention, add topic test results, ask the
+  tutor (an answer with sources, a step-by-step answer for a weak topic, a
+  brief overview for a strong one, a refusal for an out-of-scope question),
+  take a diagnostic quiz and see the evidence change, build a study plan, see
+  the unreviewed-content label, and delete all data.
+* `sign-in.spec.ts`: set a password, sign in from a second browser, and sign out
+  everywhere.
+* `accessibility.spec.ts`: axe WCAG 2.1 A/AA checks on every main page in light
+  and dark mode (fails on serious or critical issues), the skip link, and no
+  sideways scrolling at phone width.
+
+The run is offline: the API and web server start with guards
+(`e2e/offline/`) that refuse and record any connection to an address other than
+this machine, the browser's requests to other hosts are blocked, and the run
+fails if anything was attempted or if the guards were not loaded. Set
+`SCHOLARIQ_PY` to the Python with the backend installed if it is not
+`.venv/bin/python`, and `E2E_CHROMIUM` to use a specific Chromium binary.
+
+### Performance
+
+```bash
+cd backend && python benchmarks/run.py --out ../docs/PERFORMANCE.md
+```
+
+times each main operation through the API on a fresh database (median of
+three runs) and the tutor over all 60 gold questions.
 
 ## Configuration
 
@@ -244,12 +307,40 @@ they never change a topic classification.
   subjects still return loosely related concepts (2 of 6 in the evaluation).
 * Custom subjects are shared rows. A student cannot change the topics of a custom
   subject that another profile also uses.
-* Profiles have no password. A profile is tied to the browser that created it,
-  so use a trusted device and do not expose the app publicly yet.
+* A profile without a password lives only in its browser's cookie. There is no
+  email verification or password reset (the email is only a sign-in name), and
+  ScholarIQ has no HTTPS of its own; see [docs/SECURITY.md](docs/SECURITY.md).
 * Extraction runs during the upload request. Large scanned PDFs (up to 20
   pages) can take several seconds; a background job queue is not needed yet.
 * Two layout parsers ship today. Unusual layouts fall back to the line parser
   and need more correction on the review screen.
 * OCR quality depends on the scan. Handwritten marks are not supported.
-* The upload rate limit is per process; multi-worker deployments need a
-  shared limiter.
+* Rate limits (uploads, questions, sign-in) are per process; multi-worker
+  deployments need a shared limiter.
+* Automated accessibility checks (axe) catch only part of what matters; the
+  app has not yet been tested by screen-reader users.
+
+## Questions the tutor does not answer
+
+The tutor declines, rather than guesses, when a question falls outside what
+it supports. It says why and suggests the closest concepts it does cover.
+
+* **Anything outside the knowledge base.** It covers the 151 concepts in the 6
+  seed subjects (Data Structures, Algorithms, Operating Systems, DBMS,
+  Computer Networks, Discrete Mathematics). Other subjects, general knowledge,
+  current events and opinions are declined.
+* **Open-ended writing.** Essays, summaries of uploaded documents, opinions,
+  "write me a program", and code review beyond running-time analysis.
+* **Problems outside the solvers.** Arithmetic, percentages, linear and
+  quadratic equations, recurrences the master theorem covers, truth tables,
+  graph traversals and shortest paths on graphs written out in the question,
+  and SELECT queries on the built-in practice database. Calculus, proofs,
+  other recurrences, other SQL statements and word problems are declined.
+* **Code other than Python**, running any code, and running-time analysis of
+  shapes the templates do not match (reported as "not matched").
+* **Explanations of the student's own marks** ("why did I fail DBMS?"). The
+  Dashboard and Topics pages show what the marks do and do not say. The tutor
+  does answer "what should I study first?" from topic evidence, and the Study
+  Plan gives the full ordering.
+* **Images, diagrams and handwriting** in a question; questions are text only.
+* **Languages other than English.**

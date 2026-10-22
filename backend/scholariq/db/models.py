@@ -101,6 +101,9 @@ class Document(IdMixin, TimestampMixin, Base):
         _enum(DocumentStatus, "document_status"), default=DocumentStatus.UPLOADED
     )
     parser_name: Mapped[str | None] = mapped_column(String(64))
+    # Document-level interpretation: source kind, detected context, grades seen,
+    # and warnings shown on the review screen.
+    analysis: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     error: Mapped[str | None] = mapped_column(Text)
     retain_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
@@ -132,7 +135,13 @@ class ExtractedRecord(IdMixin, TimestampMixin, Base):
 class GradingScale(IdMixin, TimestampMixin, Base):
     __tablename__ = "grading_scales"
 
-    name: Mapped[str] = mapped_column(String(120), unique=True)
+    # Null for built-in templates; set for scales a student defined.
+    student_id: Mapped[str | None] = mapped_column(
+        FK, ForeignKey("students.id", ondelete="CASCADE"), index=True
+    )
+    # Template key for built-in scales, e.g. "ugc_cbcs_10".
+    template_key: Mapped[str | None] = mapped_column(String(40), unique=True)
+    name: Mapped[str] = mapped_column(String(120))
     kind: Mapped[GradingScaleKind] = mapped_column(_enum(GradingScaleKind, "grading_scale_kind"))
     # e.g. {"O": {"points": 10, "min_pct": 90}, ...} for letter scales.
     definition: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)

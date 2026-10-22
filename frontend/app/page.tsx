@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { CapabilityPanel } from "@/components/SystemPanels";
 import { Card, Notice, PageHeader } from "@/components/ui";
 import { api, load } from "@/lib/api";
@@ -11,7 +13,7 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title="Dashboard"
-        description="Your academic overview will appear here once you import a marksheet."
+        description="Your academic overview will appear here once analysis is available."
       />
 
       {info.error ? (
@@ -19,9 +21,13 @@ export default async function DashboardPage() {
           Start the backend (see the README) and reload this page.
         </Notice>
       ) : (
-        <Notice title="No academic records yet">
-          Marksheet import arrives in Milestone 2. Until then there is nothing to analyse, and
-          this dashboard does not show sample data.
+        <Notice title="Analysis is not available yet">
+          You can already import and confirm marksheets in{" "}
+          <Link href="/academics" className="underline">
+            My Academics
+          </Link>
+          . Subject analysis and topic evidence arrive in Milestone 3; until then this dashboard
+          does not show sample data.
         </Notice>
       )}
 

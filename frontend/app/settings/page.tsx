@@ -1,16 +1,19 @@
+import { DeleteMyData } from "@/components/DeleteMyData";
 import { CapabilityPanel, ReadinessPanel } from "@/components/SystemPanels";
 import { Card, Notice, PageHeader } from "@/components/ui";
-import { api, load } from "@/lib/api";
+import { api, load, type Profile } from "@/lib/api";
 import { navItem } from "@/lib/planned";
+import { serverGet } from "@/lib/server";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const item = navItem("/settings");
-  const [readiness, info] = await Promise.all([
+  const [readiness, info, profile] = await Promise.all([
     load(() => api.readiness()),
     load(() => api.systemInfo()),
+    serverGet<Profile>("/api/profile"),
   ]);
 
   return (
@@ -30,8 +33,21 @@ export default async function SettingsPage() {
             <li>Marksheets and questions are processed on this server only.</li>
             <li>No data is sent to AI services. The server refuses to start if AI keys are set.</li>
             <li>Uploaded files are kept for a configurable retention period and then deleted.</li>
-            <li>A delete-my-data action arrives with marksheet import in Milestone 2.</li>
+            <li>Extracted text is discarded once you confirm an import.</li>
           </ul>
+        </Card>
+        <Card title="Your data">
+          {profile.ok ? (
+            <div className="space-y-3 text-sm text-ink-muted">
+              <p>
+                Signed in as <span className="font-medium text-ink">{profile.data.display_name}</span>
+                . Deleting removes your profile, uploaded files and every academic record.
+              </p>
+              <DeleteMyData />
+            </div>
+          ) : (
+            <p className="text-sm text-ink-muted">No profile on this browser.</p>
+          )}
         </Card>
       </div>
     </>

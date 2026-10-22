@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from functools import lru_cache
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy import Engine, create_engine, event
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from scholariq.core.config import get_settings
 
@@ -28,14 +30,6 @@ def get_engine() -> Engine:
     return build_engine(get_settings().database_url)
 
 
-@lru_cache
-def get_sessionmaker() -> sessionmaker[Session]:
-    return sessionmaker(bind=get_engine(), expire_on_commit=False)
-
-
-def get_session() -> Iterator[Session]:
-    session = get_sessionmaker()()
-    try:
+def get_session(engine: Annotated[Engine, Depends(get_engine)]) -> Iterator[Session]:
+    with Session(engine, expire_on_commit=False) as session:
         yield session
-    finally:
-        session.close()

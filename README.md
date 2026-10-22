@@ -16,17 +16,25 @@ Tesseract OCR engine, which runs locally to read scanned marksheets. See
 | Milestone | State |
 | --- | --- |
 | 1. Foundation: skeleton, schema, config, health, Docker, compliance tests | **Done** |
-| 2. Marksheet ingestion and review | Not started |
+| 2. Marksheet ingestion and review | **Done** |
 | 3. Analytics, topic evidence, dashboard | Not started |
 | 4. Knowledge base and BM25 retrieval | Not started |
 | 5. Question answering | Not started |
 | 6. Diagnostics and study plans | Not started |
 | 7. Hardening | Not started |
 
-What works today: the API, health and readiness checks, configuration
-validation, the full database schema and migration, and a frontend shell with
-the eight product sections. Sections without a backend yet say so; none show
-sample data. The roadmap and design are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+What works today:
+
+* A local student profile (consent required, signed HttpOnly cookie).
+* Marksheet import from digital PDF, scanned PDF, PNG/JPEG (local Tesseract OCR),
+  XLSX, CSV and TXT, with per-field confidence and warnings.
+* A review screen where every value can be corrected, rows added or excluded,
+  and grades mapped to a chosen or custom grading scale. Nothing is saved until
+  the student confirms.
+* Confirmed results by semester and exam, with repeat attempts tracked.
+* Deleting an upload (with its results) and deleting all of a student's data.
+
+Sections without a backend yet say so; none show sample data. The roadmap and design are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Quick start with Docker
 
@@ -93,8 +101,44 @@ will still report the check as failed).
   Returns 503 if a required check fails.
 * `GET /api/system/info` lists which capabilities are available or planned.
 
-## Known limitations (Milestone 1)
+## How marksheet import works
 
-* No marksheet import, analytics, knowledge base or tutor yet.
-* No authentication yet; do not expose the app publicly.
-* Tesseract is installed in the API image but nothing uses it until Milestone 2.
+1. **Validate**: size limit, file type from content signature (the extension
+   must agree), PDF/image/XLSX integrity, decompression-bomb and macro checks.
+2. **Extract**: digital PDFs via pdfplumber (words with positions and ruled
+   tables); PDFs with no text layer are rendered and OCR'd; images are OCR'd
+   with Tesseract after grayscale/contrast/upscale preprocessing; XLSX values
+   via openpyxl; CSV with delimiter sniffing; text split on tabs, runs of
+   spaces or pipes.
+3. **Interpret**: pluggable layout parsers. The header-table parser matches
+   column headers against a synonym dictionary (with edit-distance tolerance)
+   and aligns cells by column position; the line parser reads rows without a
+   recognisable header by value order. The parser whose output has the best
+   count x confidence wins.
+4. **Score**: each field carries reading confidence (1.0 for digital text,
+   Tesseract word confidence for OCR) multiplied by interpretation confidence
+   (exact header match, fuzzy match, positional guess, OCR digit correction).
+   These are heuristic scores for highlighting, not probabilities. Fields under
+   0.8 are highlighted for review.
+5. **Review and confirm**: the student corrects values and chooses how grades
+   are read. Only then are assessments and results written; the extracted text
+   is discarded.
+
+Rules it follows: a missing mark is stored as missing, never zero; absent and
+withheld are statuses, not marks; maximum marks are never assumed; grades are
+not converted without a confirmed scale (and a scale that lacks a grade is
+refused); theory and practical columns become separate components; repeat
+sittings become new attempts.
+
+## Known limitations
+
+* Analytics, knowledge base and tutor are not built yet (Milestones 3 to 5).
+* Profiles have no password. A profile is tied to the browser that created it,
+  so use a trusted device and do not expose the app publicly yet.
+* Extraction runs during the upload request. Large scanned PDFs (up to 20
+  pages) can take several seconds; a background job queue is not needed yet.
+* Two layout parsers ship today. Unusual layouts fall back to the line parser
+  and need more correction on the review screen.
+* OCR quality depends on the scan. Handwritten marks are not supported.
+* The upload rate limit is per process; multi-worker deployments need a
+  shared limiter.

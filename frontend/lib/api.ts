@@ -25,6 +25,7 @@ export type SystemInfo = {
   deployment_mode: "server" | "offline";
   intelligence: string;
   uses_external_ai: boolean;
+  max_upload_bytes: number;
   capabilities: Capability[];
 };
 
@@ -78,4 +79,117 @@ export async function load<T>(
   } catch (e) {
     return { data: null, error: e instanceof Error ? e.message : "Unknown error" };
   }
+}
+
+// --------------------------------------------------------------------------- //
+// Profiles, imports and academic records
+// --------------------------------------------------------------------------- //
+
+export type Profile = { id: string; display_name: string; consented_at: string | null };
+
+export type DocumentStatus = "uploaded" | "extracted" | "confirmed" | "failed";
+
+export type DocumentAnalysis = {
+  source?: string;
+  pages?: number;
+  notes?: string[];
+  warnings?: string[];
+  grades_seen?: string[];
+  context?: { semester: number | null; exam_type: string; exam_name: string | null };
+  review_threshold?: number;
+};
+
+export type DocumentSummary = {
+  id: string;
+  original_filename: string;
+  media_type: string;
+  size_bytes: number;
+  status: DocumentStatus;
+  parser_name: string | null;
+  error: string | null;
+  created_at: string;
+  file_retained: boolean;
+  analysis: DocumentAnalysis;
+};
+
+export type ExtractedFields = {
+  subject_name?: string;
+  subject_code?: string | null;
+  component?: string;
+  status?: string;
+  marks_obtained?: string | null;
+  max_marks?: string | null;
+  grade?: string | null;
+  grade_points?: string | null;
+  credits?: string | null;
+  semester?: number | null;
+  exam_type?: string;
+  exam_name?: string | null;
+  result?: string;
+};
+
+export type ExtractedRecord = {
+  id: string;
+  row_index: number;
+  source_text: string | null;
+  fields: ExtractedFields;
+  confidence: Record<string, number>;
+  warnings: string[];
+};
+
+export type DocumentDetail = DocumentSummary & { records: ExtractedRecord[] };
+
+export type ScaleTemplate = {
+  key: string;
+  name: string;
+  description: string;
+  max_points: string;
+  points: Record<string, string>;
+};
+
+export type AcademicResult = {
+  id: string;
+  subject_id: string;
+  subject_name: string;
+  subject_code: string | null;
+  component: "theory" | "lab" | "combined";
+  status: "present" | "absent" | "withheld" | "missing";
+  marks_obtained: string | null;
+  max_marks: string | null;
+  grade: string | null;
+  grade_points: string | null;
+  credits: string | null;
+  attempt_number: number;
+  grading_scale_id: string | null;
+};
+
+export type AcademicAssessment = {
+  id: string;
+  document_id: string | null;
+  semester: number | null;
+  exam_type: string;
+  exam_name: string | null;
+  results: AcademicResult[];
+};
+
+/** Extract a readable message from a FastAPI error body. */
+export function errorMessage(body: unknown, fallback: string): string {
+  if (body && typeof body === "object" && "detail" in body) {
+    const detail = (body as { detail: unknown }).detail;
+    if (typeof detail === "string") return detail;
+    if (detail && typeof detail === "object" && "message" in detail) {
+      return String((detail as { message: unknown }).message);
+    }
+    if (Array.isArray(detail)) {
+      return detail
+        .map((d) => {
+          const item = d as { msg?: string; loc?: unknown[] };
+          const msg = (item.msg ?? "Invalid value").replace(/^Value error, /, "");
+          const row = item.loc?.find((p) => typeof p === "number");
+          return typeof row === "number" ? `Row ${row + 1}: ${msg}` : msg;
+        })
+        .join(" ");
+    }
+  }
+  return fallback;
 }

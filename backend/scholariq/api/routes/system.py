@@ -18,6 +18,7 @@ class SystemInfo(BaseModel):
     deployment_mode: DeploymentMode
     intelligence: str
     uses_external_ai: bool
+    max_upload_bytes: int
     capabilities: list[Capability]
 
 
@@ -29,5 +30,6 @@ def info(settings: Annotated[Settings, Depends(get_settings)]) -> SystemInfo:
         deployment_mode=settings.deployment_mode,
         intelligence="local deterministic algorithms and a curated knowledge base",
         uses_external_ai=False,
+        max_upload_bytes=settings.max_upload_bytes,
         capabilities=CAPABILITIES,
     )

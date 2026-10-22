@@ -107,7 +107,7 @@ backend/
     compliance/        no-external-AI policy, scanner, runtime checks
     db/                SQLAlchemy models, engine/session
     domain/            enums and typed domain models
-    ingestion/         (M2) validators, parsers, OCR, normalisation
+    ingestion/         validation, extraction, OCR, layout parsers, import service
     analytics/         (M3) subject analytics
     tutoring/          (M3/M5) evidence, classification, teaching policy
     knowledge/         (M4) content loader, graph
@@ -297,12 +297,15 @@ model in the system and is used only to turn pixels into characters.
 ## 9. Security and privacy baseline
 
 * The browser only talks to the Next.js origin; the API is proxied.
-* Uploaded files are stored under server-generated names outside any served
-  directory, with size limits and signature checks (M2).
+* Uploaded files are stored under random server-generated names (mode 0600)
+  outside any served directory, with size limits and signature checks.
 * All queries go through SQLAlchemy with bound parameters.
 * Request bodies, files and question text are not logged.
 * Startup fails if AI-provider credentials are present (`SCHOLARIQ_STRICT_AI_ENV_CHECK`).
-* Deleting a student cascades to every student-owned row; uploaded files are
-  removed by the same service (M2).
-* Authentication arrives with multi-user features in M2; until then the app is
-  single-user and must not be exposed publicly.
+* Deleting a student cascades to every student-owned row, and the same service
+  deletes their uploaded files. Expired files are purged after uploads.
+* Students are identified by an HMAC-signed HttpOnly cookie (local profile, no
+  password). Every document and record query is scoped to that student, and
+  another student's ids return 404. Password or SSO login is planned for
+  Milestone 7; until then the app must not be exposed publicly.
+* Uploads are rate limited per student (20 per 10 minutes, in process).

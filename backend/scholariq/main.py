@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from scholariq import __version__
-from scholariq.api.routes import health, system
+from scholariq.api.routes import academics, documents, health, profile, system
 from scholariq.compliance.runtime import enforce_environment
 from scholariq.core.config import Settings, get_settings
 from scholariq.core.logging import configure_logging
@@ -44,4 +44,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(health.router, prefix="/api")
     app.include_router(system.router, prefix="/api")
+    app.include_router(profile.router, prefix="/api")
+    app.include_router(documents.router, prefix="/api")
+    app.include_router(academics.router, prefix="/api")
     return app

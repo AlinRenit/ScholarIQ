@@ -40,7 +40,7 @@ on purpose to prove the refusal works.
 
 ## Dependency audit
 
-Milestone 1 dependencies. Later milestones append rows here as they add packages.
+Later milestones append rows here as they add packages.
 
 | Dependency | Kind | Network at runtime | Uses ML models | Verdict |
 | --- | --- | --- | --- | --- |
@@ -56,6 +56,15 @@ Milestone 1 dependencies. Later milestones append rows here as they add packages
 | typescript, eslint, eslint-config-next (dev) | static analysis | no | no | allowed |
 | vitest, @testing-library/*, jsdom (dev) | testing | no | no | allowed |
 | Tesseract (binary, Docker image) | OCR | no | local LSTM character recogniser | allowed (explicitly permitted; see ARCHITECTURE.md) |
+| pytesseract (M2) | subprocess wrapper around the local `tesseract` binary | no | no (calls Tesseract) | allowed |
+| pdfplumber, pdfminer.six (M2) | PDF words, positions and ruled tables | no | no | allowed |
+| pypdfium2 (M2) | PDF integrity check and page rendering for OCR (PDFium) | no | no | allowed |
+| Pillow (M2) | image validation and OCR preprocessing | no | no | allowed |
+| openpyxl (M2) | XLSX values (formulas are not evaluated; macro workbooks rejected) | no | no | allowed |
+| rapidfuzz (M2) | edit-distance matching of header names | no | no | allowed |
+| python-multipart (M2) | multipart upload parsing | no | no | allowed |
+| reportlab (M2, dev only) | generates the PDF test fixtures | no | no | allowed |
+| server-only (M2, frontend) | build-time guard for server modules | no | no | allowed |
 
 Next.js telemetry is disabled in the Docker images (`NEXT_TELEMETRY_DISABLED=1`).
 Set the same variable, or run `npx next telemetry disable`, for local development.

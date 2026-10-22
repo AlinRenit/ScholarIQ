@@ -1,0 +1,52 @@
+# Local development stack: PostgreSQL, the FastAPI backend and the Next.js frontend.
+# Usage: cp .env.example .env && docker compose up --build
+# Then open http://localhost:3000
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: scholariq
+      POSTGRES_USER: scholariq
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-scholariq}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scholariq -d scholariq"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # Not published to the host by default; uncomment for local SQL access.
+    # ports: ["5432:5432"]
+
+  api:
+    build: ./backend
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      SCHOLARIQ_DATABASE_URL: postgresql+psycopg://scholariq:${POSTGRES_PASSWORD:-scholariq}@db:5432/scholariq
+      SCHOLARIQ_UPLOAD_DIR: /data/uploads
+      SCHOLARIQ_CONTENT_DIR: /content
+    volumes:
+      - uploads:/data/uploads
+      - ./content:/content:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  web:
+    build: ./frontend
+    environment:
+      SCHOLARIQ_API_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+  uploads:

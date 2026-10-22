@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: scholariq
+          POSTGRES_PASSWORD: scholariq
+          POSTGRES_DB: scholariq
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U scholariq" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SCHOLARIQ_TEST_POSTGRES_URL: postgresql+psycopg://scholariq:scholariq@localhost:5432/scholariq
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy scholariq
+      - run: pytest
+      - name: No-external-AI compliance scan
+        run: python -m scholariq.compliance.scanner ..
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build
+      - name: Boot the stack and check readiness
+        run: |
+          docker compose up -d
+          for i in $(seq 1 30); do
+            curl -fs http://localhost:3000/api/health/ready && exit 0
+            sleep 2
+          done
+          docker compose logs
+          exit 1

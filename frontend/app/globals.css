@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* Restrained palette: ink neutrals, one accent, semantic status colours. */
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-canvas: #f7f7f5;
+  --color-surface: #ffffff;
+  --color-line: #e4e4e0;
+  --color-ink: #1c1d1f;
+  --color-ink-muted: #5b5d63;
+  --color-ink-subtle: #8a8c92;
+  --color-accent: #2f5d50;
+  --color-accent-soft: #e6efeb;
+
+  --color-ok: #2f6b3a;
+  --color-ok-soft: #e7f2e8;
+  --color-warn: #8a5a00;
+  --color-warn-soft: #fbf1dc;
+  --color-bad: #a1302a;
+  --color-bad-soft: #f8e5e3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: #121314;
+    --color-surface: #1a1b1d;
+    --color-line: #2c2e31;
+    --color-ink: #ececea;
+    --color-ink-muted: #a7a9ad;
+    --color-ink-subtle: #7d8085;
+    --color-accent: #8cc2b0;
+    --color-accent-soft: #1f2d29;
+    --color-ok: #8fcf98;
+    --color-ok-soft: #1c2a1e;
+    --color-warn: #e5bf6a;
+    --color-warn-soft: #2d2617;
+    --color-bad: #ee9a92;
+    --color-bad-soft: #321d1b;
+  }
+}
+
+html {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

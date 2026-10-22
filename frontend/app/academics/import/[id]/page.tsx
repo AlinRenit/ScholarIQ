@@ -28,14 +28,17 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
       <>
         <PageHeader title="Review import" />
         <Notice tone="error" title="This upload could not be loaded.">
-          {doc.message} <Link href="/academics" className="underline">Back to My Academics</Link>
+          {doc.message}{" "}
+          <Link href="/academics" className="underline">
+            Back to My Academics
+          </Link>
         </Notice>
       </>
     );
   }
 
   const d = doc.data;
-  const source = d.analysis.source ? SOURCE[d.analysis.source] ?? d.analysis.source : null;
+  const source = d.analysis.source ? (SOURCE[d.analysis.source] ?? d.analysis.source) : null;
 
   return (
     <>
@@ -50,7 +53,10 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
       )}
       {d.status === "confirmed" && (
         <Notice title="Already confirmed">
-          These results are saved. <Link href="/academics" className="underline">View them</Link>
+          These results are saved.{" "}
+          <Link href="/academics" className="underline">
+            View them
+          </Link>
         </Notice>
       )}
       {d.status === "extracted" && (

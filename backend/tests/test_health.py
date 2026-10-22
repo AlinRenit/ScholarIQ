@@ -51,7 +51,9 @@ def test_ready_fails_when_schema_is_behind(settings: Settings, tmp_path: Path) -
 
 
 def test_ready_fails_without_content_dir(client: TestClient, settings: Settings) -> None:
-    settings.content_dir.rmdir()
+    import shutil
+
+    shutil.rmtree(settings.content_dir)
     r = client.get("/api/health/ready")
     assert r.status_code == 503
 

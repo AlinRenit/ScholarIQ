@@ -1,0 +1,98 @@
+# Seed Computer Science curriculum: subjects and the topics they map to.
+#
+# importance: 1 (minor) .. 5 (core), used by study-plan scoring.
+# minutes: rough self-study estimate for a first pass through the topic.
+# Aliases are matched (case-insensitively, after punctuation is removed) against
+# subject names printed on marksheets.
+#
+# This is a starting curriculum, not a complete syllabus. Institutions differ;
+# edit this file or add another curriculum file to match yours.
+
+curriculum:
+  slug: cs-core
+  name: Computer Science core (seed)
+  version: "2026.10.1"
+
+subjects:
+  - slug: data-structures
+    name: Data Structures
+    codes: [CS301, CS102]
+    aliases: [DS, Data Structures and Algorithms, Data Structure, DSA, Data Structures Using C,
+              Data Structures in C, Advanced Data Structures]
+    topics:
+      - {slug: ds.arrays-strings, name: Arrays and strings, importance: 4, minutes: 120}
+      - {slug: ds.linked-lists, name: Linked lists, importance: 4, minutes: 150}
+      - {slug: ds.stacks-queues, name: Stacks and queues, importance: 5, minutes: 150}
+      - {slug: ds.trees-bst, name: Trees and binary search trees, importance: 5, minutes: 240}
+      - {slug: ds.graphs, name: Graphs, importance: 4, minutes: 240}
+      - {slug: ds.hashing, name: Hashing, importance: 4, minutes: 150}
+      - {slug: ds.sorting-searching, name: Sorting and searching, importance: 5, minutes: 210}
+      - {slug: ds.complexity, name: Time and space complexity, importance: 5, minutes: 180}
+
+  - slug: algorithms
+    name: Design and Analysis of Algorithms
+    aliases: [Algorithms, DAA, Analysis of Algorithms, Design & Analysis of Algorithms,
+              Algorithm Design, Design and Analysis of Algorithm]
+    topics:
+      - {slug: ds.complexity, name: Time and space complexity, importance: 5, minutes: 180}
+      - {slug: algo.recurrences, name: Recurrence relations, importance: 4, minutes: 180}
+      - {slug: algo.divide-conquer, name: Divide and conquer, importance: 4, minutes: 180}
+      - {slug: algo.greedy, name: Greedy algorithms, importance: 4, minutes: 180}
+      - {slug: algo.dynamic-programming, name: Dynamic programming, importance: 5, minutes: 300}
+      - {slug: algo.graph-algorithms, name: Graph algorithms, importance: 5, minutes: 300}
+      - {slug: ds.sorting-searching, name: Sorting and searching, importance: 4, minutes: 210}
+      - {slug: algo.np-completeness, name: NP-completeness, importance: 3, minutes: 150}
+
+  - slug: operating-systems
+    name: Operating Systems
+    codes: [CS302]
+    aliases: [OS, Operating System, Principles of Operating Systems, Operating System Concepts]
+    topics:
+      - {slug: os.processes-threads, name: Processes and threads, importance: 5, minutes: 180}
+      - {slug: os.cpu-scheduling, name: CPU scheduling, importance: 5, minutes: 180}
+      - {slug: os.synchronization, name: Synchronization, importance: 5, minutes: 240}
+      - {slug: os.deadlocks, name: Deadlocks, importance: 4, minutes: 180}
+      - {slug: os.memory-management, name: Memory management, importance: 5, minutes: 210}
+      - {slug: os.virtual-memory, name: Virtual memory, importance: 4, minutes: 210}
+      - {slug: os.file-systems, name: File systems, importance: 3, minutes: 150}
+
+  - slug: dbms
+    name: Database Management Systems
+    codes: [CS303]
+    aliases: [DBMS, Database Systems, Database Management System, Databases, Database System,
+              Introduction to Database Systems, RDBMS]
+    topics:
+      - {slug: db.relational-model, name: Relational model, importance: 5, minutes: 150}
+      - {slug: db.sql, name: SQL, importance: 5, minutes: 300}
+      - {slug: db.functional-dependencies, name: Functional dependencies, importance: 4, minutes: 150}
+      - {slug: db.normalization, name: Normalization, importance: 5, minutes: 210}
+      - {slug: db.transactions, name: Transactions, importance: 4, minutes: 180}
+      - {slug: db.concurrency-control, name: Concurrency control, importance: 4, minutes: 180}
+      - {slug: db.indexing, name: Indexing, importance: 3, minutes: 150}
+
+  - slug: computer-networks
+    name: Computer Networks
+    codes: [CS304]
+    aliases: [CN, Computer Network, Networks, Data Communication and Networks,
+              Computer Communication Networks, Data Communications and Networking]
+    topics:
+      - {slug: cn.layered-models, name: OSI and TCP/IP models, importance: 4, minutes: 120}
+      - {slug: cn.physical-datalink, name: Physical and data link layers, importance: 3, minutes: 180}
+      - {slug: cn.ip-addressing, name: IP addressing and subnetting, importance: 5, minutes: 210}
+      - {slug: cn.routing, name: Routing, importance: 4, minutes: 210}
+      - {slug: cn.transport, name: Transport layer (TCP and UDP), importance: 5, minutes: 210}
+      - {slug: cn.application-layer, name: Application layer protocols, importance: 3, minutes: 150}
+      - {slug: cn.network-security, name: Network security basics, importance: 3, minutes: 150}
+
+  - slug: discrete-mathematics
+    name: Discrete Mathematics
+    codes: [MA301]
+    aliases: [DM, Discrete Maths, Discrete Structures, Discrete Mathematical Structures,
+              Mathematical Foundations of Computer Science, MFCS]
+    topics:
+      - {slug: dm.logic, name: Propositional and predicate logic, importance: 5, minutes: 210}
+      - {slug: dm.sets-relations-functions, name: "Sets, relations and functions", importance: 4, minutes: 180}
+      - {slug: dm.proof-induction, name: Proofs and induction, importance: 4, minutes: 180}
+      - {slug: dm.combinatorics, name: Counting and combinatorics, importance: 4, minutes: 210}
+      - {slug: dm.graph-theory, name: Graph theory, importance: 4, minutes: 210}
+      - {slug: algo.recurrences, name: Recurrence relations, importance: 3, minutes: 180}

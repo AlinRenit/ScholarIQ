@@ -60,9 +60,9 @@ export function CreateProfile() {
           className="mt-1"
         />
         <span className="text-ink-muted">
-          I agree that ScholarIQ may store my marksheets and results on this server to analyse
-          them. They are never sent to AI services, uploaded files are deleted after the
-          retention period, and I can delete everything at any time from Settings.
+          I agree that ScholarIQ may store my marksheets and results on this server to analyse them.
+          They are never sent to AI services, uploaded files are deleted after the retention period,
+          and I can delete everything at any time from Settings.
         </span>
       </label>
       {error && (

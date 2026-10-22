@@ -40,8 +40,9 @@ export default async function SettingsPage() {
           {profile.ok ? (
             <div className="space-y-3 text-sm text-ink-muted">
               <p>
-                Signed in as <span className="font-medium text-ink">{profile.data.display_name}</span>
-                . Deleting removes your profile, uploaded files and every academic record.
+                Signed in as{" "}
+                <span className="font-medium text-ink">{profile.data.display_name}</span>. Deleting
+                removes your profile, uploaded files and every academic record.
               </p>
               <DeleteMyData />
             </div>

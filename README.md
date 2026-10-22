@@ -17,7 +17,7 @@ Tesseract OCR engine, which runs locally to read scanned marksheets. See
 | --- | --- |
 | 1. Foundation: skeleton, schema, config, health, Docker, compliance tests | **Done** |
 | 2. Marksheet ingestion and review | **Done** |
-| 3. Analytics, topic evidence, dashboard | Not started |
+| 3. Analytics, topic evidence, dashboard | **Done** |
 | 4. Knowledge base and BM25 retrieval | Not started |
 | 5. Question answering | Not started |
 | 6. Diagnostics and study plans | Not started |
@@ -33,6 +33,16 @@ What works today:
   the student confirms.
 * Confirmed results by semester and exam, with repeat attempts tracked.
 * Deleting an upload (with its results) and deleting all of a student's data.
+* A dashboard with overall, credit-weighted and GPA figures (each says how many
+  results it counts, or why it is unavailable), latest score per subject, a
+  semester trend, data gaps and the calculation rules.
+* A versioned curriculum (`content/curriculum/`, 6 subjects and 40 topics) with
+  subject matching by code, name, alias and close spelling. Subjects outside the
+  curriculum can be moved onto a curriculum subject or given topics by hand.
+* Topic classification (Strong, Developing, Needs attention, Insufficient
+  evidence) from topic-level evidence only. A subject mark counts as one weak
+  observation; at least five topic-level observations are needed. Students can
+  add topic test results and self-assessments, and remove what they entered.
 
 Sections without a backend yet say so; none show sample data. The roadmap and design are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -132,7 +142,11 @@ sittings become new attempts.
 
 ## Known limitations
 
-* Analytics, knowledge base and tutor are not built yet (Milestones 3 to 5).
+* The knowledge base and tutor are not built yet (Milestones 4 and 5), and
+  diagnostic quizzes arrive in Milestone 6. Until then topic-level evidence
+  comes only from topic test results the student enters.
+* Custom subjects are shared rows. A student cannot change the topics of a custom
+  subject that another profile also uses.
 * Profiles have no password. A profile is tied to the browser that created it,
   so use a trusted device and do not expose the app publicly yet.
 * Extraction runs during the upload request. Large scanned PDFs (up to 20

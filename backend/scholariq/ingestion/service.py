@@ -8,15 +8,17 @@ from __future__ import annotations
 
 import hashlib
 import logging
-import re
-import unicodedata
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.orm import Session
 
+from scholariq.analytics.policy import load_policy
+from scholariq.analytics.service import refresh_student
 from scholariq.core.config import Settings
+from scholariq.curriculum.matching import match_subject
+from scholariq.curriculum.schema import normalise_name
 from scholariq.db.models import (
     Assessment,
     AssessmentResult,
@@ -128,29 +130,18 @@ def import_document(
     return doc
 
 
-def normalise_subject(name: str) -> str:
-    text = unicodedata.normalize("NFKC", name).lower().replace("&", " and ")
-    text = re.sub(r"[^a-z0-9+#]+", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
-
-
 def _slugify(name: str) -> str:
-    return normalise_subject(name).replace(" ", "-")[:70] or "subject"
+    return normalise_name(name).replace(" ", "-")[:70] or "subject"
 
 
 def resolve_subject(session: Session, name: str, code: str | None) -> Subject:
-    """Find a subject by code, name or alias; create a custom one otherwise."""
-    norm = normalise_subject(name)
+    """Find a known subject by code, name, alias or close spelling; otherwise
+    create a custom subject that the student can map later."""
     subjects = session.scalars(select(Subject)).all()
-    if code:
-        for s in subjects:
-            if s.code and s.code.upper() == code.upper():
-                return s
-    for s in subjects:
-        if normalise_subject(s.name) == norm or norm in {normalise_subject(a) for a in s.aliases}:
-            if code and not s.code:
-                s.code = code
-            return s
+    if (found := match_subject(subjects, name, code)) is not None:
+        if code and not found.code and found.is_custom:
+            found.code = code
+        return found
     slug = base = f"custom-{_slugify(name)}"
     n = 2
     while session.scalar(select(Subject.id).where(Subject.slug == slug)):
@@ -272,15 +263,18 @@ def confirm_import(
         store.delete(doc.storage_key)
         doc.storage_key = None
     session.commit()
+    refresh_student(session, student.id, load_policy(settings.content_dir))
     return saved
 
 
-def delete_document(session: Session, store: FileStore, doc: Document) -> None:
+def delete_document(session: Session, settings: Settings, store: FileStore, doc: Document) -> None:
     """Delete an upload together with every result imported from it."""
+    student_id = doc.student_id
     session.execute(delete(Assessment).where(Assessment.document_id == doc.id))
     store.delete(doc.storage_key)
     session.delete(doc)
     session.commit()
+    refresh_student(session, student_id, load_policy(settings.content_dir))
 
 
 def delete_student_data(session: Session, store: FileStore, student: Student) -> None:

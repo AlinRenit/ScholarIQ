@@ -450,13 +450,18 @@ export function ReviewForm({
       )}
 
       {error && (
-        <p role="alert" className="rounded-lg border border-bad/30 bg-bad-soft p-3 text-sm text-bad">
+        <p
+          role="alert"
+          className="rounded-lg border border-bad/30 bg-bad-soft p-3 text-sm text-bad"
+        >
           {error}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-3">
         <Button onClick={submit} disabled={busy}>
-          {busy ? "Saving…" : `Confirm and save ${included.length} result${included.length === 1 ? "" : "s"}`}
+          {busy
+            ? "Saving…"
+            : `Confirm and save ${included.length} result${included.length === 1 ? "" : "s"}`}
         </Button>
         <span className="text-xs text-ink-subtle">
           Only the values shown here are saved. The extracted text is then discarded.

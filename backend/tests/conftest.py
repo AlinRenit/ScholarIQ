@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ipaddress
+import shutil
 import socket
 from collections.abc import Iterator
 from pathlib import Path
@@ -10,9 +11,11 @@ from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine
+from sqlalchemy.orm import Session
 
 from scholariq.compliance.policy import PROHIBITED_ENV_VARS
 from scholariq.core.config import Settings, get_settings
+from scholariq.curriculum.sync import load_files, sync_curricula
 from scholariq.db.session import build_engine, get_engine
 from scholariq.main import create_app
 
@@ -81,7 +84,7 @@ def migrated_url(database_url: str) -> str:
 @pytest.fixture
 def settings(tmp_path: Path, migrated_url: str) -> Settings:
     content = tmp_path / "content"
-    content.mkdir()
+    shutil.copytree(REPO_ROOT / "content", content)
     return Settings(
         environment="test",
         database_url=migrated_url,
@@ -96,6 +99,13 @@ def engine(settings: Settings) -> Iterator[Engine]:
     eng = build_engine(settings.database_url)
     yield eng
     eng.dispose()
+
+
+@pytest.fixture
+def curriculum(settings: Settings, engine: Engine) -> None:
+    """Load the seed curriculum from the (copied) content directory."""
+    with Session(engine) as session:
+        sync_curricula(session, load_files(settings.content_dir))
 
 
 @pytest.fixture

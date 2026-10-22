@@ -9,7 +9,7 @@ setup:
 	cd frontend && npm ci
 
 migrate:
-	cd backend && ../$(VENV)/bin/alembic upgrade head
+	cd backend && ../$(VENV)/bin/alembic upgrade head && ../$(VENV)/bin/python -m scholariq.curriculum.sync
 
 api:
 	cd backend && ../$(VENV)/bin/uvicorn scholariq.main:create_app --factory --reload --port 8000

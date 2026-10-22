@@ -108,8 +108,9 @@ backend/
     db/                SQLAlchemy models, engine/session
     domain/            enums and typed domain models
     ingestion/         validation, extraction, OCR, layout parsers, import service
-    analytics/         (M3) subject analytics
-    tutoring/          (M3/M5) evidence, classification, teaching policy
+    curriculum/        (M3) curriculum schema, YAML sync, subject matching
+    analytics/         (M3) subject analytics, topic evidence and classification
+    tutoring/          (M5) teaching policy
     knowledge/         (M4) content loader, graph
     retrieval/         (M4) tokeniser, stemmer, BM25
     nlu/               (M5) query parsing
@@ -181,7 +182,7 @@ Design rules encoded in the schema:
 | Deleting a student removes all their data | `ON DELETE CASCADE` from `students` |
 | Duplicate uploads are detected | unique `(student_id, sha256)` on `documents` |
 
-### Classification method *(planned, Milestone 3)*
+### Classification method *(implemented in Milestone 3, rules `topic-rules/1`)*
 
 Evidence items carry a normalised score in [0, 1], a sample size and a kind.
 Each kind has a configurable weight (subject prior lowest, topic exam and
@@ -195,6 +196,14 @@ produces one of four labels:
 
 The UI shows the label, the evidence list and the rule that fired. It never
 shows a "mastery %" or presents thresholds as calibrated probabilities.
+
+As built: a subject mark contributes at most one observation, self-assessments
+are recorded with reduced weight but never count toward the five topic-level
+observations, recency decays with a 180-day half-life, and when topic-level
+evidence disagrees with the subject band the topic-level evidence wins and the
+reason says so. Weights and thresholds live in `analytics/policy.py` and can be
+overridden from the content directory; each classification records the rule
+and policy versions.
 
 ### Study-plan priority *(planned, Milestone 6)*
 

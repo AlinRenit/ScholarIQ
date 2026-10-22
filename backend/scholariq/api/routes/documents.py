@@ -187,5 +187,11 @@ def confirm(
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove(document_id: str, student: StudentDep, session: SessionDep, store: StoreDep) -> None:
-    delete_document(session, store, _owned(session, student.id, document_id))
+def remove(
+    document_id: str,
+    student: StudentDep,
+    session: SessionDep,
+    settings: SettingsDep,
+    store: StoreDep,
+) -> None:
+    delete_document(session, settings, store, _owned(session, student.id, document_id))

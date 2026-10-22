@@ -193,3 +193,88 @@ export function errorMessage(body: unknown, fallback: string): string {
   }
   return fallback;
 }
+
+// --------------------------------------------------------------------------- //
+// Analytics and topics
+// --------------------------------------------------------------------------- //
+
+export type ScoreOut = { percent: number; basis: "marks" | "grade_points" };
+export type AggregateOut = {
+  value: number | null;
+  basis: string;
+  counted: number;
+  excluded: number;
+  reason: string | null;
+};
+export type Band = "strong" | "developing" | "needs_attention" | "no_score";
+export type SubjectAnalysis = {
+  id: string;
+  name: string;
+  is_custom: boolean;
+  mapped_topics: number;
+  band: Band;
+  latest: ScoreOut | null;
+  latest_note: string | null;
+  best: ScoreOut | null;
+  credits: number | null;
+  sittings: {
+    semester: number | null;
+    exam_type: string;
+    score: ScoreOut | null;
+    note: string | null;
+    components: string[];
+  }[];
+  notes: string[];
+};
+export type SemesterAnalysis = {
+  semester: number | null;
+  results: number;
+  marks_percentage: AggregateOut;
+  credit_weighted_percentage: AggregateOut;
+  gpa: AggregateOut;
+};
+export type Overview = {
+  policy: { version: string; subject_bands: { strong_at: number; attention_below: number } };
+  counts: { subjects: number; results: number; assessments: number; semesters: number };
+  overall: Record<"marks_percentage" | "credit_weighted_percentage" | "gpa", AggregateOut>;
+  semesters: SemesterAnalysis[];
+  trend: { direction: string; change_points: number | null; explanation: string };
+  spread_points: number | null;
+  subjects: SubjectAnalysis[];
+  grade_distribution: Record<string, number>;
+  data_gaps: string[];
+  methodology: string[];
+};
+
+export type MasteryClass = "strong" | "developing" | "needs_attention" | "insufficient_evidence";
+export type TopicEvidence = {
+  id: string;
+  kind: string;
+  description: string;
+  observed_at: string;
+  removable: boolean;
+};
+export type TopicAnalysis = {
+  id: string;
+  slug: string;
+  name: string;
+  estimated_study_minutes: number | null;
+  subjects: { id: string; name: string; importance: number }[];
+  classification: MasteryClass;
+  direct_observations: number;
+  reasons: string[];
+  subject_messages: string[];
+  next_action: string;
+  rule_version: string;
+  evidence: TopicEvidence[];
+};
+
+export type CurriculumSubject = {
+  id: string;
+  slug: string;
+  name: string;
+  code: string | null;
+  aliases: string[];
+  is_custom: boolean;
+  topics: { id: string; slug: string; name: string; importance: number }[];
+};

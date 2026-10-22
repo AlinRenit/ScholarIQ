@@ -55,8 +55,8 @@ export default async function AcademicsPage() {
             <ResultsTable assessments={assessments.data} />
           ) : (
             <Notice title="No confirmed results yet">
-              Results appear here after you review and confirm an import. Subject analysis and
-              topic evidence arrive in Milestone 3.
+              Results appear here after you review and confirm an import. The Dashboard and Topics
+              pages are computed from confirmed results only.
             </Notice>
           )}
         </section>

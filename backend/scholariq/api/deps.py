@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import Cookie, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from scholariq.analytics.policy import Policy, load_policy
 from scholariq.core.config import Settings, get_settings
 from scholariq.core.ratelimit import RateLimiter
 from scholariq.core.security import COOKIE_NAME, unsign
@@ -25,6 +26,13 @@ def get_store(settings: SettingsDep) -> Iterator[FileStore]:
 
 
 StoreDep = Annotated[FileStore, Depends(get_store)]
+
+
+def get_policy(settings: SettingsDep) -> Policy:
+    return load_policy(settings.content_dir)
+
+
+PolicyDep = Annotated[Policy, Depends(get_policy)]
 
 
 def current_student(

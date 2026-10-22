@@ -49,8 +49,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Brand />
         <div className="mt-8">{nav}</div>
         <p className="mt-10 px-3 text-xs leading-relaxed text-ink-subtle">
-          All analysis and answers are computed locally. No language models or external AI
-          services are used.
+          All analysis and answers are computed locally. No language models or external AI services
+          are used.
         </p>
       </aside>
 

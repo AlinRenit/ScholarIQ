@@ -34,7 +34,9 @@ class SyncReport:
 
 def load_files(content_dir: Path) -> list[CurriculumFile]:
     files = sorted((content_dir / "curriculum").glob("*.yaml"))
-    return [CurriculumFile.model_validate(yaml.safe_load(p.read_text())) for p in files]
+    return [
+        CurriculumFile.model_validate(yaml.safe_load(p.read_text(encoding="utf-8"))) for p in files
+    ]
 
 
 def subject_names(subject: Subject) -> set[str]:

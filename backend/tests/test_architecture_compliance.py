@@ -41,7 +41,7 @@ def test_no_inference_endpoints_or_ai_credentials_in_source() -> None:
 
 
 def test_env_example_has_no_secrets() -> None:
-    lines = (REPO_ROOT / ".env.example").read_text().splitlines()
+    lines = (REPO_ROOT / ".env.example").read_text(encoding="utf-8").splitlines()
     for line in lines:
         if "=" not in line or line.lstrip().startswith("#"):
             continue

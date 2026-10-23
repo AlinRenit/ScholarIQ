@@ -132,4 +132,4 @@ def load_policy(content_dir: Path) -> Policy:
     path = content_dir / "policy.yaml"
     if not path.exists():
         return DEFAULT_POLICY
-    return Policy.model_validate(yaml.safe_load(path.read_text()) or {})
+    return Policy.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")) or {})

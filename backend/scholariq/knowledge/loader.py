@@ -61,7 +61,9 @@ def load_content(content_dir: Path) -> KnowledgeContent:
     sources_path = content_dir / "sources.yaml"
     if sources_path.exists():
         try:
-            sources = SourcesFile.model_validate(yaml.safe_load(sources_path.read_text())).sources
+            sources = SourcesFile.model_validate(
+                yaml.safe_load(sources_path.read_text(encoding="utf-8"))
+            ).sources
         except (ValidationError, yaml.YAMLError) as exc:
             problems.append(f"sources.yaml: {exc}")
 
@@ -77,7 +79,7 @@ def load_content(content_dir: Path) -> KnowledgeContent:
     for path in sorted(root.glob("*/*.yaml")) if root.exists() else []:
         rel = path.relative_to(content_dir).as_posix()
         try:
-            tf = TopicFile.model_validate(yaml.safe_load(path.read_text()))
+            tf = TopicFile.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
         except (ValidationError, yaml.YAMLError) as exc:
             problems.append(f"{rel}: {exc}")
             continue

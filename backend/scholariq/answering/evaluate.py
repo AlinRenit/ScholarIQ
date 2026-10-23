@@ -58,7 +58,7 @@ class GoldResult:
 
 
 def load_cases(path: Path) -> list[GoldCase]:
-    return GoldFile.model_validate(yaml.safe_load(path.read_text())).cases
+    return GoldFile.model_validate(yaml.safe_load(path.read_text(encoding="utf-8"))).cases
 
 
 def _text(a: Answer) -> str:
@@ -177,7 +177,7 @@ def main(argv: list[str] | None = None) -> None:
     text = report(results)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(text)
+        args.out.write_text(text, encoding="utf-8")
     print(text)
 
 

@@ -148,7 +148,9 @@ def run_once(work: Path) -> dict[str, float | list[float]]:
             )
         )
 
-        cases = yaml.safe_load((ROOT / "content/eval/answers.yaml").read_text())["cases"]
+        cases = yaml.safe_load((ROOT / "content/eval/answers.yaml").read_text(encoding="utf-8"))[
+            "cases"
+        ]
         t["first tutor answer"], _ = _ms(
             lambda: _ok(c.post("/api/tutor/ask", json={"text": "What is a stack?"}))
         )

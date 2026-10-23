@@ -65,7 +65,7 @@ class Summary:
 
 
 def load_cases(path: Path) -> list[EvalCase]:
-    return EvalFile.model_validate(yaml.safe_load(path.read_text())).cases
+    return EvalFile.model_validate(yaml.safe_load(path.read_text(encoding="utf-8"))).cases
 
 
 def run(index: ConceptIndex, cases: list[EvalCase], k: int = 10) -> list[CaseResult]:
@@ -182,7 +182,7 @@ def main(argv: list[str] | None = None) -> None:
     text = report(results)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(text)
+        args.out.write_text(text, encoding="utf-8")
     print(text)
 
 

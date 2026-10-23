@@ -82,13 +82,17 @@ def scan_python_manifests(root: Path) -> list[Violation]:
         rel = _rel(root, path)
         specs: list[str] = []
         if path.name == "pyproject.toml":
-            data = tomllib.loads(path.read_text())
+            data = tomllib.loads(path.read_text(encoding="utf-8"))
             project = data.get("project", {})
             specs += project.get("dependencies", [])
             for group in project.get("optional-dependencies", {}).values():
                 specs += group
         elif re.fullmatch(r"requirements.*\.txt", path.name):
-            specs += [ln for ln in path.read_text().splitlines() if ln and ln[0] not in "#-"]
+            specs += [
+                ln
+                for ln in path.read_text(encoding="utf-8").splitlines()
+                if ln and ln[0] not in "#-"
+            ]
         for spec in specs:
             name = _requirement_name(spec)
             if name in policy.PROHIBITED_PYTHON_PACKAGES:
@@ -142,7 +146,7 @@ def scan_python_imports(root: Path) -> list[Violation]:
         if path.suffix != ".py" or _rel(root, path) in POLICY_FILES:
             continue
         rel = _rel(root, path)
-        tree = ast.parse(path.read_text(), filename=rel)
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=rel)
         module = _module_name(root, path) or ""
         in_intelligence = any(
             module == p or module.startswith(p + ".") for p in policy.INTELLIGENCE_PACKAGES
@@ -171,12 +175,12 @@ def scan_npm(root: Path) -> list[Violation]:
         rel = _rel(root, path)
         names: list[str] = []
         if path.name == "package.json":
-            data = json.loads(path.read_text())
+            data = json.loads(path.read_text(encoding="utf-8"))
             for field in ("dependencies", "devDependencies", "optionalDependencies",
                           "peerDependencies"):  # fmt: skip
                 names += list(data.get(field, {}))
         elif path.name == "package-lock.json":
-            names += list(_npm_names_from_lock(json.loads(path.read_text())))
+            names += list(_npm_names_from_lock(json.loads(path.read_text(encoding="utf-8"))))
         for name in sorted(set(names)):
             if policy.is_prohibited_npm(name):
                 out.append(Violation("npm-dependency", rel, name))
@@ -197,7 +201,7 @@ def scan_text(root: Path) -> list[Violation]:
         if rel in POLICY_FILES or not _is_text(path) or path.name == "package-lock.json":
             continue
         try:
-            text = path.read_text()
+            text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
         for lineno, line in enumerate(text.splitlines(), 1):

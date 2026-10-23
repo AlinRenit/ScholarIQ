@@ -50,7 +50,7 @@ def load_abbreviations(content_dir: Path) -> dict[str, str]:
     path = content_dir / "lexicon.yaml"
     if not path.exists():
         return {}
-    data = yaml.safe_load(path.read_text()) or {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return {str(k).lower(): str(v) for k, v in (data.get("abbreviations") or {}).items()}
 
 

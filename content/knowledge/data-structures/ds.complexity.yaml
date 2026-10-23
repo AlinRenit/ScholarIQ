@@ -2,6 +2,11 @@ topic: ds.complexity
 version: "2026.10.1"
 concepts:
   - slug: ds.complexity-big-o
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 1d995cb2a990
     name: Big-O notation
     aliases: [big O, big-oh, O notation, asymptotic upper bound, time complexity]
     difficulty: 2
@@ -84,6 +89,11 @@ concepts:
         explanation: n·n + n = n² + n, and the n² term dominates.
 
   - slug: ds.asymptotic-notation
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 2d3662e9d406
     name: Big-Omega and Big-Theta
     aliases: [big omega, big theta, asymptotic notation, tight bound, lower bound notation, Ω, Θ]
     difficulty: 3
@@ -119,6 +129,11 @@ concepts:
         explanation: Matching upper and lower bounds give a tight bound.
 
   - slug: ds.growth-rates
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: bb2185205f2c
     name: Common growth rates
     aliases: [order of growth, complexity classes, logarithmic linear quadratic exponential]
     difficulty: 1

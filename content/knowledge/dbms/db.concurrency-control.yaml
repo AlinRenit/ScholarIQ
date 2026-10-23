@@ -2,6 +2,11 @@ topic: db.concurrency-control
 version: "2026.10.1"
 concepts:
   - slug: db.two-phase-locking
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 6e7e471905b7
     name: Two-phase locking
     aliases: [2PL, two phase locking, strict two-phase locking, shared and exclusive locks, growing and shrinking phase]
     difficulty: 3
@@ -58,6 +63,11 @@ concepts:
         explanation: Shared locks are compatible with each other; an exclusive lock must wait.
 
   - slug: db.isolation-levels
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 88614d1f856d
     name: Isolation levels and read anomalies
     aliases: [dirty read, non-repeatable read, phantom read, read uncommitted, read committed, repeatable read, serializable isolation]
     difficulty: 3

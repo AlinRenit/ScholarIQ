@@ -2,6 +2,11 @@ topic: os.file-systems
 version: "2026.10.1"
 concepts:
   - slug: os.file-allocation
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 761d38e9af4b
     name: File allocation methods
     aliases: [contiguous allocation, linked allocation, indexed allocation, FAT, file allocation table]
     difficulty: 2
@@ -48,6 +53,11 @@ concepts:
         explanation: Each file needs one run of consecutive free blocks, so free space breaks into unusable gaps.
 
   - slug: os.inode
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 44e7b199ed6b
     name: Inode
     aliases: [inodes, index node, i-node, direct blocks, indirect blocks]
     difficulty: 3

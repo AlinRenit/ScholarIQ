@@ -2,6 +2,11 @@ topic: db.indexing
 version: "2026.10.1"
 concepts:
   - slug: db.index
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 58882fa87f2e
     name: Database index
     aliases: [index, indexes, indices, clustered index, primary index, secondary index, dense index, sparse index]
     difficulty: 2
@@ -59,6 +64,11 @@ concepts:
         explanation: Sparse lookup relies on scanning forward in key order, which only works for the file's sort key.
 
   - slug: db.b-plus-tree
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 1b28a1bb680a
     name: B+ tree index
     aliases: [B+ tree, B plus tree, B-tree, B tree, multilevel index]
     difficulty: 3

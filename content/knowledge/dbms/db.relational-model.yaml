@@ -2,6 +2,11 @@ topic: db.relational-model
 version: "2026.10.1"
 concepts:
   - slug: db.relation
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: defddb415658
     name: Relation
     aliases: [table, relational model, tuple, attribute, relation schema, relations]
     difficulty: 1
@@ -40,6 +45,11 @@ concepts:
         explanation: Degree counts attributes (columns); cardinality counts tuples (rows).
 
   - slug: db.keys
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: f2be3d3109b3
     name: Keys
     aliases: [primary key, candidate key, super key, superkey, foreign key, composite key, alternate key]
     difficulty: 2

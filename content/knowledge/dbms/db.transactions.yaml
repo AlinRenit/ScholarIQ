@@ -2,6 +2,11 @@ topic: db.transactions
 version: "2026.10.1"
 concepts:
   - slug: db.acid
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: dee2dc560200
     name: ACID properties
     aliases: [ACID, atomicity, consistency, isolation, durability, transaction properties, transaction]
     difficulty: 2
@@ -49,6 +54,11 @@ concepts:
         explanation: Durability is provided by writing the log to stable storage before reporting the commit.
 
   - slug: db.serializability
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 36788063edaf
     name: Serializability
     aliases: [conflict serializability, serializable schedule, precedence graph, conflicting operations, schedule]
     difficulty: 3

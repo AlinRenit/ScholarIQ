@@ -2,6 +2,11 @@ topic: cn.physical-datalink
 version: "2026.10.1"
 concepts:
   - slug: cn.mac-address
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 27dcd8803a60
     name: MAC address
     aliases: [MAC, hardware address, physical address, Ethernet address, ARP, address resolution protocol]
     difficulty: 2
@@ -43,6 +48,11 @@ concepts:
         explanation: The Address Resolution Protocol broadcasts a request and caches the reply.
 
   - slug: cn.error-detection
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: c11145383b69
     name: Error detection
     aliases: [parity, parity bit, checksum, CRC, cyclic redundancy check, error detection codes]
     difficulty: 3

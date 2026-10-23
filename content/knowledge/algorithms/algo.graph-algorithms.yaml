@@ -2,6 +2,11 @@ topic: algo.graph-algorithms
 version: "2026.10.1"
 concepts:
   - slug: algo.dijkstra
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: cf30065e8b25
     name: Dijkstra's algorithm
     aliases: [Dijkstra, Dijkstras algorithm, single-source shortest path, shortest path algorithm]
     difficulty: 3
@@ -65,6 +70,11 @@ concepts:
         explanation: S→A→B→C costs 2 + 3 + 1 = 6, shorter than S→B→C (7) or S→A→C (9).
 
   - slug: algo.bellman-ford
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 9bbc137ec784
     name: Bellman-Ford algorithm
     aliases: [Bellman Ford, Bellman-Ford, negative weight shortest path]
     difficulty: 4

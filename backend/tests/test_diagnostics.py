@@ -81,7 +81,7 @@ def test_quiz_updates_topic_evidence_and_classification(
     assert len(quiz["questions"]) == 5
     assert {q["style"] for q in quiz["questions"]} == {"conceptual", "application"}
     assert quiz["submitted_at"] is None and quiz["marked"] == []
-    assert all(q["trust"] == "imported" for q in quiz["questions"])
+    assert all(q["trust"] in ("imported", "verified") for q in quiz["questions"])
 
     r = client.post(
         f"/api/practice/quizzes/{quiz['id']}/submit",

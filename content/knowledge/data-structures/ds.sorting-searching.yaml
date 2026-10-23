@@ -2,6 +2,11 @@ topic: ds.sorting-searching
 version: "2026.10.1"
 concepts:
   - slug: ds.linear-search
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: efd231de0705
     name: Linear search
     aliases: [sequential search]
     difficulty: 1
@@ -32,6 +37,11 @@ concepts:
         explanation: The target may be last or absent, so every element is checked.
 
   - slug: ds.binary-search
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 74d6bbef9fde
     name: Binary search
     aliases: [binary chop, half-interval search, bisection search]
     difficulty: 2
@@ -92,6 +102,11 @@ concepts:
         explanation: The discard step relies on everything left of mid being smaller and everything right being larger.
 
   - slug: ds.insertion-sort
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 8285a9c156c0
     name: Insertion sort
     aliases: [insertion sorting]
     difficulty: 2
@@ -126,6 +141,11 @@ concepts:
         explanation: Each new element is compared once with its left neighbour and stays put.
 
   - slug: ds.merge-sort
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: b923293ffb8a
     name: Merge sort
     aliases: [mergesort, merge sorting]
     difficulty: 3

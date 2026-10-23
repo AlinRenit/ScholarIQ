@@ -2,6 +2,11 @@ topic: cn.transport
 version: "2026.10.1"
 concepts:
   - slug: cn.tcp
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: d75e0463bf13
     name: TCP
     aliases: [transmission control protocol, TCP protocol, reliable transport, connection-oriented]
     difficulty: 2
@@ -42,6 +47,11 @@ concepts:
         explanation: TCP uses sequence numbers, acknowledgements and retransmission.
 
   - slug: cn.udp
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 02e71e55cfbc
     name: UDP
     aliases: [user datagram protocol, UDP protocol, connectionless transport]
     difficulty: 1
@@ -88,6 +98,11 @@ concepts:
         explanation: Source port, destination port, length and checksum, two bytes each.
 
   - slug: cn.three-way-handshake
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: e895ee78a84c
     name: TCP three-way handshake
     aliases: [three-way handshake, SYN SYN-ACK ACK, connection establishment, TCP connection setup]
     difficulty: 2

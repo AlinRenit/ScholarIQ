@@ -2,6 +2,11 @@ topic: os.synchronization
 version: "2026.10.1"
 concepts:
   - slug: os.race-condition
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 19d5238f1655
     name: Race condition
     aliases: [race conditions, data race, lost update]
     difficulty: 2
@@ -41,6 +46,11 @@ concepts:
         explanation: Interleaved load-add-store sequences can lose updates, so the total can fall short.
 
   - slug: os.critical-section
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 24a88191b6f3
     name: Critical section problem
     aliases: [critical section, critical region, mutual exclusion, progress, bounded waiting]
     difficulty: 3
@@ -75,6 +85,11 @@ concepts:
         explanation: Bounded waiting rules out a process being overtaken forever.
 
   - slug: os.mutex
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: daec55c5b9a4
     name: Mutex lock
     aliases: [mutex, lock, mutual exclusion lock, spinlock, spin lock]
     difficulty: 2

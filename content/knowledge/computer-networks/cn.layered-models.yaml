@@ -2,6 +2,11 @@ topic: cn.layered-models
 version: "2026.10.1"
 concepts:
   - slug: cn.osi-model
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 243d3c4b34c0
     name: OSI reference model
     aliases: [OSI model, OSI, seven layer model, OSI layers, open systems interconnection]
     difficulty: 1
@@ -58,6 +63,11 @@ concepts:
         explanation: The transport layer (layer 4) identifies processes by port and runs end to end.
 
   - slug: cn.tcp-ip-model
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 5ce0b6fdfa57
     name: TCP/IP model
     aliases: [TCP/IP, internet protocol suite, internet model, TCP IP model, five-layer model]
     difficulty: 1

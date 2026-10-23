@@ -2,6 +2,11 @@ topic: dm.sets-relations-functions
 version: "2026.10.1"
 concepts:
   - slug: dm.sets
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 68f934b47df9
     name: Sets
     aliases: [set, set operations, union, intersection, power set, subset, set difference, cardinality]
     difficulty: 1
@@ -45,6 +50,11 @@ concepts:
         explanation: 30 + 25 − 10 = 45 by inclusion-exclusion.
 
   - slug: dm.relations
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 13fd58a879db
     name: Relations
     aliases: [relation, binary relation, reflexive, symmetric, transitive, antisymmetric, equivalence relation, partial order]
     difficulty: 2

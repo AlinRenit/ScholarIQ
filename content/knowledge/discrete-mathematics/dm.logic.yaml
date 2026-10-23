@@ -2,6 +2,11 @@ topic: dm.logic
 version: "2026.10.1"
 concepts:
   - slug: dm.propositional-logic
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 8f971ceda6a9
     name: Propositional logic
     aliases: [propositions, logical connectives, truth table, truth tables, conjunction, disjunction, negation]
     difficulty: 1
@@ -57,6 +62,11 @@ concepts:
         explanation: "x = 3 makes x > 0 true, and y = 10 makes y > 10 false, so its negation is true and the conjunction holds."
 
   - slug: dm.implication
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: a81533dabca1
     name: Conditional statement
     aliases: [implication, conditional, if then, converse, contrapositive, inverse, material implication]
     difficulty: 2

@@ -40,7 +40,8 @@ def main(argv: list[str] | None = None) -> int:
     print("    review:")
     print("      status: verified")
     print(f"      by: {args.by}")
-    print(f"      on: {date.today().isoformat()}")
+    # Quoted: YAML 1.1 reads a bare on: key as the boolean true.
+    print(f'      "on": {date.today().isoformat()}')
     print(f"      hash: {c.content_hash()[:12]}")
     return 0
 

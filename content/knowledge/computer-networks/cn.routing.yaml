@@ -2,6 +2,11 @@ topic: cn.routing
 version: "2026.10.1"
 concepts:
   - slug: cn.forwarding-table
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 37b5a5e70084
     name: Forwarding and longest prefix match
     aliases: [routing table, forwarding table, longest prefix match, default route, next hop]
     difficulty: 3
@@ -49,6 +54,11 @@ concepts:
         explanation: The most specific match describes the destination most precisely.
 
   - slug: cn.distance-vector
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: cd749a0b8d32
     name: Distance-vector routing
     aliases: [distance vector, RIP, Bellman-Ford routing, count to infinity, split horizon]
     difficulty: 3

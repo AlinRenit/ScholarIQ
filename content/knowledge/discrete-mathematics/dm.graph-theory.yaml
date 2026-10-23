@@ -2,6 +2,11 @@ topic: dm.graph-theory
 version: "2026.10.1"
 concepts:
   - slug: dm.graph-basics
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 317e897c1fb9
     name: Degrees and the handshaking lemma
     aliases: [handshaking lemma, degree sum formula, vertex degree, simple graph, complete graph]
     difficulty: 2
@@ -42,6 +47,11 @@ concepts:
         explanation: Its sum is 9, which is odd, but degree sums must be even.
 
   - slug: dm.euler-hamilton
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 4ea5028a0d2f
     name: Euler and Hamiltonian paths
     aliases: [Euler path, Euler circuit, Eulerian, Hamiltonian path, Hamiltonian cycle, Konigsberg bridges]
     difficulty: 3

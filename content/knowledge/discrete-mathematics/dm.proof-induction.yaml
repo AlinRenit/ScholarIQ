@@ -2,6 +2,11 @@ topic: dm.proof-induction
 version: "2026.10.1"
 concepts:
   - slug: dm.mathematical-induction
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 20a1c64885fe
     name: Mathematical induction
     aliases: [induction, proof by induction, principle of induction, base case, inductive step, inductive hypothesis]
     difficulty: 2

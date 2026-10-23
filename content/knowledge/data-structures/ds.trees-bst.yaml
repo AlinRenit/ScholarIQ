@@ -2,6 +2,11 @@ topic: ds.trees-bst
 version: "2026.10.1"
 concepts:
   - slug: ds.binary-tree
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 56b91e0781f0
     name: Binary tree
     aliases: [binary trees, tree data structure]
     difficulty: 2
@@ -39,6 +44,11 @@ concepts:
         explanation: 2^(3+1) − 1 = 15 (levels of 1, 2, 4 and 8 nodes).
 
   - slug: ds.tree-traversal
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 883ecae176ec
     name: Tree traversal
     aliases: [inorder traversal, preorder traversal, postorder traversal, level order traversal,
               in-order, pre-order, post-order]
@@ -100,6 +110,11 @@ concepts:
           which is first in, first out.
 
   - slug: ds.bst
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 513f2e25d7b4
     name: Binary search tree
     aliases: [BST, binary search trees, ordered binary tree]
     difficulty: 3

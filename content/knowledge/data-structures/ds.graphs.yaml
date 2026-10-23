@@ -2,6 +2,11 @@ topic: ds.graphs
 version: "2026.10.1"
 concepts:
   - slug: ds.graph
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 4cdaded74d71
     name: Graph
     aliases: [graphs, graph data structure, directed graph, undirected graph, digraph]
     difficulty: 2
@@ -40,6 +45,11 @@ concepts:
         explanation: Every pair can be joined once - 6 × 5 / 2 = 15.
 
   - slug: ds.graph-representation
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 5b269cf4151b
     name: Graph representation
     aliases: [adjacency list, adjacency matrix, representing graphs]
     difficulty: 2

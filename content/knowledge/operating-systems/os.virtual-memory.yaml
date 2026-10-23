@@ -2,6 +2,11 @@ topic: os.virtual-memory
 version: "2026.10.1"
 concepts:
   - slug: os.virtual-memory-concept
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 36ee356c151b
     name: Virtual memory and demand paging
     aliases: [virtual memory, demand paging, page fault, page faults, swap space, valid-invalid bit]
     difficulty: 3
@@ -49,6 +54,11 @@ concepts:
         explanation: The page-table entry is invalid, so the OS must load the page first.
 
   - slug: os.page-replacement
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 1e59fa22cd52
     name: Page replacement algorithms
     aliases: [page replacement, FIFO page replacement, LRU, least recently used, optimal page replacement, OPT, Belady's anomaly]
     difficulty: 3

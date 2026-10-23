@@ -2,6 +2,11 @@ topic: algo.divide-conquer
 version: "2026.10.1"
 concepts:
   - slug: algo.divide-and-conquer
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 88e19d9e92e1
     name: Divide and conquer
     aliases: [divide-and-conquer, divide and conquer paradigm, D&C]
     difficulty: 2
@@ -75,6 +80,11 @@ concepts:
           and so on, giving exponentially many calls.
 
   - slug: algo.max-subarray
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 78c772b6345b
     name: Maximum subarray problem
     aliases: [maximum subarray, max subarray sum, Kadane's algorithm, largest sum contiguous subarray]
     difficulty: 3

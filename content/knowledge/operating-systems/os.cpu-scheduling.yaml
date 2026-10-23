@@ -2,6 +2,11 @@ topic: os.cpu-scheduling
 version: "2026.10.1"
 concepts:
   - slug: os.scheduling-criteria
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 39b7ec160f9c
     name: Scheduling criteria
     aliases: [waiting time, turnaround time, response time, throughput, CPU utilisation, scheduling metrics]
     difficulty: 2
@@ -35,6 +40,11 @@ concepts:
         explanation: Turnaround is completion minus arrival, 15 − 2 = 13.
 
   - slug: os.fcfs
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 5dda4e3e0102
     name: First-come, first-served scheduling
     aliases: [FCFS, FIFO scheduling, first come first serve, first come first served]
     difficulty: 2
@@ -73,6 +83,11 @@ concepts:
         explanation: Waits are 0, 5 and 8, so the average is 13 / 3 ≈ 4.33.
 
   - slug: os.sjf
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 7aa6df400e35
     name: Shortest-job-first scheduling
     aliases: [SJF, shortest job first, SRTF, shortest remaining time first, shortest job next]
     difficulty: 3

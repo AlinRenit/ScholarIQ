@@ -2,6 +2,11 @@ topic: algo.recurrences
 version: "2026.10.1"
 concepts:
   - slug: algo.recurrence-relation
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 7d6b4d87cc13
     name: Recurrence relation
     aliases: [recurrence, recurrences, recurrence equation, recursive formula]
     difficulty: 2
@@ -50,6 +55,11 @@ concepts:
         explanation: Unrolling gives 1 + 2 + … + n = n(n + 1)/2.
 
   - slug: algo.master-theorem
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 35c4a567f9a6
     name: Master theorem
     aliases: [master method, master theorem for divide and conquer recurrences]
     difficulty: 3

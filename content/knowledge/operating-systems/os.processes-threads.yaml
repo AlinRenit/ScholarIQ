@@ -2,6 +2,11 @@ topic: os.processes-threads
 version: "2026.10.1"
 concepts:
   - slug: os.process
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 7e777c875dd8
     name: Process
     aliases: [processes, program in execution, process control block, PCB, process states]
     difficulty: 2
@@ -55,6 +60,11 @@ concepts:
         explanation: The PCB holds the saved CPU state so the process can resume later.
 
   - slug: os.thread
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 151f002854f9
     name: Thread
     aliases: [threads, lightweight process, multithreading, kernel thread, user thread]
     difficulty: 2

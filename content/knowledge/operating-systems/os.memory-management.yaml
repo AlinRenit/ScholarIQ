@@ -2,6 +2,11 @@ topic: os.memory-management
 version: "2026.10.1"
 concepts:
   - slug: os.address-translation
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: e98f42d5dad5
     name: Logical and physical addresses
     aliases: [logical address, physical address, virtual address, address binding, MMU, memory management unit]
     difficulty: 2
@@ -39,6 +44,11 @@ concepts:
         explanation: 2500 < 12000, so it is valid and maps to 30000 + 2500 = 32500.
 
   - slug: os.fragmentation
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 76013f41d877
     name: Fragmentation
     aliases: [external fragmentation, internal fragmentation, compaction, first fit, best fit, worst fit]
     difficulty: 2
@@ -84,6 +94,11 @@ concepts:
         explanation: It needs 3 pages (12 KB) for 10 KB of data, wasting 2 KB.
 
   - slug: os.paging
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: d24857593ec7
     name: Paging
     aliases: [page table, pages and frames, page number and offset, page frame]
     difficulty: 3

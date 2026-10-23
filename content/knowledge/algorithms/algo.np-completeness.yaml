@@ -2,6 +2,11 @@ topic: algo.np-completeness
 version: "2026.10.1"
 concepts:
   - slug: algo.p-and-np
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 7adfbe16e4ef
     name: P and NP
     aliases: [complexity classes P and NP, P vs NP, class NP, class P, nondeterministic polynomial time]
     difficulty: 3
@@ -50,6 +55,11 @@ concepts:
         explanation: Anything solvable quickly can be verified quickly. Whether the classes are equal is open.
 
   - slug: algo.np-complete
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 682ce98cc0b6
     name: NP-complete problem
     aliases: [NP-complete, NP completeness, NP-hard, NP hard, NPC]
     difficulty: 4

@@ -2,6 +2,11 @@ topic: algo.greedy
 version: "2026.10.1"
 concepts:
   - slug: algo.greedy-method
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: d3ee50d4d471
     name: Greedy algorithm
     aliases: [greedy method, greedy approach, greedy strategy, greedy algorithms, greedy choice property]
     difficulty: 2
@@ -58,6 +63,11 @@ concepts:
         explanation: That locally optimal, irrevocable choice is what makes an algorithm greedy.
 
   - slug: algo.activity-selection
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: d088b539fbe1
     name: Activity selection
     aliases: [interval scheduling, activity selection problem, maximum non-overlapping intervals]
     difficulty: 3

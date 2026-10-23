@@ -123,7 +123,7 @@ environment before each release.
 * **Uploaded files are parsed by third-party libraries** (pdfplumber, PDFium,
   Pillow, openpyxl, Tesseract). They run in the API process without an extra
   sandbox; keep them updated.
-* **Seed content has not been reviewed by a person.** A wrong answer key would
+* **Part of the seed content (63 of 151 concepts) has not been reviewed.** A wrong answer key would
   mark a correct student answer as wrong and lower their topic evidence. Every
   such question is labelled "not yet reviewed by a person", and
   `SCHOLARIQ_ALLOW_UNREVIEWED_CONTENT=false` restricts the app to reviewed

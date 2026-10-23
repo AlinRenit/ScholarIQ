@@ -2,6 +2,11 @@ topic: cn.ip-addressing
 version: "2026.10.1"
 concepts:
   - slug: cn.ipv4-address
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: ff137744edcc
     name: IPv4 address
     aliases: [IP address, IPv4, dotted decimal, IP addresses, network and host part]
     difficulty: 1
@@ -34,6 +39,11 @@ concepts:
         explanation: Four 8-bit octets make 32 bits.
 
   - slug: cn.subnetting
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 05e2d933b9b3
     name: Subnetting and CIDR
     aliases: [subnet, subnet mask, CIDR, classless inter-domain routing, prefix length, network address, broadcast address, subnetting]
     difficulty: 3

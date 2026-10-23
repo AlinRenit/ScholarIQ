@@ -2,6 +2,11 @@ topic: ds.linked-lists
 version: "2026.10.1"
 concepts:
   - slug: ds.linked-list
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 646775f309db
     name: Linked list
     aliases: [singly linked list, linked lists, SLL]
     difficulty: 2
@@ -90,6 +95,11 @@ concepts:
           n elements right.
 
   - slug: ds.doubly-linked-list
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: e479c78dbc46
     name: Doubly linked list
     aliases: [DLL, two-way linked list, doubly linked lists]
     difficulty: 2

@@ -49,8 +49,9 @@ What works today:
 * A Computer Science knowledge base (`content/knowledge/`): 151 concepts,
   201 explanations and worked examples, 242 practice questions and 205
   prerequisite and related-concept links across all 40 topics, each citing
-  textbooks or RFCs for further reading. None of it has been reviewed by a
-  person yet, and the app labels it that way everywhere.
+  textbooks or RFCs for further reading. 88 of the 151 concepts have been
+  reviewed and signed off (at least one in every topic); the rest are labelled
+  "not yet reviewed by a person" everywhere they appear.
 * Knowledge Base pages with coverage per topic, concept pages, and search that
   shows its whole score: BM25 contribution per word plus a bonus when the query
   names a concept. Retrieval quality is measured in
@@ -287,7 +288,7 @@ they never change a topic classification.
 
 * Every quiz question is multiple choice, and most topics have five to eight
   questions, so after one or two retakes questions repeat (in a new order).
-  The answer keys are seed content no person has reviewed yet.
+  Questions on concepts that have not been reviewed yet are labelled as such.
 * Topic prerequisites are derived from concept "requires" links in the
   knowledge base. The plan formula's weights are teaching conventions (defaults
   in `backend/scholariq/analytics/policy.py`, overridable in an optional
@@ -299,8 +300,8 @@ they never change a topic classification.
   thresholds were tuned on questions written by the same author as the content,
   so real students' phrasing will expose gaps; the held-out evaluation set is
   small (24 questions).
-* No knowledge-base entry has been reviewed by a person yet. The seed content
-  was written for ScholarIQ from standard textbook material.
+* 63 of the 151 knowledge-base concepts have not been reviewed yet. The seed
+  content was written for ScholarIQ from standard textbook material.
 * Knowledge-base search is lexical. It handles names, aliases, British and
   American spellings and word endings, but not misspellings (the tutor corrects
   spelling before searching), and some queries about unrelated

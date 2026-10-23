@@ -2,6 +2,11 @@ topic: ds.hashing
 version: "2026.10.1"
 concepts:
   - slug: ds.hash-table
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 59caf6c44dc0
     name: Hash table
     aliases: [hash map, hashmap, dictionary, hash tables, associative array]
     difficulty: 2
@@ -62,6 +67,11 @@ concepts:
           inorder traversal.
 
   - slug: ds.collision-resolution
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: bce50692697a
     name: Collision resolution
     aliases: [hash collisions, separate chaining, chaining, open addressing, linear probing,
               quadratic probing, double hashing]

@@ -2,6 +2,11 @@ topic: algo.dynamic-programming
 version: "2026.10.1"
 concepts:
   - slug: algo.dynamic-programming
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 783eed9c3396
     name: Dynamic programming
     aliases: [DP, dynamic programming approach, tabulation, bottom-up dynamic programming]
     difficulty: 3
@@ -62,6 +67,11 @@ concepts:
         explanation: Each entry fib(i) for i = 2 … n is one addition of two stored entries.
 
   - slug: algo.memoization
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 6c3ff2265e83
     name: Memoisation
     aliases: [memoization, memoisation, top-down dynamic programming, caching recursive results]
     difficulty: 2

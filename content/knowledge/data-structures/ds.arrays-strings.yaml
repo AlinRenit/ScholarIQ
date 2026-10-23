@@ -2,6 +2,11 @@ topic: ds.arrays-strings
 version: "2026.10.1"
 concepts:
   - slug: ds.array
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 328bdfc4213e
     name: Array
     aliases: [static array, fixed-size array, one-dimensional array]
     difficulty: 1
@@ -82,6 +87,11 @@ concepts:
           n existing elements one place to the right.
 
   - slug: ds.dynamic-array
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 45013a34e1bd
     name: Dynamic array
     aliases: [resizable array, ArrayList, vector, growable array, Python list]
     difficulty: 2

@@ -2,6 +2,11 @@ topic: ds.stacks-queues
 version: "2026.10.1"
 concepts:
   - slug: ds.stack
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 534556ed92de
     name: Stack
     aliases: [LIFO, stacks, LIFO stack, push down stack]
     difficulty: 1
@@ -81,6 +86,11 @@ concepts:
           bracket, which is exactly the top of a stack.
 
   - slug: ds.queue
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 27024530b1aa
     name: Queue
     aliases: [FIFO, queues, FIFO queue]
     difficulty: 1

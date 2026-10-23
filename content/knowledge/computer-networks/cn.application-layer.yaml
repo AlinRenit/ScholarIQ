@@ -2,6 +2,11 @@ topic: cn.application-layer
 version: "2026.10.1"
 concepts:
   - slug: cn.dns
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 9686f78cfa21
     name: DNS
     aliases: [domain name system, DNS resolution, name server, DNS lookup, recursive resolver]
     difficulty: 2
@@ -49,6 +54,11 @@ concepts:
         explanation: MX (mail exchanger) records name the domain's mail servers.
 
   - slug: cn.http
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 0ce78d7cc483
     name: HTTP
     aliases: [hypertext transfer protocol, HTTP methods, GET and POST, HTTP status codes, HTTPS, web protocol]
     difficulty: 2

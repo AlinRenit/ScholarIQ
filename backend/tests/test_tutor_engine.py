@@ -82,16 +82,22 @@ def test_definition_answer_follows_the_template(session: Session) -> None:
 
 
 def test_answers_from_unreviewed_content_are_labelled(session: Session) -> None:
-    a = ask(make(session), "What is a stack?")
+    a = ask(make(session), "What is a deque?")  # ds.deque is not reviewed yet
     assert not a.review.all_reviewed
     assert a.review.label and "Not yet reviewed by a person" in a.review.label
-    assert a.review.unreviewed == ["ds.stack"]
+    assert a.review.unreviewed == ["ds.deque"]
+
+
+def test_answers_from_reviewed_content_carry_no_label(session: Session) -> None:
+    a = ask(make(session), "What is a stack?")  # ds.stack is reviewed
+    assert a.review.all_reviewed and not a.review.unreviewed and not a.review.label
 
 
 def test_reviewed_only_mode_abstains_rather_than_using_unreviewed_content(session: Session) -> None:
-    a = ask(make(session, allow_unreviewed=False), "What is a stack?")
+    a = ask(make(session, allow_unreviewed=False), "What is a deque?")
     assert a.status == "abstained"
     assert a.handler == "F"
+    assert ask(make(session, allow_unreviewed=False), "What is a stack?").status == "answered"
 
 
 @pytest.mark.parametrize(

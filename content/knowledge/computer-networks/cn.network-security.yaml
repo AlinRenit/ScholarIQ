@@ -2,6 +2,11 @@ topic: cn.network-security
 version: "2026.10.1"
 concepts:
   - slug: cn.symmetric-encryption
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: f28a191284e3
     name: Symmetric-key encryption
     aliases: [symmetric encryption, secret key cryptography, AES, shared key encryption, symmetric key]
     difficulty: 2
@@ -40,6 +45,11 @@ concepts:
         explanation: The same key encrypts and decrypts, so it must reach both sides without being exposed.
 
   - slug: cn.public-key-encryption
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: a10fe4ad6506
     name: Public-key cryptography
     aliases: [asymmetric encryption, public key encryption, RSA, public and private key, asymmetric cryptography]
     difficulty: 3

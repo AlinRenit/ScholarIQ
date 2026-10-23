@@ -2,6 +2,11 @@ topic: db.sql
 version: "2026.10.1"
 concepts:
   - slug: db.sql-select
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 5e474729fffb
     name: SQL SELECT queries
     aliases: [SELECT statement, SQL query, SELECT FROM WHERE, ORDER BY, DISTINCT, SQL basics]
     difficulty: 1
@@ -48,6 +53,11 @@ concepts:
         explanation: WHERE filters rows; HAVING filters groups after GROUP BY.
 
   - slug: db.sql-joins
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 4751b0db79e4
     name: SQL joins
     aliases: [JOIN, inner join, left join, left outer join, right join, full outer join, outer join]
     difficulty: 2

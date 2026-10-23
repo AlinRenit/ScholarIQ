@@ -2,6 +2,11 @@ topic: db.functional-dependencies
 version: "2026.10.1"
 concepts:
   - slug: db.functional-dependency
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 2eabc6ff0379
     name: Functional dependency
     aliases: [FD, functional dependencies, FDs, determinant, trivial functional dependency]
     difficulty: 2
@@ -53,6 +58,11 @@ concepts:
           2, breaking B → A.
 
   - slug: db.armstrong-axioms
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 68294b48fcdc
     name: Armstrong's axioms
     aliases: [Armstrong axioms, inference rules for functional dependencies, reflexivity augmentation transitivity]
     difficulty: 3

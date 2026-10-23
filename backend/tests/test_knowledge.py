@@ -53,9 +53,19 @@ def test_every_concept_has_an_explanation_or_example(knowledge_content: Knowledg
     assert bare == []
 
 
-def test_seed_content_is_honestly_unreviewed(knowledge_content: KnowledgeContent) -> None:
-    # No person has reviewed the seed entries yet; none may claim otherwise.
-    assert {trust_of(c) for _, c in knowledge_content.concepts()} == {TrustStatus.IMPORTED}
+def test_seed_reviews_match_the_content_they_vouch_for(
+    knowledge_content: KnowledgeContent,
+) -> None:
+    # A review block counts only while its hash matches the concept; a stale
+    # one would silently drop the concept back to unreviewed.
+    stale = [
+        c.slug
+        for _, c in knowledge_content.concepts()
+        if c.review.status == "verified" and trust_of(c) is not TrustStatus.VERIFIED
+    ]
+    assert stale == []
+    trusts = {trust_of(c) for _, c in knowledge_content.concepts()}
+    assert trusts == {TrustStatus.IMPORTED, TrustStatus.VERIFIED}
 
 
 # --------------------------------------------------------------------------- #
@@ -293,8 +303,11 @@ def test_search_finds_the_concept_a_question_names(engine: Engine) -> None:
 @pytest.mark.usefixtures("knowledge")
 def test_unreviewed_content_is_excluded_when_not_allowed(engine: Engine) -> None:
     with Session(engine) as session:
-        assert get_index(session, allow_unreviewed=False).search("stack") == []
-        assert get_index(session, allow_unreviewed=True).search("stack")
+        reviewed_only = get_index(session, allow_unreviewed=False)
+        assert all(h.concept.trust is TrustStatus.VERIFIED for h in reviewed_only.search("queue"))
+        assert "ds.deque" not in [h.concept.slug for h in reviewed_only.search("deque")]
+        everything = get_index(session, allow_unreviewed=True)
+        assert "ds.deque" in [h.concept.slug for h in everything.search("deque")]
 
 
 # --------------------------------------------------------------------------- #
@@ -305,7 +318,7 @@ def test_unreviewed_content_is_excluded_when_not_allowed(engine: Engine) -> None
 @pytest.mark.usefixtures("knowledge")
 def test_knowledge_overview(client: TestClient) -> None:
     body = client.get("/api/knowledge/overview").json()
-    assert body["concepts"] >= 150 and body["verified_concepts"] == 0
+    assert body["concepts"] >= 150 and 0 < body["verified_concepts"] < body["concepts"]
     assert body["allow_unreviewed"] is True
     topics = [t for s in body["subjects"] for t in s["topics"]]
     assert all(t["questions"] >= 5 for t in topics)
@@ -327,7 +340,7 @@ def test_concept_page_hides_quiz_answers(client: TestClient) -> None:
     r = client.get("/api/knowledge/concepts/ds.stack")
     assert r.status_code == 200
     body = r.json()
-    assert body["trust_status"] == "imported" and body["reviewed_by"] is None
+    assert body["trust_status"] == "verified" and body["reviewed_by"]
     assert body["question_count"] >= 1
     assert {
         "kind": "contrasts_with",
@@ -362,3 +375,26 @@ def test_retrieval_evaluation_set(knowledge: None, engine: Engine) -> None:
     assert in_scope.hit1 >= 0.85
     assert in_scope.hit3 >= 0.9
     assert "## Misses" in report(results)
+
+
+def test_review_helper_prints_a_block_that_loads(
+    capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import yaml
+
+    from scholariq.knowledge import review
+    from scholariq.knowledge.schema import Review
+
+    monkeypatch.setenv(
+        "SCHOLARIQ_CONTENT_DIR", str(Path(__file__).resolve().parents[2] / "content")
+    )
+    from scholariq.core.config import get_settings
+
+    get_settings.cache_clear()
+    try:
+        assert review.main(["ds.deque", "--by", "A Reviewer"]) == 0
+    finally:
+        get_settings.cache_clear()
+    block = "\n".join(capsys.readouterr().out.splitlines()[1:])
+    parsed = Review.model_validate(yaml.safe_load(block)["review"])
+    assert parsed.status == "verified" and parsed.on is not None

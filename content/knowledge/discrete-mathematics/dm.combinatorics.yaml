@@ -2,6 +2,11 @@ topic: dm.combinatorics
 version: "2026.10.1"
 concepts:
   - slug: dm.counting-principles
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 08901753b3e5
     name: Sum and product rules
     aliases: [counting, product rule, sum rule, rule of product, rule of sum, fundamental counting principle]
     difficulty: 1
@@ -32,6 +37,11 @@ concepts:
         explanation: Each of the 8 positions has 2 choices, so 2^8 = 256.
 
   - slug: dm.permutations-combinations
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 8806b35fa960
     name: Permutations and combinations
     aliases: [permutations, combinations, nPr, nCr, binomial coefficient, n choose r, arrangements, selections]
     difficulty: 2

@@ -44,7 +44,7 @@ def test_ask_follow_up_and_history(client: TestClient, knowledge: None) -> None:
     first = ask(client, "What is a stack?")
     conv = first["conversation_id"]
     assert first["answer"]["handler"] == "A"
-    assert first["answer"]["review"]["all_reviewed"] is False
+    assert first["answer"]["review"]["all_reviewed"] is True  # ds.stack is reviewed
 
     simpler = ask(client, action="simplify", conversation_id=conv)
     assert simpler["answer"]["personalisation"]["level"] == "guided"

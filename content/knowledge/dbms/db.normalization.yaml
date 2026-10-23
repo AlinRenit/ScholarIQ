@@ -2,6 +2,11 @@ topic: db.normalization
 version: "2026.10.1"
 concepts:
   - slug: db.anomalies
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: 6aad4beaa95b
     name: Update anomalies
     aliases: [insertion anomaly, deletion anomaly, update anomaly, modification anomaly, redundancy]
     difficulty: 2
@@ -39,6 +44,11 @@ concepts:
         explanation: Removing one fact (the enrolment) unintentionally removed another (the instructor).
 
   - slug: db.1nf
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: ae153bbb9cfc
     name: First normal form
     aliases: [1NF, first normal form, atomic values]
     difficulty: 1
@@ -73,6 +83,11 @@ concepts:
         explanation: 1NF only rules out multi-valued or composite cells.
 
   - slug: db.2nf
+    review:
+      status: verified
+      by: ALTIOR
+      "on": 2026-10-23
+      hash: b0a818ac037e
     name: Second normal form
     aliases: [2NF, second normal form, partial dependency, partial dependencies]
     difficulty: 3

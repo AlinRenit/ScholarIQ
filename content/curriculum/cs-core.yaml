@@ -7,6 +7,12 @@
 #
 # This is a starting curriculum, not a complete syllabus. Institutions differ;
 # edit this file or add another curriculum file to match yours.
+#
+# modules: syllabus units ("Module 1", "Unit 3") and the topics each covers.
+# They are used by Exam Breakdown to total marks per module. The groupings
+# below follow a common five-unit layout; replace them with your institution's
+# syllabus. A topic belongs to at most one module of a subject, and a topic left
+# out of every module is shown as "not in a module".
 
 curriculum:
   slug: cs-core
@@ -28,6 +34,12 @@ subjects:
       - {slug: ds.hashing, name: Hashing, importance: 4, minutes: 150}
       - {slug: ds.sorting-searching, name: Sorting and searching, importance: 5, minutes: 210}
       - {slug: ds.complexity, name: Time and space complexity, importance: 5, minutes: 180}
+    modules:
+      - {slug: ds.m1, number: 1, name: Introduction and analysis, topics: [ds.complexity, ds.arrays-strings]}
+      - {slug: ds.m2, number: 2, name: Linear data structures, topics: [ds.linked-lists, ds.stacks-queues]}
+      - {slug: ds.m3, number: 3, name: Trees, topics: [ds.trees-bst]}
+      - {slug: ds.m4, number: 4, name: Graphs, topics: [ds.graphs]}
+      - {slug: ds.m5, number: 5, name: "Sorting, searching and hashing", topics: [ds.sorting-searching, ds.hashing]}
 
   - slug: algorithms
     name: Design and Analysis of Algorithms
@@ -42,6 +54,12 @@ subjects:
       - {slug: algo.graph-algorithms, name: Graph algorithms, importance: 5, minutes: 300}
       - {slug: ds.sorting-searching, name: Sorting and searching, importance: 4, minutes: 210}
       - {slug: algo.np-completeness, name: NP-completeness, importance: 3, minutes: 150}
+    modules:
+      - {slug: algo.m1, number: 1, name: Analysis of algorithms, topics: [ds.complexity, algo.recurrences]}
+      - {slug: algo.m2, number: 2, name: Divide and conquer, topics: [algo.divide-conquer, ds.sorting-searching]}
+      - {slug: algo.m3, number: 3, name: Greedy method, topics: [algo.greedy]}
+      - {slug: algo.m4, number: 4, name: Dynamic programming and graph algorithms, topics: [algo.dynamic-programming, algo.graph-algorithms]}
+      - {slug: algo.m5, number: 5, name: Complexity classes, topics: [algo.np-completeness]}
 
   - slug: operating-systems
     name: Operating Systems
@@ -55,6 +73,12 @@ subjects:
       - {slug: os.memory-management, name: Memory management, importance: 5, minutes: 210}
       - {slug: os.virtual-memory, name: Virtual memory, importance: 4, minutes: 210}
       - {slug: os.file-systems, name: File systems, importance: 3, minutes: 150}
+    modules:
+      - {slug: os.m1, number: 1, name: Processes and threads, topics: [os.processes-threads]}
+      - {slug: os.m2, number: 2, name: CPU scheduling, topics: [os.cpu-scheduling]}
+      - {slug: os.m3, number: 3, name: Synchronization and deadlocks, topics: [os.synchronization, os.deadlocks]}
+      - {slug: os.m4, number: 4, name: Memory management, topics: [os.memory-management, os.virtual-memory]}
+      - {slug: os.m5, number: 5, name: Storage and file systems, topics: [os.file-systems]}
 
   - slug: dbms
     name: Database Management Systems
@@ -69,6 +93,12 @@ subjects:
       - {slug: db.transactions, name: Transactions, importance: 4, minutes: 180}
       - {slug: db.concurrency-control, name: Concurrency control, importance: 4, minutes: 180}
       - {slug: db.indexing, name: Indexing, importance: 3, minutes: 150}
+    modules:
+      - {slug: db.m1, number: 1, name: Relational model, topics: [db.relational-model]}
+      - {slug: db.m2, number: 2, name: SQL, topics: [db.sql]}
+      - {slug: db.m3, number: 3, name: Database design, topics: [db.functional-dependencies, db.normalization]}
+      - {slug: db.m4, number: 4, name: Transactions and concurrency, topics: [db.transactions, db.concurrency-control]}
+      - {slug: db.m5, number: 5, name: Storage and indexing, topics: [db.indexing]}
 
   - slug: computer-networks
     name: Computer Networks
@@ -83,6 +113,12 @@ subjects:
       - {slug: cn.transport, name: Transport layer (TCP and UDP), importance: 5, minutes: 210}
       - {slug: cn.application-layer, name: Application layer protocols, importance: 3, minutes: 150}
       - {slug: cn.network-security, name: Network security basics, importance: 3, minutes: 150}
+    modules:
+      - {slug: cn.m1, number: 1, name: Network models and lower layers, topics: [cn.layered-models, cn.physical-datalink]}
+      - {slug: cn.m2, number: 2, name: Network layer, topics: [cn.ip-addressing]}
+      - {slug: cn.m3, number: 3, name: Routing, topics: [cn.routing]}
+      - {slug: cn.m4, number: 4, name: Transport layer, topics: [cn.transport]}
+      - {slug: cn.m5, number: 5, name: Application layer and security, topics: [cn.application-layer, cn.network-security]}
 
   - slug: discrete-mathematics
     name: Discrete Mathematics
@@ -96,3 +132,9 @@ subjects:
       - {slug: dm.combinatorics, name: Counting and combinatorics, importance: 4, minutes: 210}
       - {slug: dm.graph-theory, name: Graph theory, importance: 4, minutes: 210}
       - {slug: algo.recurrences, name: Recurrence relations, importance: 3, minutes: 180}
+    modules:
+      - {slug: dm.m1, number: 1, name: Logic, topics: [dm.logic]}
+      - {slug: dm.m2, number: 2, name: "Sets, relations and functions", topics: [dm.sets-relations-functions]}
+      - {slug: dm.m3, number: 3, name: Proofs and recurrences, topics: [dm.proof-induction, algo.recurrences]}
+      - {slug: dm.m4, number: 4, name: Combinatorics, topics: [dm.combinatorics]}
+      - {slug: dm.m5, number: 5, name: Graph theory, topics: [dm.graph-theory]}

@@ -12,8 +12,9 @@ For every candidate topic::
 * goal: 1 when the student picked the topic (or its subject) as a goal.
 * unlocks: how many other topics in the plan build on this one, capped at 3,
   divided by 3.
-* recent_result: 1 minus the fraction correct in the latest diagnostic quiz,
-  when that quiz is within ``recent_days``; otherwise 0.
+* recent_result: 1 minus the latest topic-level result (fraction correct in a
+  diagnostic quiz, or fraction of marks on the topic's questions in a
+  confirmed exam breakdown), when it is within ``recent_days``; otherwise 0.
 * study_time: estimated minutes divided by ``long_topic_minutes``, capped at 1.
 
 Topics classified Strong are left out unless they are a goal. Topics are then
@@ -44,6 +45,7 @@ class TopicInput:
     minutes: int | None
     subject_bands: tuple[Band, ...] = ()
     last_quiz: tuple[float, datetime] | None = None  # (fraction correct, when)
+    last_source: str = "quiz"  # what last_quiz came from, for the explanation
 
 
 @dataclass
@@ -85,12 +87,16 @@ def _terms(
         need_why += "; a subject mark that includes it may need attention"
     importance = (t.importance or 0) / 5
     recent = 0.0
-    recent_why = f"No diagnostic quiz in the last {rules.recent_days} days"
+    recent_why = f"No diagnostic quiz or exam result in the last {rules.recent_days} days"
     if t.last_quiz is not None:
         score, when = t.last_quiz
         if (now - when).days <= rules.recent_days:
             recent = 1 - score
-            recent_why = f"Latest quiz: {score:.0%} correct"
+            recent_why = (
+                f"Latest quiz: {score:.0%} correct"
+                if t.last_source == "quiz"
+                else f"Latest {t.last_source}: {score:.0%} of the marks"
+            )
     minutes = t.minutes or 0
     return {
         "need": Term(need, w.need, need_why),

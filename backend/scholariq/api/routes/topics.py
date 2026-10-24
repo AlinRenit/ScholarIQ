@@ -166,7 +166,8 @@ def delete_evidence(
     if ev.kind not in STUDENT_ENTERED:
         raise HTTPException(
             status.HTTP_409_CONFLICT,
-            "This evidence comes from your results or quizzes; change those instead.",
+            "This evidence comes from your results, quizzes or exam breakdowns; "
+            "change those instead.",
         )
     session.delete(ev)
     session.commit()

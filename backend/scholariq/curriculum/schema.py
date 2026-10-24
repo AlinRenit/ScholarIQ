@@ -21,6 +21,17 @@ class TopicSpec(BaseModel):
     summary: str | None = None
 
 
+class ModuleSpec(BaseModel):
+    """A syllabus unit of a subject and the subject topics it covers."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    slug: Slug
+    number: int = Field(ge=1, le=99)
+    name: Name
+    topics: list[Slug] = Field(default_factory=list)
+
+
 class SubjectSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -29,12 +40,27 @@ class SubjectSpec(BaseModel):
     codes: list[str] = Field(default_factory=list)
     aliases: list[str] = Field(default_factory=list)
     topics: list[TopicSpec] = Field(min_length=1)
+    # Optional. A topic belongs to at most one module of a subject; topics not
+    # listed in any module are simply unassigned.
+    modules: list[ModuleSpec] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _unique_topics(self) -> SubjectSpec:
         slugs = [t.slug for t in self.topics]
         if len(slugs) != len(set(slugs)):
             raise ValueError(f"{self.slug}: duplicate topic slugs")
+        for attr in ("slug", "number"):
+            values = [getattr(m, attr) for m in self.modules]
+            if len(values) != len(set(values)):
+                raise ValueError(f"{self.slug}: duplicate module {attr}s")
+        seen: set[str] = set()
+        for m in self.modules:
+            for t in m.topics:
+                if t not in slugs:
+                    raise ValueError(f"{self.slug}: module {m.slug} lists unknown topic {t}")
+                if t in seen:
+                    raise ValueError(f"{self.slug}: topic {t} is in more than one module")
+                seen.add(t)
         return self
 
 

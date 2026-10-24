@@ -144,7 +144,8 @@ def list_documents(student: StudentDep, session: SessionDep) -> list[DocumentOut
         .where(Document.student_id == student.id)
         .order_by(Document.created_at.desc())
     ).all()
-    return [_doc_out(d) for d in docs]
+    # Question papers belong to exam breakdowns and are managed there.
+    return [_doc_out(d) for d in docs if (d.analysis or {}).get("kind") != "question_paper"]
 
 
 @router.get("/grading-scales", response_model=list[ScaleTemplateOut])

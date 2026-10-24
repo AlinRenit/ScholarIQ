@@ -1,6 +1,8 @@
-"""Regenerate the marksheet fixtures in ./marksheets.
+"""Regenerate the marksheet fixtures in ./marksheets and the question papers in
+./question_papers.
 
 Run from backend/:  python -m tests.fixtures.generate
+(or ``python -m tests.fixtures.generate question-papers`` for the papers only)
 The outputs are committed so tests do not depend on fonts or reportlab.
 All names and marks are fictional.
 """
@@ -156,12 +158,67 @@ def malformed() -> None:
     (OUT / "png_named_csv.csv").write_bytes((OUT / "scanned_semester4.png").read_bytes())
 
 
+PAPERS = Path(__file__).parent / "question_papers"
+
+PAPER_LINES = [
+    "Example Institute of Technology",
+    "B.Tech Semester III Examination, November 2025",
+    "CS301 Data Structures",
+    "Time: 3 Hours                Maximum Marks: 34",
+    "PART A",
+    "Answer all questions. Each question carries 2 marks.",
+    "1. Define a stack and list its operations.",
+    "2. What is a linked list?",
+    "3. What is a hash collision?",
+    "PART B",
+    "Answer any two questions.",
+    "4. (a) Explain how a queue can be implemented using a circular array, showing the",
+    "enqueue and dequeue operations. [6]",
+    "(b) Convert the infix expression A+B*C into postfix using a stack. [4]",
+    "5. Explain insertion and deletion in a binary search tree with an example. [10]",
+    "6. Write the algorithm for breadth first search of a graph and explain its time",
+    "complexity. [10]",
+    "PART C",
+    "7. Explain merge sort and analyse its time complexity. [8]",
+]
+
+
+def question_papers() -> None:
+    from reportlab.pdfgen import canvas
+
+    PAPERS.mkdir(exist_ok=True)
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    c.setFont("Helvetica", 11)
+    y = 800
+    for line in PAPER_LINES:
+        c.drawString(50, y, line)
+        y -= 22
+    c.save()
+    (PAPERS / "digital_ds_paper.pdf").write_bytes(buf.getvalue())
+
+    font = ImageFont.truetype(FONT, 26)
+    img = Image.new("L", (1700, 100 + 50 * len(PAPER_LINES)), 255)
+    d = ImageDraw.Draw(img)
+    for i, line in enumerate(PAPER_LINES):
+        d.text((60, 50 + 50 * i), line, font=font, fill=0)
+    img = img.rotate(0.3, expand=False, fillcolor=255).filter(ImageFilter.GaussianBlur(0.5))
+    img.save(PAPERS / "scanned_ds_paper.png")
+    img.convert("RGB").save(PAPERS / "scanned_ds_paper.pdf", resolution=200)
+
+
 if __name__ == "__main__":
+    import sys
+
+    if sys.argv[1:] == ["question-papers"]:
+        question_papers()
+        raise SystemExit(0)
     OUT.mkdir(exist_ok=True)
     digital_pdf()
     unruled_pdf()
     scanned()
     spreadsheets()
     malformed()
+    question_papers()
     for p in sorted(OUT.iterdir()):
         print(p.name, p.stat().st_size)

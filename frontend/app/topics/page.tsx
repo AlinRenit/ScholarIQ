@@ -1,9 +1,17 @@
 import Link from "next/link";
 
+import { ExamSummaryCard } from "@/components/exams/ExamSummaryCard";
 import { SubjectMapping } from "@/components/topics/SubjectMapping";
 import { TopicCard } from "@/components/topics/TopicCard";
 import { Notice, PageHeader } from "@/components/ui";
-import type { CurriculumSubject, MasteryClass, Overview, Profile, TopicAnalysis } from "@/lib/api";
+import type {
+  CurriculumSubject,
+  ExamSummary,
+  MasteryClass,
+  Overview,
+  Profile,
+  TopicAnalysis,
+} from "@/lib/api";
 import { MASTERY, Pill } from "@/lib/labels";
 import { navItem } from "@/lib/planned";
 import { serverGet } from "@/lib/server";
@@ -37,10 +45,11 @@ export default async function TopicsPage() {
     );
   }
 
-  const [topics, overview, curriculum] = await Promise.all([
+  const [topics, overview, curriculum, exams] = await Promise.all([
     serverGet<TopicAnalysis[]>("/api/topics"),
     serverGet<Overview>("/api/analytics/overview"),
     serverGet<CurriculumSubject[]>("/api/curriculum/subjects"),
+    serverGet<ExamSummary>("/api/exam-breakdowns/summary"),
   ]);
   const unmapped = overview.ok
     ? overview.data.subjects.filter((s) => s.is_custom && s.mapped_topics === 0)
@@ -82,6 +91,12 @@ export default async function TopicsPage() {
           ))}
         </ul>
       </div>
+
+      {exams.ok && exams.data.confirmed > 0 && (
+        <div className="mb-10">
+          <ExamSummaryCard summary={exams.data} />
+        </div>
+      )}
 
       {unmapped.length > 0 && curriculumSubjects.length > 0 && (
         <section className="mb-10">

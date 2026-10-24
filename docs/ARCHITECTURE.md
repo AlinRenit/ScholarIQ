@@ -315,6 +315,24 @@ topics; a depth-first pass places a topic's planned prerequisites before it
 Marking a topic as studied is stored on the plan item only and is never
 evidence.
 
+### Exam breakdowns *(implemented in Milestone 8)*
+
+Tables `subject_module` (number, name; `subject_topic.module_id` points to it),
+`exam_breakdown` (student, subject, optional assessment and question-paper
+document, status draft/confirmed, choice rules), `exam_question` (label,
+section, text, max and obtained marks, attempt status, optional/choice group,
+needs_review, parse confidence) and `exam_question_mapping` (exactly one of
+topic or module, share in (0, 1]). `topic_evidence.exam_breakdown_id` links the
+evidence a confirmed breakdown writes (kind `exam_breakdown`, weight 1.0,
+direct). Migration `0006` is additive and rebuilds only the evidence-kind
+check. The parser lives in `ingestion/question_paper.py`; arithmetic,
+suggestions and persistence in the `scholariq.exams` package (pure functions in
+`analysis.py`, BM25 suggester in `suggest.py`, `service.py` for storage and
+evidence). The API is `/api/exam-breakdowns` (list, create, detail, paper
+upload, update, confirm, reopen, analysis, delete, cross-exam summary); every
+route loads the breakdown through the signed-in student, so another student's
+id is a 404.
+
 ## 6. Dependencies
 
 Each dependency was checked against the no-AI requirement. The full audit is in

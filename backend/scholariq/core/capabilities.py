@@ -37,4 +37,5 @@ CAPABILITIES: list[Capability] = [
     _c("tutor", "Question understanding and answer handlers", 5, _A),
     _c("diagnostics", "Diagnostic quizzes and study plans", 6, _A),
     _c("hardening", "Security, offline and accessibility hardening", 7, _A),
+    _c("exam_breakdown", "Question-level exam breakdown by module and topic", 8, _A),
 ]

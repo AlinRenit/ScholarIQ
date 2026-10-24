@@ -47,6 +47,10 @@ and data leaving the machine (to AI services or anywhere else).
   `SCHOLARIQ_MAX_UPLOAD_BYTES` (10 MB default) and 20 PDF pages, and deleted
   after `SCHOLARIQ_UPLOAD_RETENTION_DAYS`. Spreadsheet formulas are never
   evaluated and macro workbooks are refused.
+* Question papers go through the same upload checks and storage as
+  marksheets. API responses carry the file name and parse notes, never the
+  stored path or the full extracted text. Exam breakdowns, their questions,
+  mappings and evidence are deleted with the profile.
 * The practice SQL solver runs in an in-memory SQLite database with an
   authorizer that allows only reading its own tables. Student code is parsed
   with `ast`, never executed.

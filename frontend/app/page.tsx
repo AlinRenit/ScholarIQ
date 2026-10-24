@@ -2,8 +2,16 @@ import Link from "next/link";
 
 import { SemesterTrendChart, SubjectScoreChart } from "@/components/dashboard/Charts";
 import { StatTile } from "@/components/dashboard/StatTile";
+import { ExamSummaryCard } from "@/components/exams/ExamSummaryCard";
 import { Card, Notice, PageHeader } from "@/components/ui";
-import type { MasteryClass, Overview, Profile, SubjectAnalysis, TopicAnalysis } from "@/lib/api";
+import type {
+  ExamSummary,
+  MasteryClass,
+  Overview,
+  Profile,
+  SubjectAnalysis,
+  TopicAnalysis,
+} from "@/lib/api";
 import { BAND, MASTERY, Pill } from "@/lib/labels";
 import { serverGet } from "@/lib/server";
 
@@ -59,9 +67,10 @@ export default async function DashboardPage() {
     );
   }
 
-  const [overview, topics] = await Promise.all([
+  const [overview, topics, exams] = await Promise.all([
     serverGet<Overview>("/api/analytics/overview"),
     serverGet<TopicAnalysis[]>("/api/topics"),
+    serverGet<ExamSummary>("/api/exam-breakdowns/summary"),
   ]);
   if (!overview.ok) {
     return (
@@ -86,6 +95,11 @@ export default async function DashboardPage() {
           </Link>{" "}
           and confirm it. The dashboard only shows figures computed from results you have confirmed.
         </Notice>
+        {exams.ok && exams.data.confirmed > 0 && (
+          <div className="mt-6">
+            <ExamSummaryCard summary={exams.data} />
+          </div>
+        )}
       </>
     );
   }
@@ -250,6 +264,12 @@ export default async function DashboardPage() {
           )}
         </Card>
       </div>
+
+      {exams.ok && (
+        <div className="mt-6">
+          <ExamSummaryCard summary={exams.data} />
+        </div>
+      )}
 
       <details className="mt-6 rounded-lg border border-line bg-surface p-5">
         <summary className="cursor-pointer text-sm font-semibold">

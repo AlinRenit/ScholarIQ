@@ -39,6 +39,8 @@ class EvidenceWeights(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     topic_exam: float = Field(1.0, ge=0)
+    # Marks on exam questions mapped to the topic; one observation per question.
+    exam_breakdown: float = Field(1.0, ge=0)
     diagnostic: float = Field(1.0, ge=0)
     practice: float = Field(0.6, ge=0)
     self_report: float = Field(0.5, ge=0)

@@ -83,6 +83,21 @@ class EvidenceKind(StrEnum):
     DIAGNOSTIC = "diagnostic"
     PRACTICE = "practice"
     SELF_REPORT = "self_report"
+    # Marks on individual exam questions mapped to this topic (exam breakdown).
+    EXAM_BREAKDOWN = "exam_breakdown"
+
+
+class BreakdownStatus(StrEnum):
+    # Only a confirmed breakdown produces topic evidence.
+    DRAFT = "draft"
+    CONFIRMED = "confirmed"
+
+
+class AttemptStatus(StrEnum):
+    # UNKNOWN is never treated as "not attempted": the question is left out.
+    ATTEMPTED = "attempted"
+    NOT_ATTEMPTED = "not_attempted"
+    UNKNOWN = "unknown"
 
 
 class MasteryClass(StrEnum):

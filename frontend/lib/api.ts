@@ -282,7 +282,201 @@ export type CurriculumSubject = {
   code: string | null;
   aliases: string[];
   is_custom: boolean;
-  topics: { id: string; slug: string; name: string; importance: number }[];
+  topics: {
+    id: string;
+    slug: string;
+    name: string;
+    importance: number;
+    module_id?: string | null;
+  }[];
+  modules?: { id: string; number: number; name: string }[];
+};
+
+// --------------------------------------------------------------------------- //
+// Exam breakdowns
+// --------------------------------------------------------------------------- //
+
+export type AttemptStatus = "attempted" | "not_attempted" | "unknown";
+export type ExamBand = "strong" | "developing" | "needs_attention";
+
+export type ExamModule = { id: string; number: number; name: string };
+export type ExamSubjectTopic = { id: string; slug: string; name: string; module_id: string | null };
+
+export type TopicCandidate = {
+  topic_id: string;
+  topic_name: string;
+  module_id: string | null;
+  score: number;
+  matched: string[];
+};
+
+export type TopicSuggestion = {
+  status: "clear" | "ambiguous" | "none";
+  candidates: TopicCandidate[];
+  paper_module_id: string | null;
+};
+
+export type QuestionMapping = { topic_id: string | null; module_id: string | null; share: string };
+
+export type ExamQuestion = {
+  id: string;
+  position: number;
+  label: string;
+  section: string | null;
+  context: string | null;
+  text: string;
+  page: number | null;
+  max_marks: string | null;
+  marks_obtained: string | null;
+  attempt_status: AttemptStatus;
+  is_optional: boolean;
+  choice_group: string | null;
+  needs_review: boolean;
+  parse_confidence: string | null;
+  paper_module: string | null;
+  mappings: QuestionMapping[];
+  suggestion: TopicSuggestion;
+  counted: boolean;
+  exclusion: string | null;
+};
+
+export type ExamBreakdownSummary = {
+  id: string;
+  title: string;
+  subject_id: string;
+  subject_name: string;
+  assessment_id: string | null;
+  held_on: string | null;
+  status: "draft" | "confirmed";
+  question_count: number;
+  earned: string | null;
+  possible: string | null;
+  percentage: number | null;
+  complete: boolean;
+  updated_at: string;
+};
+
+export type RecordedResult = {
+  assessment_label: string;
+  marks_obtained: string | null;
+  max_marks: string | null;
+};
+
+export type ExamBreakdownDetail = ExamBreakdownSummary & {
+  declared_total: string | null;
+  choice_rules: Record<string, number>;
+  questions: ExamQuestion[];
+  modules: ExamModule[];
+  topics: ExamSubjectTopic[];
+  paper: {
+    filename: string;
+    status: string;
+    error: string | null;
+    source: string | null;
+    notes: string[];
+    warnings: string[];
+  } | null;
+  recorded: RecordedResult | null;
+  warnings: string[];
+};
+
+export type PaperUploadResult = {
+  questions_found: number;
+  warnings: string[];
+  error: string | null;
+  source: string | null;
+  breakdown: ExamBreakdownDetail;
+};
+
+export type LostMarks = { label: string; lost: string };
+
+export type ExamModuleRow = {
+  id: string | null;
+  number: number | null;
+  name: string;
+  earned: string;
+  possible: string;
+  percentage: number | null;
+  band: ExamBand | null;
+  questions: string[];
+  marks_lost: string;
+  lost_by: LostMarks[];
+  topics: string[];
+  evidence: "complete" | "partial";
+  left_out: string[];
+  module_only: string[];
+};
+
+export type ExamTopicRow = {
+  id: string;
+  name: string;
+  module_id: string | null;
+  module_name: string | null;
+  earned: string;
+  possible: string;
+  percentage: number | null;
+  band: ExamBand | null;
+  questions: string[];
+  marks_lost: string;
+  lost_by: LostMarks[];
+  partial: boolean;
+  classification: MasteryClass | null;
+  direct_observations: number;
+  min_observations: number;
+  evidence_sufficient: boolean;
+  recommendation: string;
+};
+
+export type ExamAnalysis = {
+  breakdown: ExamBreakdownSummary;
+  overall: {
+    earned: string;
+    possible: string;
+    percentage: number | null;
+    band: ExamBand | null;
+    counted: number;
+    total_questions: number;
+    complete: boolean;
+    excluded: { reason: string; text: string; labels: string[] }[];
+    unmapped: string[];
+  };
+  modules: ExamModuleRow[];
+  focus_module_id: string | null;
+  topics: ExamTopicRow[];
+  recorded: RecordedResult | null;
+  warnings: string[];
+  rule_version: string;
+};
+
+export type ExamSummary = {
+  confirmed: number;
+  drafts: number;
+  modules: {
+    subject_id: string;
+    subject_name: string;
+    module_id: string;
+    number: number;
+    name: string;
+    earned: string;
+    possible: string;
+    percentage: number | null;
+    marks_lost: string;
+    exams: number;
+  }[];
+  topics: {
+    topic_id: string;
+    name: string;
+    earned: string;
+    possible: string;
+    percentage: number | null;
+    marks_lost: string;
+    exams: number;
+    weak_in_exams: number;
+    repeated: boolean;
+    classification: MasteryClass | null;
+    plan_position: number | null;
+    breakdown_ids: string[];
+  }[];
 };
 
 export type TrustStatus = "verified" | "imported" | "retired";

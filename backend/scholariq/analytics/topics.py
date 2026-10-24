@@ -4,8 +4,9 @@ Inputs are evidence items about one student and one topic. Output is one of
 four labels with the reasons and evidence behind it.
 
 Rules (policy.topics):
-1. Count *topic-level* observations: topic exam items, diagnostic and practice
-   answers. Subject marks and self-reports are not topic-level.
+1. Count *topic-level* observations: topic exam items, exam questions mapped
+   to the topic (exam breakdowns), diagnostic and practice answers. Subject
+   marks and self-reports are not topic-level.
 2. Fewer than ``min_direct_observations`` -> INSUFFICIENT_EVIDENCE. Asking a
    question about a topic is never evidence.
 3. Otherwise take a weighted mean of all scored evidence. Each item weighs
@@ -29,7 +30,12 @@ from scholariq.analytics.policy import Policy
 from scholariq.analytics.subjects import Band
 from scholariq.domain.enums import EvidenceKind, MasteryClass
 
-DIRECT_KINDS = {EvidenceKind.TOPIC_EXAM, EvidenceKind.DIAGNOSTIC, EvidenceKind.PRACTICE}
+DIRECT_KINDS = {
+    EvidenceKind.TOPIC_EXAM,
+    EvidenceKind.EXAM_BREAKDOWN,
+    EvidenceKind.DIAGNOSTIC,
+    EvidenceKind.PRACTICE,
+}
 RULE_VERSION = "topic-rules/1"
 
 
@@ -67,6 +73,7 @@ def _weight(item: EvidenceItem, policy: Policy, now: datetime) -> float:
     w = policy.topics.weights
     per_kind = {
         EvidenceKind.TOPIC_EXAM: w.topic_exam,
+        EvidenceKind.EXAM_BREAKDOWN: w.exam_breakdown,
         EvidenceKind.DIAGNOSTIC: w.diagnostic,
         EvidenceKind.PRACTICE: w.practice,
         EvidenceKind.SELF_REPORT: w.self_report,
@@ -121,6 +128,7 @@ _NEXT = {
 _KIND_LABELS = {
     EvidenceKind.SUBJECT_SCORE_PRIOR: "Subject result",
     EvidenceKind.TOPIC_EXAM: "Topic test",
+    EvidenceKind.EXAM_BREAKDOWN: "Exam questions",
     EvidenceKind.DIAGNOSTIC: "Diagnostic quiz",
     EvidenceKind.PRACTICE: "Practice",
     EvidenceKind.SELF_REPORT: "Self-assessment",
@@ -142,6 +150,11 @@ def describe(item: EvidenceItem) -> str:
         return f"{label}: {pct} for the whole subject (counts as one weak observation)"
     if "obtained" in d and "maximum" in d:
         marks = f"{_trim(d['obtained'])} of {_trim(d['maximum'])} marks ({pct})"
+        if item.kind is EvidenceKind.EXAM_BREAKDOWN:
+            where = f" in {d['exam']}" if d.get("exam") else ""
+            labels = d.get("questions") or []
+            which = f" ({', '.join(labels)})" if labels else ""
+            return f"{label}{where}: {marks}, {item.sample_size} question(s){which}"
         return f"{label}: {marks}, {item.sample_size} question(s)"
     return f"{label}: {pct} over {item.sample_size} question(s)"
 

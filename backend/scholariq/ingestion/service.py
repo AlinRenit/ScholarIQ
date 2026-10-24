@@ -193,6 +193,8 @@ def confirm_import(
 ) -> list[AssessmentResult]:  # fmt: skip
     if doc.status is not DocumentStatus.EXTRACTED:
         raise InvalidState(f"This document is {doc.status.value} and cannot be confirmed.")
+    if (doc.analysis or {}).get("kind") == "question_paper":
+        raise InvalidState("This is a question paper; it is used by an exam breakdown.")
 
     scale: GradingScale | None = None
     points: dict[str, Decimal] = {}

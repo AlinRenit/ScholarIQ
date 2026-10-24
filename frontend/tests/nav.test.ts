@@ -3,10 +3,11 @@ import { describe, expect, it } from "vitest";
 import { NAV_ITEMS, isActive } from "@/lib/nav";
 
 describe("navigation", () => {
-  it("lists the eight product sections in order", () => {
+  it("lists the nine product sections in order", () => {
     expect(NAV_ITEMS.map((n) => n.label)).toEqual([
       "Dashboard",
       "My Academics",
+      "Exam Breakdown",
       "Topics",
       "AI-Free Tutor",
       "Practice",

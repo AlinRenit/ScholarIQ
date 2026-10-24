@@ -23,6 +23,7 @@ Tesseract OCR engine, which runs locally to read scanned marksheets. See
 | 5. Question answering (AI-free tutor) | **Done** |
 | 6. Diagnostics and study plans | **Done** |
 | 7. Hardening: security review, offline and end-to-end tests, accessibility, performance | **Done** |
+| 8. Question-level exam analysis and module/topic weakness detection | **Done** |
 
 What works today:
 
@@ -39,6 +40,12 @@ What works today:
 * A dashboard with overall, credit-weighted and GPA figures (each says how many
   results it counts, or why it is unavailable), latest score per subject, a
   semester trend, data gaps and the calculation rules.
+* Exam Breakdown: upload a question paper (digital or scanned PDF, PNG, JPEG or
+  TXT) or type the questions in, check every question and mark, enter marks per
+  question or sub-question, and map each question to a topic (suggested by BM25
+  from the knowledge base) or only to a module. The analysis shows overall,
+  per-module and per-topic results with the questions that lost marks. See
+  [How exam breakdowns work](#how-exam-breakdowns-work).
 * A versioned curriculum (`content/curriculum/`, 6 subjects and 40 topics) with
   subject matching by code, name, alias and close spelling. Subjects outside the
   curriculum can be moved onto a curriculum subject or given topics by hand.
@@ -240,6 +247,41 @@ not converted without a confirmed scale (and a scale that lacks a grade is
 refused); theory and practical columns become separate components; repeat
 sittings become new attempts.
 
+## How exam breakdowns work
+
+1. **Start**: choose the subject and, optionally, the recorded exam it belongs
+   to. One breakdown per subject per recorded exam; a breakdown never creates
+   or changes a recorded result. When both exist and the totals differ, the
+   page shows a warning instead.
+2. **Read the paper** (`backend/scholariq/ingestion/question_paper.py`): the
+   same extraction as marksheets (pdfplumber, or Tesseract for scans), then a
+   line-based parser finds question numbers (`Q1`, `1.`, `2(b)(i)`, KTU-style
+   numbering that restarts after a heading), marks (`[5]`, `(5 marks)`, `5M`,
+   `(3+2)`, a marks column in a table), Part/Section/Module headings, OR
+   pairs, "answer any N" choices and the paper total. Each question gets a
+   confidence; low-confidence questions and questions without marks are
+   flagged for review. Nothing is counted until the student confirms.
+3. **Map**: modules come from the curriculum file (5 per subject) or, for the
+   student's own subjects, from the module editor. A module is never guessed
+   from a question's position. Topic suggestions are BM25 over each topic's
+   name, concept names, aliases, summary and definitions; weak matches give no
+   suggestion and close scores are shown as several candidates.
+4. **Compute** (`backend/scholariq/exams/analysis.py`): performance is
+   sum(obtained) / sum(maximum), never an average of percentages. A blank mark
+   is unknown (never zero), questions marked uncertain or without a maximum are
+   left out and listed, an optional question that was not chosen does not add
+   to the maximum, and a question mapped to several topics is split by the
+   given shares (equal by default) so marks are never counted twice.
+5. **Evidence**: confirming writes one `exam_breakdown` evidence row per topic
+   (score = marks share, sample size = questions), labelled "Exam questions"
+   and traceable to the breakdown. Saving again replaces those rows; deleting
+   or returning to draft removes only that exam's rows. For the topics it
+   covers, the breakdown replaces the weak subject-mark prior of the same
+   sitting, so the subject mark is not counted twice. Classification still
+   needs five direct observations, so exam performance and topic mastery are
+   shown separately. The study plan uses the latest exam-question result as
+   `recent_result`.
+
 ## Knowledge-base content and review
 
 Content is YAML under `content/knowledge/<subject>/<topic>.yaml`, validated on
@@ -316,6 +358,12 @@ they never change a topic classification.
 * Two layout parsers ship today. Unusual layouts fall back to the line parser
   and need more correction on the review screen.
 * OCR quality depends on the scan. Handwritten marks are not supported.
+* The question-paper parser is heuristic and was built against common Indian
+  university layouts (KTU, Anna University, CBSE-style sections). Unusual
+  numbering, marks written only in the instructions, or questions spread over
+  two columns need correction by hand. Diagrams and formulas are not read.
+* When a custom subject is merged into a curriculum subject, questions mapped
+  only to one of the custom subject's modules lose that mapping.
 * Rate limits (uploads, questions, sign-in) are per process; multi-worker
   deployments need a shared limiter.
 * Automated accessibility checks (axe) catch only part of what matters; the

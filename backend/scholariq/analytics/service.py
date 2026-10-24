@@ -87,7 +87,12 @@ def topic_links(session: Session, subject_ids: set[str]) -> dict[str, list[tuple
 def rebuild_subject_priors(
     session: Session, student_id: str, summaries: list[SubjectSummary], rows: list[ResultRow]
 ) -> None:
-    """Subject-score priors are derived data: replace them from current results."""
+    """Subject-score priors are derived data: replace them from current results.
+
+    When a confirmed exam breakdown of the same sitting already gives
+    question-level marks for a topic, the subject mark of that sitting is not
+    added to the topic again: it is the same marks, summed.
+    """
     session.execute(
         delete(TopicEvidence).where(
             TopicEvidence.student_id == student_id,
@@ -101,10 +106,22 @@ def rebuild_subject_priors(
         latest_result[s.subject_id] = next(
             r.result_id for r in rows if r.subject_id == s.subject_id and r.assessment_id == last
         )
+    covered = {
+        (ev.details.get("assessment_id"), ev.details.get("subject_id"), ev.topic_id)
+        for ev in session.scalars(
+            select(TopicEvidence).where(
+                TopicEvidence.student_id == student_id,
+                TopicEvidence.kind == EvidenceKind.EXAM_BREAKDOWN,
+            )
+        )
+    }
     for s in summaries:
         if s.latest is None:
             continue
+        sitting = s.sittings[-1].assessment_id
         for topic, _ in links.get(s.subject_id, []):
+            if (sitting, s.subject_id, topic.id) in covered:
+                continue
             session.add(
                 TopicEvidence(
                     student_id=student_id,

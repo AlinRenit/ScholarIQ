@@ -2,7 +2,9 @@
 
 Groups:
   * Students and their documents, assessments and results.
-  * Curriculum: subjects and topics, with configurable subject-to-topic mapping.
+  * Curriculum: subjects and topics, with configurable subject-to-topic mapping
+    and optional per-subject modules (syllabus units) grouping the topics.
+  * Exam breakdowns: question-level marks for one exam, mapped to topics/modules.
   * Knowledge base: concepts, relationships, documents, sources, questions.
   * Learner model: diagnostic attempts, topic evidence, derived mastery.
   * Study plans and tutoring conversations.
@@ -33,6 +35,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from scholariq.db.base import Base, IdMixin, TimestampMixin, utcnow
 from scholariq.domain.enums import (
+    AttemptStatus,
+    BreakdownStatus,
     DocumentStatus,
     EvidenceKind,
     ExamType,
@@ -245,6 +249,9 @@ class Subject(IdMixin, TimestampMixin, Base):
     topic_links: Mapped[list[SubjectTopic]] = relationship(
         back_populates="subject", cascade="all, delete-orphan"
     )
+    modules: Mapped[list[SubjectModule]] = relationship(
+        back_populates="subject", cascade="all, delete-orphan", order_by="SubjectModule.number"
+    )
 
 
 class Topic(IdMixin, TimestampMixin, Base):
@@ -256,6 +263,30 @@ class Topic(IdMixin, TimestampMixin, Base):
     estimated_study_minutes: Mapped[int | None] = mapped_column(Integer)
 
     concepts: Mapped[list[Concept]] = relationship(back_populates="topic")
+
+
+class SubjectModule(IdMixin, Base):
+    """A syllabus unit of one subject ("Module 2: Linear data structures").
+
+    Modules come only from curriculum files or from the student (custom
+    subjects); they are never inferred from a topic's position in a list.
+    """
+
+    __tablename__ = "subject_modules"
+
+    subject_id: Mapped[str] = mapped_column(FK, ForeignKey("subjects.id", ondelete="CASCADE"))
+    slug: Mapped[str] = mapped_column(String(120))
+    # The number printed in the syllabus (Module 1, Unit 3, ...).
+    number: Mapped[int] = mapped_column(Integer)
+    name: Mapped[str] = mapped_column(String(200))
+
+    subject: Mapped[Subject] = relationship(back_populates="modules")
+
+    __table_args__ = (
+        UniqueConstraint("subject_id", "slug", name="subject_module_slug"),
+        UniqueConstraint("subject_id", "number", name="subject_module_number"),
+        CheckConstraint("number >= 1", name="module_number_positive"),
+    )
 
 
 class SubjectTopic(Base):
@@ -272,11 +303,152 @@ class SubjectTopic(Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
     # Curriculum-supplied importance, 1 (minor) to 5 (core). Used in plan scoring.
     importance: Mapped[int] = mapped_column(Integer, default=3)
+    # The module of this subject that covers the topic; null when unassigned.
+    module_id: Mapped[str | None] = mapped_column(
+        FK, ForeignKey("subject_modules.id", ondelete="SET NULL")
+    )
 
     subject: Mapped[Subject] = relationship(back_populates="topic_links")
     topic: Mapped[Topic] = relationship()
 
     __table_args__ = (CheckConstraint("importance BETWEEN 1 AND 5", name="importance_range"),)
+
+
+# --------------------------------------------------------------------------- #
+# Exam breakdowns
+# --------------------------------------------------------------------------- #
+
+
+class ExamBreakdown(IdMixin, TimestampMixin, Base):
+    """Question-level marks for one subject in one exam.
+
+    It never creates an AssessmentResult: when linked to an existing sitting
+    the overall subject mark stays where it is and is only compared with the
+    question totals.
+    """
+
+    __tablename__ = "exam_breakdowns"
+
+    student_id: Mapped[str] = mapped_column(
+        FK, ForeignKey("students.id", ondelete="CASCADE"), index=True
+    )
+    subject_id: Mapped[str] = mapped_column(FK, ForeignKey("subjects.id", ondelete="RESTRICT"))
+    assessment_id: Mapped[str | None] = mapped_column(
+        FK, ForeignKey("assessments.id", ondelete="SET NULL")
+    )
+    # The uploaded question paper, if any.
+    document_id: Mapped[str | None] = mapped_column(
+        FK, ForeignKey("documents.id", ondelete="SET NULL")
+    )
+    title: Mapped[str] = mapped_column(String(200))
+    held_on: Mapped[date | None] = mapped_column(Date)
+    # Total marks printed on the paper, as confirmed by the student.
+    declared_total: Mapped[Decimal | None] = mapped_column(MARKS)
+    status: Mapped[BreakdownStatus] = mapped_column(
+        _enum(BreakdownStatus, "breakdown_status"), default=BreakdownStatus.DRAFT
+    )
+    # Choice rules found on the paper or entered: {"Section B": 2} means
+    # "answer any 2 questions of the group Section B".
+    choice_rules: Mapped[dict[str, int]] = mapped_column(JSON, default=dict)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+    questions: Mapped[list[ExamQuestion]] = relationship(
+        back_populates="breakdown", cascade="all, delete-orphan", order_by="ExamQuestion.position"
+    )
+
+    __table_args__ = (
+        CheckConstraint("declared_total IS NULL OR declared_total > 0", name="total_positive"),
+        # One breakdown per subject per recorded sitting; repeat attempts are
+        # separate sittings (supplementary exams) and get their own.
+        UniqueConstraint("assessment_id", "subject_id", name="assessment_subject"),
+    )
+
+
+class ExamQuestion(IdMixin, Base):
+    """One markable question or sub-question ("2(b)(i)")."""
+
+    __tablename__ = "exam_questions"
+
+    breakdown_id: Mapped[str] = mapped_column(
+        FK, ForeignKey("exam_breakdowns.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int] = mapped_column(Integer)
+    label: Mapped[str] = mapped_column(String(40))
+    section: Mapped[str | None] = mapped_column(String(80))
+    # Text of the parent question, for sub-questions.
+    context: Mapped[str | None] = mapped_column(Text)
+    text: Mapped[str] = mapped_column(Text, default="")
+    page: Mapped[int | None] = mapped_column(Integer)
+    # Null means not known yet. Never substitute zero for a missing value.
+    max_marks: Mapped[Decimal | None] = mapped_column(MARKS)
+    marks_obtained: Mapped[Decimal | None] = mapped_column(MARKS)
+    attempt_status: Mapped[AttemptStatus] = mapped_column(
+        _enum(AttemptStatus, "attempt_status"), default=AttemptStatus.UNKNOWN
+    )
+    # Part of a choice ("answer any two"); left out when not attempted.
+    is_optional: Mapped[bool] = mapped_column(Boolean, default=False)
+    choice_group: Mapped[str | None] = mapped_column(String(80))
+    # Uncertain questions are left out of every calculation until cleared.
+    needs_review: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Heuristic reading confidence 0..1 for parsed questions; null when typed.
+    parse_confidence: Mapped[Decimal | None] = mapped_column(Numeric(4, 3))
+    # Module heading printed on the paper above the question ("Module II").
+    paper_module: Mapped[str | None] = mapped_column(String(40))
+    source_text: Mapped[str | None] = mapped_column(Text)
+
+    breakdown: Mapped[ExamBreakdown] = relationship(back_populates="questions")
+    mappings: Mapped[list[ExamQuestionMapping]] = relationship(
+        back_populates="question", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (
+        CheckConstraint("max_marks IS NULL OR max_marks > 0", name="max_marks_positive"),
+        CheckConstraint("marks_obtained IS NULL OR marks_obtained >= 0", name="marks_non_negative"),
+        CheckConstraint(
+            "marks_obtained IS NULL OR max_marks IS NULL OR marks_obtained <= max_marks",
+            name="marks_within_max",
+        ),
+        CheckConstraint(
+            "parse_confidence IS NULL OR (parse_confidence >= 0 AND parse_confidence <= 1)",
+            name="confidence_unit",
+        ),
+    )
+
+
+class ExamQuestionMapping(IdMixin, Base):
+    """A share of one question attributed to a topic, or only to a module.
+
+    A question's shares add up to 1; each topic or module receives that share
+    of the question's marks (obtained and maximum), never the full marks.
+    """
+
+    __tablename__ = "exam_question_mappings"
+
+    question_id: Mapped[str] = mapped_column(
+        FK, ForeignKey("exam_questions.id", ondelete="CASCADE"), index=True
+    )
+    topic_id: Mapped[str | None] = mapped_column(FK, ForeignKey("topics.id", ondelete="CASCADE"))
+    # Set only for a module-level mapping (topic not known).
+    module_id: Mapped[str | None] = mapped_column(
+        FK, ForeignKey("subject_modules.id", ondelete="CASCADE")
+    )
+    share: Mapped[Decimal] = mapped_column(Numeric(5, 4), default=Decimal(1))
+
+    question: Mapped[ExamQuestion] = relationship(back_populates="mappings")
+
+    __table_args__ = (
+        CheckConstraint(
+            "(topic_id IS NULL AND module_id IS NOT NULL) "
+            "OR (topic_id IS NOT NULL AND module_id IS NULL)",
+            name="topic_or_module",
+        ),
+        CheckConstraint("share > 0 AND share <= 1", name="share_unit"),
+        UniqueConstraint("question_id", "topic_id", name="question_topic"),
+        UniqueConstraint("question_id", "module_id", name="question_module"),
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -476,6 +648,9 @@ class TopicEvidence(IdMixin, Base):
     )
     diagnostic_attempt_id: Mapped[str | None] = mapped_column(
         FK, ForeignKey("diagnostic_attempts.id", ondelete="CASCADE")
+    )
+    exam_breakdown_id: Mapped[str | None] = mapped_column(
+        FK, ForeignKey("exam_breakdowns.id", ondelete="CASCADE"), index=True
     )
     details: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

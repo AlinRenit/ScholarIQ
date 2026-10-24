@@ -20,6 +20,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     capability: "marksheet_import",
   },
   {
+    href: "/exam-breakdown",
+    label: "Exam Breakdown",
+    description:
+      "Upload a question paper, enter your marks per question and see which modules and topics cost you marks.",
+    capability: "exam_breakdown",
+  },
+  {
     href: "/topics",
     label: "Topics",
     description: "Topics mapped from your subjects, with the evidence behind each classification.",

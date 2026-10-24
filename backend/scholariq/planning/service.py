@@ -87,6 +87,7 @@ def generate(
         v = views.get(topic.id)
         bands: tuple[Band, ...] = ()
         last_quiz = None
+        last_source = "quiz"
         importance = None
         label = MasteryClass.INSUFFICIENT_EVIDENCE
         if v is not None:
@@ -97,13 +98,20 @@ def generate(
                 for e in v.evidence
                 if e.kind is EvidenceKind.SUBJECT_SCORE_PRIOR and "band" in e.details
             )
-            quizzes = [
-                e for e in v.evidence if e.kind is EvidenceKind.DIAGNOSTIC and e.score is not None
+            # The latest topic-level result: a diagnostic quiz, or this topic's
+            # questions in a confirmed exam breakdown.
+            recent = [
+                e
+                for e in v.evidence
+                if e.kind in (EvidenceKind.DIAGNOSTIC, EvidenceKind.EXAM_BREAKDOWN)
+                and e.score is not None
             ]
-            if quizzes:
-                q = max(quizzes, key=lambda e: e.observed_at)
+            if recent:
+                q = max(recent, key=lambda e: e.observed_at)
                 when = q.observed_at if q.observed_at.tzinfo else q.observed_at.replace(tzinfo=UTC)
                 last_quiz = (float(q.score or 0), when)
+                if q.kind is EvidenceKind.EXAM_BREAKDOWN:
+                    last_source = f"exam questions ({q.details.get('exam', 'exam')})"
         inputs.append(
             TopicInput(
                 topic.id,
@@ -113,6 +121,7 @@ def generate(
                 topic.estimated_study_minutes,
                 bands,
                 last_quiz,
+                last_source,
             )
         )
 

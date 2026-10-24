@@ -8,6 +8,7 @@ import { createProfile, expect, importMarksheet, test } from "./fixtures";
 const PAGES = [
   "/",
   "/academics",
+  "/exam-breakdown",
   "/topics",
   "/tutor",
   "/practice",

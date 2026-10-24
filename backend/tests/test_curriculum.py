@@ -16,6 +16,7 @@ from scholariq.db.models import (
     AssessmentResult,
     Student,
     Subject,
+    SubjectModule,
     SubjectTopic,
     Topic,
 )
@@ -125,3 +126,78 @@ def test_policy_override_file(settings: Settings, tmp_path: Path) -> None:
     assert p.version == "policy/custom"
     assert p.topics.min_direct_observations == 8
     assert p.topics.strong_at == 0.75  # unspecified values keep defaults
+
+
+def _with_modules(modules: list[dict[str, object]]) -> dict[str, object]:
+    return {
+        "curriculum": {"slug": "x", "name": "X", "version": "1"},
+        "subjects": [
+            {
+                "slug": "a",
+                "name": "A",
+                "topics": [{"slug": "t1", "name": "One"}, {"slug": "t2", "name": "Two"}],
+                "modules": modules,
+            }
+        ],
+    }
+
+
+@pytest.mark.parametrize(
+    ("modules", "message"),
+    [
+        ([{"slug": "m1", "number": 1, "name": "M", "topics": ["t9"]}], "unknown topic t9"),
+        (
+            [
+                {"slug": "m1", "number": 1, "name": "M", "topics": ["t1"]},
+                {"slug": "m2", "number": 2, "name": "N", "topics": ["t1"]},
+            ],
+            "more than one module",
+        ),
+        (
+            [
+                {"slug": "m1", "number": 1, "name": "M"},
+                {"slug": "m2", "number": 1, "name": "N"},
+            ],
+            "duplicate module numbers",
+        ),
+    ],
+)
+def test_invalid_modules_rejected(modules: list[dict[str, object]], message: str) -> None:
+    with pytest.raises(ValidationError, match=message):
+        CurriculumFile.model_validate(_with_modules(modules))
+
+
+def test_module_sync_keeps_ids_and_follows_the_file(settings: Settings, engine: Engine) -> None:
+    files = [
+        CurriculumFile.model_validate(
+            _with_modules(
+                [
+                    {"slug": "m1", "number": 1, "name": "First", "topics": ["t1"]},
+                    {"slug": "m2", "number": 2, "name": "Second", "topics": ["t2"]},
+                ]
+            )
+        )
+    ]
+    with Session(engine) as s:
+        sync_curricula(s, files)
+        before = {m.slug: m.id for m in s.scalars(select(SubjectModule))}
+        # Swap the numbers, rename one and move t2 out of every module.
+        data = _with_modules(
+            [
+                {"slug": "m1", "number": 2, "name": "First", "topics": ["t1"]},
+                {"slug": "m2", "number": 1, "name": "Renamed"},
+            ]
+        )
+        sync_curricula(s, [CurriculumFile.model_validate(data)])
+        after = {m.slug: (m.id, m.number, m.name) for m in s.scalars(select(SubjectModule))}
+        assert after == {"m1": (before["m1"], 2, "First"), "m2": (before["m2"], 1, "Renamed")}
+        links = {
+            t.slug: link.module_id
+            for link, t in s.execute(
+                select(SubjectTopic, Topic).join(Topic, SubjectTopic.topic_id == Topic.id)
+            ).all()
+        }
+        assert links == {"t1": before["m1"], "t2": None}
+        # Dropping the modules from the file removes them.
+        sync_curricula(s, [CurriculumFile.model_validate(_with_modules([]))])
+        assert s.scalar(select(func.count(SubjectModule.id))) == 0
